@@ -1,0 +1,22 @@
+{
+	"extends": [
+		"eslint:recommended"
+	],
+	"parserOptions": {
+		"ecmaVersion": 2017
+	},
+	"env": {
+		"es6": true,
+		"commonjs": true,
+		"node": true,
+		"jest": true
+	},
+	"rules": {
+		"linebreak-style": "off",
+		"no-var": "warn",
+		"no-console": "off",
+		"quotes"           : ["error", "single"],
+		"comma-dangle": [ "error", "always" ],
+		"semi": [ "error", "always" ]
+	}
+}
