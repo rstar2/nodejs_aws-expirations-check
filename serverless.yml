@@ -14,7 +14,7 @@ provider:
   runtime: nodejs8.10
 
   stage: dev
-  region: eu-west-1
+  region: ${file(env.yml):env.AWS_REGION} # Note this env.AWS_REGION SHOULD NOT be set as environment variable
 
   # 'iamRoleStatement' defines the permission policy for the Lambda function.
   # In this case Lambda functions are granted with permissions to access DynamoDB.
