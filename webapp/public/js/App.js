@@ -2,13 +2,11 @@
 const App = {
     template: html`
     <div>
-        <h1>
-            {{ title }}
-        </h1>
+        <h1>{{ title }}</h1>
         <pre>
             {{ response }}
         </pre>
-        <button @click="test"></button
+        <button @click="list">List</button>
     </div>
     `,
     // components: {
@@ -22,10 +20,10 @@ const App = {
         };
     },
     methods: {
-        test() {
-            fetch(`${APP_CONTEXT_PATH}/api/test`)
-            .then(res => res.json())
-            .then(data => this.response = data);
+        list() {
+            fetch(`${APP_CONTEXT_PATH}/api/list`)
+                .then(res => res.json())
+                .then(data => this.response = data);
         }
     }
 };

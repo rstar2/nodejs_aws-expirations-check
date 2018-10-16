@@ -66,6 +66,10 @@ module.exports.check = async (event, context, callback) => {
 
 module.exports.api = async (event, context, callback) => {
     console.time('Invoking function api took');
+    console.dir(event)
+    console.dir(context)
+
+
 
     try {
         let responseBody;
