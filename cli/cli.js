@@ -73,7 +73,7 @@ if (isLocal) {
     // this will load the necessary ENV variables from env.yml
     const fs = require('fs');
     const yaml = require('js-yaml');
-    const parsedEnvYaml = yaml.load(fs.readFileSync('./env.yml'));
+    const parsedEnvYaml = yaml.load(fs.readFileSync('../env.yml'));
 
     let env = parsedEnvYaml['env'];
     const stage = process.env.NODE_ENV || 'dev';
@@ -82,7 +82,7 @@ if (isLocal) {
     // merge with "real" env variables, eg. if any is already set DO NOT overwrite it
     Object.keys(env).forEach((key) => process.env[key] = process.env[key] || env[key]);
 
-    const handler = require('./handler')[func];
+    const handler = require('../handler')[func];
     handler(event, null, (error, response) => {
         if (error) {
             console.error('Finished with error', error);
@@ -92,6 +92,7 @@ if (isLocal) {
         console.log('Finished successfully', response);
     });
 } else {
+    // TODO: USe HTPP requests
     const request = require('request');
     console.error('Not ready yet');
 }
