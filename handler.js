@@ -64,20 +64,27 @@ module.exports.check = async (event, context, callback) => {
 };
 
 
+const apiFunctionSecret = process.env.AWS_LAMBDA_API_SECRET;
+
 module.exports.api = async (event, context, callback) => {
     console.time('Invoking function api took');
-    console.dir(event)
-    console.dir(context)
 
+    let action, data;
 
-
-    try {
-        let responseBody;
+    // check if this function is not invoked from another "authorized" function
+    // here the secret has more meaning of an identified for such event, not as authorization-secret/token
+    // as anyway AWS will allow only functions that has IAM permissions to invoke this one
+    if (event.secret === apiFunctionSecret) {
+        console.log('Invoking function from another authorized function');
+        // this is event from another function
+        action = event.action;
+        data = event.data;
+    } else {
+        // this is normal API HTTP Gateway event
         switch (event.httpMethod) {
             case 'GET':
                 switch (event.path) {
                     case '/list':
-                        responseBody = await dbList();
                         break;
                     default:
                         return callback(`Unsupported API gateway with HTTP GET path ${event.path}`);
@@ -86,14 +93,9 @@ module.exports.api = async (event, context, callback) => {
 
             // eslint-disable-next-line no-case-declarations
             case 'POST':
-                // assume it's JSON ("application/json")
-                const data = JSON.parse(event.body);
                 switch (event.path) {
                     case '/add':
-                        responseBody = await dbAdd(data);
-                        break;
                     case '/delete':
-                        responseBody = await dbDelete(data);
                         break;
                     default:
                         return callback(`Unsupported API gateway with HTTP POST path ${event.path}`);
@@ -103,17 +105,38 @@ module.exports.api = async (event, context, callback) => {
                 return callback(`Unsupported API gateway with HTTP method ${event.httpMethod}`);
         }
 
+        action = event.path.substring(1);
+        // assume it's JSON ("application/json")
+        data = event.body && JSON.parse(event.body);
+    }
+
+    try {
+        let responseBody;
+        switch (action) {
+            case 'list':
+                responseBody = await dbList();
+                break;
+            case 'add':
+                responseBody = await dbAdd(data);
+                break;
+            case 'delete':
+                responseBody = await dbDelete(data);
+                break;
+            default:
+                throw new Error(`Invalid api action: ${action}`);
+        }
+
         console.timeEnd('Invoking function api took');
         callback(null, createResponse(200, responseBody));
     } catch (error) {
         console.timeEnd('Invoking function api took', '- failed');
-        callback(null, createResponse(500, { status: false, error, }));
+        callback(null, createResponse(500, { error, }));
     }
 };
 
-const createResponse = (status, body) => {
+const createResponse = (statusCode, body) => {
     return {
-        statusCode: 200,
+        statusCode,
         body: JSON.stringify(body),
     };
 };

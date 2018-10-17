@@ -6,8 +6,11 @@ const argv = require('minimist')(process.argv.slice(2), { boolean: true, string:
 // usage:
 const help =
     `Usage: 
-	expire-cli <action> [--name=XXX] [--expire=YYY] [--id=YYY] [--local]
-Note: --local option will invoke the function handler locally, otherwise will request the function public API, e.g. will create real HTTP request
+	expire-cli <action> [--name=XXX] [--expire=YYY] [--id=YYY] [--localHttp] [--localInvoke]
+Note:
+    --localHttp option will invoke the function handler locally by faking a dummy HTTP event,
+    --localInvoke option will invoke the function handler locally by faking a dummy "secret" event,
+      otherwise will request the function public API, e.g. will create real HTTP request
 Examples:
 	expire-cli list
 	expire-cli add --name=XXXX --expire="2 17 2019"
@@ -18,7 +21,8 @@ Examples:
 	expire-cli delete --id=XXXXX
 `;
 const action = argv._[0];
-const isLocal = !!argv['local']; // locally invoke the function handler
+const isLocalHttp = !!argv['localHttp']; // locally invoke the function handler
+const isLocalInvoke = !!argv['localInvoke']; // locally invoke the function handler
 const name = argv['name'];
 let expiresAt = argv['expire'];
 const id = argv['id'];
@@ -36,9 +40,11 @@ if (!action) {
 }
 
 let event = {
+    action,
     path: '/' + action,
 };
 let func = 'api';
+let data;
 switch (action) {
     case 'check':
         event.httpMethod = 'GET';
@@ -56,20 +62,29 @@ switch (action) {
         }
         expiresAt = new Date(expiresAt).getTime();
         event.httpMethod = 'POST';
-        event.body = JSON.stringify({ name, expiresAt, });
+        data = { name, expiresAt, };
         break;
     case 'delete':
         if (!id) {
             exit('Missing \'--id\' argument for the \'delete\' action.');
         }
         event.httpMethod = 'POST';
-        event.body = JSON.stringify({ id, });
+        data = { id, };
         break;
     default:
         exit(`No valid action ${action}`);
 }
 
-if (isLocal) {
+if (data) {
+    Object.assign(event, {
+        data,
+        body: JSON.stringify(data),
+    });
+}
+
+if (isLocalInvoke || isLocalHttp) {
+    // invoke by sending "fake" another-function event  or  "fake" HTTP event 
+
     // this will load the necessary ENV variables from env.yml
     const fs = require('fs');
     const yaml = require('js-yaml');
@@ -83,6 +98,13 @@ if (isLocal) {
     Object.keys(env).forEach((key) => process.env[key] = process.env[key] || env[key]);
 
     const handler = require('../handler')[func];
+
+    if (isLocalInvoke) {
+        // add the "auth"/identification secret/token
+        Object.assign(event, {
+            secret: process.env.AWS_LAMBDA_API_SECRET,
+        });
+    }
     handler(event, null, (error, response) => {
         if (error) {
             console.error('Finished with error', error);
@@ -92,8 +114,8 @@ if (isLocal) {
         console.log('Finished successfully', response);
     });
 } else {
-    // TODO: USe HTPP requests
+    // TODO: Use real HTTP requests
     const request = require('request');
-    console.error('Not ready yet');
+    console.error('Not implemented yet');
 }
 
