@@ -9,8 +9,10 @@ pids
 *.seed
 
 # Dependency directories
-node_modules
-jspm_packages
+**/node_modules
+**/jspm_packages
+
+**/.webpack
 
 # Optional npm cache directory
 .npm
@@ -19,7 +21,6 @@ jspm_packages
 .node_repl_history
 
 # Serverless
-.webpack
 .serverless
 
 # env

@@ -22,6 +22,9 @@ const api = (url, data) => {
         .then(res => res.json());
 };
 
+Vue.use(window.vuelidate.default);
+const { required, minLength } = window.validators;
+
 const App = {
     template: html`
     <div class="md-layout">
@@ -49,18 +52,21 @@ const App = {
             <md-dialog-content>
                 <!-- <form novalidate class="md-layout" @submit.prevent="validateAdd"> -->
     
-                <md-field>
+                <md-field :class="validateClass('name')">
                     <label>Name</label>
-                    <md-input v-model="addItem.name" required></md-input>
+                    <md-input v-model="addItem.name"></md-input>
+                    <span class="md-error" v-if="!$v.addItem.name.required">The name is required</span>
+                    <span class="md-error" v-else-if="!$v.addItem.name.minlength">Name must have at least {{$v.addItem.name.$params.minLength.min}} letters.</span>
                 </md-field>
     
-                <md-datepicker v-model="addItem.expiresAtDate" md-immediately required>
+                <md-datepicker v-model="addItem.expiresAtDate" md-immediately :class="validateClass('expiresAtDate')">
                     <label>Expires At</label>
+                    <span class="md-error" v-if="!$v.addItem.expiresAtDate.required">The expire-date is required</span>
                 </md-datepicker>
     
                 <md-dialog-actions>
                     <md-button class="md-primary" @click="showDialogAdd = false">Close</md-button>
-                    <md-button class="md-primary" @click="validateAdd">Add</md-button>
+                    <md-button type="submit" class="md-primary" @click="validateAdd" :disabled="$v.addItem.$invalid">Add</md-button>
                 </md-dialog-actions>
     
                 <!-- </form> -->
@@ -101,7 +107,7 @@ const App = {
             addItem: {
                 name: null,
                 expiresAt: null,
-                expiresAtDate: null
+                expiresAtDate: null,
             }
         };
     },
@@ -155,13 +161,42 @@ const App = {
         },
 
         validateAdd() {
-            if (this.addItem.name && this.addItem.expiresAt) {
-                this.apiAdd(this.addItem);
-                this.addItem = {};
-                this.showDialogAdd = false;
-            } else {
-                // TODO: show validation errors
+            // validate first and if any invalid field then return
+            this.$v.addItem.$touch();
+
+            if (this.$v.addItem.$invalid) {
+                // validation errors are shown already when this.$v.addItem.$touch() is called
+                return;
+            }
+
+            this.apiAdd(this.addItem);
+            this.$v.addItem.$reset();
+            this.addItem = {};
+            this.showDialogAdd = false;
+        }
+    },
+    validateClass(fieldName) {
+        const field = this.$v.addItem[fieldName];
+
+        if (field) {
+            return {
+                'md-invalid': field.$invalid && field.$dirty
+            };
+        }
+        return null;
+    },
+
+    // Vuelidate integration
+    validations: {
+        'addItem': {
+            'name': {
+                required,
+                minLength: minLength(5)
+            },
+            'expiresAtDate': {
+                required,
             }
         }
-    }
+
+    },
 };
