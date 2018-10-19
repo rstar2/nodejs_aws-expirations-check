@@ -150,24 +150,30 @@ const dbList = async () => {
 };
 
 const dbAdd = async (data) => {
+    const Item = {
+        id: uuid.v1(),
+        name: data.name,
+        expiresAt: data.expiresAt,
+        createdAt: Date.now(),
+    };
     const params = {
         TableName: dynamodb_TableName,
-        Item: {
-            id: uuid.v1(),
-            name: data.name,
-            expiresAt: data.expiresAt,
-            createdAt: Date.now(),
-        },
+        Item,
     };
-    return dynamodbUtils.exec('put', params);
+    return dynamodbUtils.exec('put', params)
+        // return the newly added item
+        .then(() => ({ Item, }));
 };
 
 const dbDelete = async (data) => {
+    const id = data.id;
     const params = {
         TableName: dynamodb_TableName,
         Key: {
-            id: data.id,
+            id,
         },
     };
-    return dynamodbUtils.exec('delete', params);
+    return dynamodbUtils.exec('delete', params)
+        // return the deleted item's id
+        .then(() => ({ id, }));
 };

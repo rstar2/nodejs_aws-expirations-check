@@ -22,8 +22,8 @@ module.exports = (stage) => {
     app.set('view engine', 'hbs');
 
     // from Express 4.16 they are back in the core
-    app.use(express.json());
     app.use(express.urlencoded({ extended: false, }));
+    app.use(express.json());
 
     app.use('/public', express.static(path.join(__dirname, 'public')));
 
