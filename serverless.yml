@@ -13,6 +13,19 @@ custom:
 plugins:
   - serverless-iam-roles-per-function
 
+package:
+  exclude:
+    - .vscode/**
+    - cli/**
+    - tests/**
+    - '**/__mocks__/**'
+    - webapp/node_modules/**
+    - webapp/public-src/**
+    - webapp/app-local.js
+    - webapp/package-lock.json
+    - webapp/package.json
+    - webapp/webpack.config.js
+
 provider:
   name: aws
   profile: serverless-cli
