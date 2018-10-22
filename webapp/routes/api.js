@@ -21,6 +21,7 @@ const api = (req, res) => {
 
     const event = createEventPayload({ action, data, });
 
+    console.log('Invoking the lambda API with', event);
     // invoke the api Lambda function
     lambda.invoke({
         FunctionName: apiFunction,
@@ -31,10 +32,10 @@ const api = (req, res) => {
             if (data.StatusCode !== 200) throw new Error('Invoking lambda API function failed');
             return data;
         })
-        .then(data => data.Payload)    
-        .then(data => JSON.parse(data))    
+        .then(data => data.Payload)
+        .then(data => JSON.parse(data))
         .then(data => {
-            console.log("Received response from lambda API")
+            console.log('Received response from lambda API');
 
             const { statusCode, body, } = data;
 
@@ -60,5 +61,5 @@ const api = (req, res) => {
 module.exports = (app) => {
     // use the same middleware for all API request
     app.get('/list', api);
-    app.post(['/add', '/delete',], api);
+    app.post(['/add', '/delete', '/update',], api);
 };

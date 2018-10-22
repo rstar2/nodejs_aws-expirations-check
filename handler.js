@@ -122,6 +122,9 @@ module.exports.api = async (event, context, callback) => {
             case 'delete':
                 responseBody = await dbDelete(data);
                 break;
+            case 'update':
+                responseBody = await dbUpdate(data);
+                break;
             default:
                 throw new Error(`Invalid api action: ${action}`);
         }
@@ -176,4 +179,30 @@ const dbDelete = async (data) => {
     return dynamodbUtils.exec('delete', params)
         // return the deleted item's id
         .then(() => ({ id, }));
+};
+
+const dbUpdate = async (data) => {
+    const Item = {
+        id: data.id,
+        name: data.name,
+        expiresAt: data.expiresAt,
+        createdAt: Date.now(),
+    };
+
+    const params = {
+        TableName: dynamodb_TableName,
+        Key: {
+            id: Item.id,
+        },
+        UpdateExpression: 'set name=:n, expiresAt=:e, createdAt=:c',
+        ExpressionAttributeValues: {
+            ':n': Item.name,
+            ':e': Item.expiresAt,
+            ':c': Item.createdAt,
+        },
+        // ReturnValues: 'UPDATED_NEW',
+    };
+    return dynamodbUtils.exec('put', params)
+        // return the updated item
+        .then(() => ({ Item, }));
 };

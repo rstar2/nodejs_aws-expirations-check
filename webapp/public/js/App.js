@@ -1,30 +1,3 @@
-// eslint-disable-next-line
-const api = (url, data) => {
-    // if sending data as JSON body must be JSON encoded string
-    // AND !!! 'Content-Type' header must be valid JSON one
-    const opts = data && {
-        method: 'POST',
-        body: JSON.stringify(data),
-
-        // !!! this is obligatory for JSON encoded data so that the Express 'body-parser' to parse it properly
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    };
-
-    return fetch(url, opts)
-        .then(res => {
-            if (!res.ok) {
-                return res.json().then(err => Promise.reject(err));
-            }
-            return res;
-        })
-        .then(res => res.json());
-};
-
-Vue.use(window.vuelidate.default);
-const { required, minLength } = window.validators;
-
 const App = {
     template: html`
     <div class="md-layout">
@@ -42,44 +15,21 @@ const App = {
             <md-list-item v-for="item in list" :key="item.id">
                 <span class="md-list-item-text">{{item.expiresAt | date}}</span>
                 <span class="md-list-item-text">{{item.name}}</span>
+                <md-button @click="updateItem = item" class="md-default md-raised md-list-action">Update</md-button>
                 <md-button @click="apiDelete(item.id)" class="md-accent md-raised md-list-action">Delete</md-button>
             </md-list-item>
         </md-list>
     
-        <md-dialog :md-active.sync="showDialogAdd">
-            <md-dialog-title>Add new expiration-check item</md-dialog-title>
+        <app-dialog-add v-model:show="showDialogAdd" :show-item="updateItem" @action="apiAddUpdate">
+        </app-dialog-add>
     
-            <md-dialog-content>
-                <!-- <form novalidate class="md-layout" @submit.prevent="validateAdd"> -->
-    
-                <md-field :class="validateClass('name')">
-                    <label>Name</label>
-                    <md-input v-model="addItem.name"></md-input>
-                    <span class="md-error" v-if="!$v.addItem.name.required">The name is required</span>
-                    <span class="md-error" v-else-if="!$v.addItem.name.minlength">Name must have at least {{$v.addItem.name.$params.minLength.min}} letters.</span>
-                </md-field>
-    
-                <md-datepicker v-model="addItem.expiresAtDate" md-immediately :class="validateClass('expiresAtDate')">
-                    <label>Expires At</label>
-                    <span class="md-error" v-if="!$v.addItem.expiresAtDate.required">The expire-date is required</span>
-                </md-datepicker>
-    
-                <md-dialog-actions>
-                    <md-button class="md-primary" @click="showDialogAdd = false">Close</md-button>
-                    <md-button type="submit" class="md-primary" @click="validateAdd" :disabled="$v.addItem.$invalid">Add</md-button>
-                </md-dialog-actions>
-    
-                <!-- </form> -->
-            </md-dialog-content>
-        </md-dialog>
-    
-        <!-- :md-active.sync needs a boolean prop -->
-        <md-snackbar :md-active.sync="showInfo" md-position="center" :md-duration="3000" md-persistent>
-            <span>{{info}}</span>
-            <md-button class="md-accent" @click="showInfo = false">Dismiss</md-button>
-        </md-snackbar>
+        <app-notifications v-model="info"></app-notifications>
     </div>
     `,
+    components: {
+        'app-dialog-add': DialogAdd,
+        'app-notifications': Notifications,
+    },
     filters: {
         /**
          * @param {Number|String} expiresAt 
@@ -96,48 +46,29 @@ const App = {
     data() {
         return {
             // describes the current list
-            list: [],
+            list: [{
+                id: "asdasd",
+                expiresAt: 1539637200000,
+                name: "test"
+            }],
 
-            // describes the snackbar info to show , e.g. the result of the api call
+            // describes the notification result info to show (e.g. result of the api call)
             info: null,
 
-            // describes whether to open/show the DialogAdd
+            // describes whether to open/show the DialogAdd/Update
             showDialogAdd: false,
-
-            addItem: {
-                name: null,
-                expiresAt: null,
-                expiresAtDate: null,
-            }
+            updateItem: null,
         };
     },
-    computed: {
-        // showInfo() {
-        //     return !!this.info;
-        // },
-
-        // we need a getter AND a setter as 'showInfo' is set when using :md-active.sync="showInfo", to auto close it
-        showInfo: {
-            // getter
-            get: function () {
-                return !!this.info;
-            },
-            // setter
-            set: function (newValue) {
-                if (!newValue) {
-                    this.info = null;
-                }
-            }
-        }
-    },
     watch: {
-        // watch a nested property
-        'addItem.expiresAtDate': function (expiresAtDate) {
-            // 'expiresAtDate' is Date object, so create a 'expiresAt' as Number 
-            if (expiresAtDate) {
-                this.addItem.expiresAt = expiresAtDate.getTime();
-            } else {
-                this.addItem.expiresAt = null;
+        showDialogAdd(newValue) {
+            if (!newValue) {
+                this.updateItem = null;
+            }
+        },
+        updateItem(newValue) {
+            if (newValue) {
+                this.showDialogAdd = true;
             }
         }
     },
@@ -159,44 +90,20 @@ const App = {
                 .then(ItemId => this.list = this.list.filter(item => item.id !== ItemId))
                 .then(() => this.info = 'Deleted');
         },
-
-        validateAdd() {
-            // validate first and if any invalid field then return
-            this.$v.addItem.$touch();
-
-            if (this.$v.addItem.$invalid) {
-                // validation errors are shown already when this.$v.addItem.$touch() is called
-                return;
-            }
-
-            this.apiAdd(this.addItem);
-            this.$v.addItem.$reset();
-            this.addItem = {};
-            this.showDialogAdd = false;
-        }
-    },
-    validateClass(fieldName) {
-        const field = this.$v.addItem[fieldName];
-
-        if (field) {
-            return {
-                'md-invalid': field.$invalid && field.$dirty
-            };
-        }
-        return null;
-    },
-
-    // Vuelidate integration
-    validations: {
-        'addItem': {
-            'name': {
-                required,
-                minLength: minLength(5)
-            },
-            'expiresAtDate': {
-                required,
+        apiUpdate({ id, name, expiresAt }) {  // delete is reserved JS keyword
+            api(`${APP_CONTEXT_PATH}/api/update`, { id, name, expiresAt })
+                .then(data => data.Item)
+                .then(Item => this.list = this.list.filter(item => item.id !== Item.id))
+                .then(() => this.info = 'Updated');
+        },
+        apiAddUpdate(item) {
+            if (item.id) {
+                this.apiUpdate(item);
+            } else {
+                this.apiAdd(item);
             }
         }
-
+    },
+    mounted() {
     },
 };
