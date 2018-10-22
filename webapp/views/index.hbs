@@ -5,11 +5,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Material+Icons">
-	<link rel="stylesheet" href="https://unpkg.com/vue-material/dist/vue-material.css">
-	<link rel="stylesheet" href="https://unpkg.com/vue-material/dist/theme/default.css">
-
-	<link href="{{context-path}}/public/css/styles.css" rel="stylesheet">
+	<link href="{{context-path}}/public/styles/build.app.css" rel="stylesheet">
 </head>
 
 <body>
@@ -17,37 +13,12 @@
 		Hello
 	</div>
 
-	<script src="https://unpkg.com/vue"></script>
-	<script src="https://unpkg.com/vue-material/dist/vue-material.min.js"></script>
-
-	<script src="https://unpkg.com/vuelidate/dist/vuelidate.min.js"></script>
-	<script src="https://unpkg.com/vuelidate/dist/validators.min.js"></script>
-
 	{{!-- Make the context-path be accessible from the JS also --}}
 	<script>
 		const APP_CONTEXT_PATH = '{{context-path}}';
-
-		// defined just because the html tagged template is used
-		// by a VSCode plugin to lint/hint the HTML inside Vue component templates
-		// when using html`.....`,
-		// so if this is missing the cJS will break with ReferenceError: html is not defined
-		const html = (strings) => strings.raw[0];
 	</script>
 
-	<script src="{{context-path}}/public/js/services/api.js"></script>
-	<script src="{{context-path}}/public/js/components/DialogAdd.js"></script>
-	<script src="{{context-path}}/public/js/components/Notifications.js"></script>
-	<script src="{{context-path}}/public/js/App.js"></script>
-
-
-	<script>
-		Vue.use(VueMaterial.default);
-
-		new Vue({
-			el: '#app',
-			render: h => h(App),
-		});
-	</script>
+	<script src="{{context-path}}/public/js/build.app.js"></script>
 
 </body>
 

@@ -21,3 +21,5 @@ const api = (url, data) => {
         })
         .then(res => res.json());
 };
+
+export default api;
