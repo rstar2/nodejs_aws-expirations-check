@@ -10,6 +10,14 @@ custom:
   apiLambdaFunction: ${self:service}-${self:provider.stage}-api
   apiLambdaFunctionSecret: ${file(env.yml):env.AWS_LAMBDA_API_SECRET}
 
+  # implementing custom authorization
+  authorizer:
+    users:
+      name: authorizerUser
+      type: TOKEN
+      identitySource: method.request.header.Authorization
+      identityValidationExpression: Bearer (.*)
+
 plugins:
   - serverless-iam-roles-per-function
   - serverless-offline
@@ -65,7 +73,7 @@ provider:
 
 functions:
   - check:
-      handler: handler.check
+      handler: handlers/check.handler
       events:
         - http:
             path: check
@@ -74,30 +82,34 @@ functions:
             # authorizer: aws_iam
         # - schedule: rate(10 minutes) # Run every 10 minutes
         - schedule: cron(15 8 * * ? *) # Run at 8:15 am (UTC) every day
+  
+  - authorizerUser:
+      handler: handlers/authorizer.handler
 
   - api:
-      handler: handler.api
+      handler: handlers/api.handler
       events:
         - http:
             path: list
             method: GET
             cors: true
-            # authorizer: aws_iam
+            authorizer: aws_iam
         - http:
             path: add
             method: POST
             cors: true
-            # authorizer: aws_iam
+            authorizer: aws_iam
         - http:
             path: delete
             method: POST
             cors: true
-            # authorizer: aws_iam
+            authorizer: aws_iam
         - http:
             path: update
             method: POST
             cors: true
-            # authorizer: aws_iam
+            authorizer: aws_iam
+            
 
       # provide these env vars to the function as she'll need it
       environment:
@@ -110,8 +122,11 @@ functions:
         # all routes get proxied to the Express router
         - http: ANY /
           cors: true
+          authorizer: ${self:custom.authorizer.users}
         - http: 'ANY {proxy+}'
           cors: true
+          authorizer: ${self:custom.authorizer.users}
+          
       # provide these env vars to the function as she'll need it
       environment:
         AWS_STAGE: ${self:provider.stage}
