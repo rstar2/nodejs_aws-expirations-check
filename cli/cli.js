@@ -6,19 +6,20 @@ const argv = require('minimist')(process.argv.slice(2), { boolean: true, string:
 // usage:
 const help =
     `Usage: 
-	expire-cli <action> [--name=XXX] [--expire=YYY] [--id=YYY] [--localHttp] [--localInvoke]
+	cli <action> [--name=XXX] [--expire=YYY] [--id=YYY] [--localHttp] [--localInvoke]
 Note:
     --localHttp option will invoke the function handler locally by faking a dummy HTTP event,
     --localInvoke option will invoke the function handler locally by faking a dummy "secret" event,
       otherwise will request the function public API, e.g. will create real HTTP request
 Examples:
-	expire-cli list
-	expire-cli add --name=XXXX --expire="2 17 2019"
-	expire-cli add --name=XXXX --expire="2/17/2019"
-	expire-cli add --name=XXXX --expire="2-17-2019"
-	expire-cli add --name=XXXX --expire="2019-2-17"
-	expire-cli add --name=XXXX --expire="Feb 17, 2019"
-	expire-cli delete --id=XXXXX
+	cli list
+	cli add --name=XXXX --expire="2 17 2019"
+	cli add --name=XXXX --expire="2/17/2019"
+	cli add --name=XXXX --expire="2-17-2019"
+	cli add --name=XXXX --expire="2019-2-17"
+	cli add --name=XXXX --expire="Feb 17, 2019"
+	cli delete --id=XXXXX
+	cli update --id=XXXXX --expire="Feb 17, 2019"
 `;
 const action = argv._[0];
 const isLocalHttp = !!argv['localHttp']; // locally invoke the function handler
@@ -37,6 +38,11 @@ const exit = (error, printHelp = true) => {
 
 if (!action) {
     exit('No action specified');
+}
+
+// convert to Number
+if (expiresAt) {
+    expiresAt = new Date(expiresAt).getTime();
 }
 
 let event = {
@@ -60,7 +66,6 @@ switch (action) {
         if (!expiresAt) {
             exit('Missing \'--expire\' argument for the \'add\' action.');
         }
-        expiresAt = new Date(expiresAt).getTime();
         event.httpMethod = 'POST';
         data = { name, expiresAt, };
         break;
@@ -71,6 +76,17 @@ switch (action) {
         event.httpMethod = 'POST';
         data = { id, };
         break;
+    case 'update':
+        if (!id) {
+            exit('Missing \'--id\' argument for the \'update\' action.');
+        }
+        if (!name || !expiresAt) {
+            exit('Missing either \'--name\' and/or \'--expire\' argument for the \'update\' action.');
+        }
+
+        event.httpMethod = 'POST';
+        data = { id, name, expiresAt, };
+        break;    
     default:
         exit(`No valid action ${action}`);
 }

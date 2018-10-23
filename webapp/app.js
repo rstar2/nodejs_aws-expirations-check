@@ -28,7 +28,13 @@ module.exports = (stage) => {
     app.use('/public', express.static(path.join(__dirname, 'public')));
 
     // set the stage as global local template variable (e.g. accessible in all routes)
-    app.locals['context-path'] = stage ? '/' + stage : '';
+    if (process.env.IS_OFFLINE === 'true') {
+        // if we test it locally with
+        // $ sls offline start
+        app.locals['context-path'] = '';
+    } else {
+        app.locals['context-path'] = stage ? '/' + stage : '';
+    }
 
     // configure routes
     const apiRouter = express.Router();

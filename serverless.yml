@@ -12,6 +12,7 @@ custom:
 
 plugins:
   - serverless-iam-roles-per-function
+  - serverless-offline
 
 package:
   exclude:
@@ -92,6 +93,11 @@ functions:
             method: POST
             cors: true
             # authorizer: aws_iam
+        - http:
+            path: update
+            method: POST
+            cors: true
+            # authorizer: aws_iam
 
       # provide these env vars to the function as she'll need it
       environment:
@@ -111,6 +117,9 @@ functions:
         AWS_STAGE: ${self:provider.stage}
         AWS_LAMBDA_API: ${self:custom.apiLambdaFunction}
         AWS_LAMBDA_API_SECRET: ${self:custom.apiLambdaFunctionSecret}
+        # AWS_PROFILE will allow to uing the serverless-oofline plugin and thus 'aws-sdk' will have  proper auth credentials,
+        # apart from that it's not used 
+        AWS_PROFILE: ${file(env.yml):env.AWS_PROFILE}
       
       # Using the 'serverless-iam-roles-per-function' plugin we can
       # easily define IAM roles per function
