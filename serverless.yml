@@ -79,7 +79,7 @@ functions:
             path: check
             method: GET
             cors: true
-            # authorizer: aws_iam
+            authorizer: aws_iam
         # - schedule: rate(10 minutes) # Run every 10 minutes
         - schedule: cron(15 8 * * ? *) # Run at 8:15 am (UTC) every day
   
@@ -116,15 +116,17 @@ functions:
         AWS_LAMBDA_API_SECRET: ${self:custom.apiLambdaFunctionSecret}
 
   - webapp:
-      handler: webapp/lambda.handler
+      handler: handlers/webapp.handler
       timeout: 30
       events:
         # all routes get proxied to the Express router
         - http: ANY /
           cors: true
+          # authorizer: aws_iam
           authorizer: ${self:custom.authorizer.users}
         - http: 'ANY {proxy+}'
           cors: true
+          # authorizer: aws_iam
           authorizer: ${self:custom.authorizer.users}
           
       # provide these env vars to the function as she'll need it
@@ -132,7 +134,7 @@ functions:
         AWS_STAGE: ${self:provider.stage}
         AWS_LAMBDA_API: ${self:custom.apiLambdaFunction}
         AWS_LAMBDA_API_SECRET: ${self:custom.apiLambdaFunctionSecret}
-        # AWS_PROFILE will allow to uing the serverless-oofline plugin and thus 'aws-sdk' will have  proper auth credentials,
+        # AWS_PROFILE will allow to uing the serverless-offline plugin and thus 'aws-sdk' will have  proper auth credentials,
         # apart from that it's not used 
         AWS_PROFILE: ${file(env.yml):env.AWS_PROFILE}
       

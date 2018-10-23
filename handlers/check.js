@@ -1,21 +1,21 @@
-'use strict';
-
 const moment = require('moment');
-const uuid = require('uuid');
 
-// initialize a DynamoDB client for the specific region
-const dynamodbUtils = require('../lib/dynamodb-utils')(process.env.AWS_REGION);
-const dynamodb_TableName = 'my-expirations-check-dev-expirations';
-
-const dateUtils = require('../lib/date-utils');
+const dateUtils = require('../utils/date');
 
 // initialize a Twilio client to send SMS
-const twilioUtils = require('../lib/twilio-utils')(process.env.TWILIO_ACCOUNT_SID,
+const twilioUtils = require('../utils/twilio')(process.env.TWILIO_ACCOUNT_SID,
     process.env.TWILIO_AUTH_TOKEN, process.env.TWILIO_SENDER);
 
-const awsSesUtils = require('../lib/aws-ses-utils')(process.env.AWS_SES_SENDER);
+const awsSesUtils = require('../utils/aws-ses')(process.env.AWS_SES_SENDER);
+
+const { dbList, } = require('../lib/dynamodb');
+
+const { createResponse, } = require('../utils/http');
 
 module.exports.handler = async (event, context, callback) => {
+    console.log("Event:");
+    console.dir(event);
+
     let response;
     console.time('Invoking function check took');
 
@@ -47,6 +47,9 @@ module.exports.handler = async (event, context, callback) => {
             }
         }
     } else if (event.httpMethod) {
+        // this Lambda with HTTP gateway is secured with 'authorizer: aws_iam'
+        console.log(`Authenticated user identity: ${event.requestContext.identity.cognitoIdentityId}`);
+
         // if this is HTTP request
         response = createResponse(200, {
             checked: `Checked on ${moment().format('MMM Do YY')}`,

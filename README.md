@@ -26,3 +26,6 @@ $ sls deploy
 ```
 $ node cli update --localHttp --id=ab18a7a0-5839-11e8-a4ce-a5f3659aa8fd --expire="Feb 17, 2019"
 ```
+
+
+## Securing with IAM (AWS Cognito and etc)
