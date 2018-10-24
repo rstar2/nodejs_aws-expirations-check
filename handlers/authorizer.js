@@ -1,7 +1,3 @@
-const jwt = require('../utils/jwt')(process.env.JWT_SECRET);
-
-
-
 // For Lambda authorizers of the TOKEN type, API Gateway passes the source token to the Lambda function as the event.authorizationToken.
 // Based on the value of this token, the preceding authorizer function returns an Allow IAM policy on a specified method
 // if the token value is 'allow'. This permits a caller to invoke the specified method.
@@ -33,12 +29,12 @@ module.exports.handler = async (event, context, callback) => {
         // Return a 401 Unauthorized response
         return callback('Unauthorized: No token in Bearer');
     }
-    
+
     const token = split[1].trim().toLowerCase();
 
     // with Node8.10 Lambda we can return directly a promise
     // https://aws.amazon.com/blogs/compute/node-js-8-10-runtime-now-available-in-aws-lambda/
-    return authorizeDummy(token, event.methodArn)
+    return authorizeJWT(token, event.methodArn)
         .then((policy => {
             console.log(`Authorized call with token ${token} for ${policy.principalId}`);
             return policy;
@@ -50,7 +46,7 @@ module.exports.handler = async (event, context, callback) => {
 
     // for Node6.10 - just call the callback
     // try {
-    //     const policy = await authorizeDummy(token, event.methodArn);
+    //     const policy = await authorizeJWT(token, event.methodArn);
     //     console.log(`Authorized call with token ${token} for ${policy.principalId}`);
     //     callback(null, policy);
     // } catch (err) {
@@ -60,9 +56,11 @@ module.exports.handler = async (event, context, callback) => {
 };
 
 /**
- * @param {String} token 
+ * @param {String} token
+ * @param {String} resource
  * @return {Promise} 
  */
+// eslint-disable-next-line
 const authorizeDummy = (token, resource) => {
     return new Promise((resolve, reject) => {
         /*
@@ -71,10 +69,10 @@ const authorizeDummy = (token, resource) => {
          * here for demo purpose we will just compare with hardcoded value
          */
         switch (token) {
-            case '4674cc54-bd05-11e7-abc4-cec278b6b50a':
+            case '4674cc54-bd05-11e7-abc4-yes':
                 resolve(generateAllow('user123', resource));
                 break;
-            case '4674cc54-bd05-11e7-abc4-cec278b6b50b':
+            case '4674cc54-bd05-11e7-abc4-no':
                 resolve(generateDeny('user456', resource));
                 break;
             default:
@@ -83,21 +81,24 @@ const authorizeDummy = (token, resource) => {
     });
 };
 
+
+const jwt = require('../utils/jwt')(process.env.JWT_SECRET);
+const dbConnect = require('../lib/auth');
+
 /**
- * @param {String} token 
+ * @param {String} token
+ * @param {String} resource 
  * @return {Promise} 
  */
 const authorizeJWT = (jsonWebToken, resource) => {
-    return jwt.verify(jsonWebToken).then(id => {
-        if (!id) throw 'No id decoded from the JWT';
-
-        switch (id) {
-            case 'user123':
-                return generateAllow(id, resource);
-            default:
-                return generateDeny(id, resource);
-        }
-    });
+    return jwt.verify(jsonWebToken)
+        .then(id => {
+            if (!id) throw 'No id decoded from the JWT';
+            return id;
+        })
+        .then(id => Promise.all(id, dbConnect()))
+        .then(([id, db,]) => db.authorize(id)
+            .then(authorized => generatePolicy(id, authorized ? EFFECT_ALLOW : EFFECT_DENY, resource)));
 };
 
 const EFFECT_ALLOW = 'Allow';

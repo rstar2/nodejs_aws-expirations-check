@@ -10,7 +10,7 @@ module.exports = (jwtSecret, jwtOptions = jwtOptionsDef) => {
          * @param {String} id
          * @returns {Promise<String>}
          */
-        create: create.bind(this, jwtSecret, jwtOptions),
+        sign: sign.bind(this, jwtSecret, jwtOptions),
 
         /**
          * @param {String} jsonWebToken
@@ -27,7 +27,7 @@ module.exports = (jwtSecret, jwtOptions = jwtOptionsDef) => {
  * @param {String} id
  * @returns {Promise<String>}
  */
-const create = (jwtSecret, jwtOptions, id) => {
+const sign = (jwtSecret, jwtOptions, id) => {
     const payload = { id, };
     const token = jwt.sign(payload, jwtSecret, jwtOptions);
     return Promise.resolve(token);

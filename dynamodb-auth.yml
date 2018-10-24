@@ -1,0 +1,21 @@
+Resources:  
+  AuthTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:custom.authTable}
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        # these are the other attribute definitions going to be used - not as keys
+        # They are just shown for showing what are the item's attributes
+        # !!! They SHOULD NOT be added/uncommented in the configuration, ONLY KeySchema attributes are to be described here
+        # - AttributeName: name
+        #   AttributeType: S      
+        # - AttributeName: expiresAt
+        #   AttributeType: N      
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1

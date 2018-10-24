@@ -7,6 +7,7 @@ service: my-expirations-check
 custom:
   # define the name of the DynamoDB Table here as it's ARN will be used in the IAM roles also
   expirationsTable: ${self:service}-${self:provider.stage}-expirations
+  authTable: ${self:service}-${self:provider.stage}-auth
   apiLambdaFunction: ${self:service}-${self:provider.stage}-api
   apiLambdaFunctionSecret: ${file(env.yml):env.AWS_LAMBDA_API_SECRET}
 
@@ -76,9 +77,10 @@ functions:
   # the custom authorizer function (that's placed before a API Gateway event)
   - authorizerUser:
       handler: handlers/authorizer.handler
-      # provide these env vars to the function as she'll need it
       environment:
+      # needed for auth (register/login)
         JWT_SECRET: ${file(env.yml):env.JWT_SECRET}
+        AWS_DYNAMODB_ITEMS: ${self:custom.expirationsTable}
 
   - check:
       handler: handlers/check.handler
@@ -120,8 +122,8 @@ functions:
             authorizer: aws_iam
             # authorizer: ${self:custom.authorizer.user}
 
-      # provide these env vars to the function as she'll need it
       environment:
+        # needed to communicate with the API Lambda
         AWS_LAMBDA_API_SECRET: ${self:custom.apiLambdaFunctionSecret}
 
   - webapp:
@@ -144,15 +146,23 @@ functions:
             method: ANY
             cors: true
           
-      # provide these env vars to the function as she'll need it
       environment:
+        # needed by the Express HTTP server (to send it to the client for a context path)
+        # this could be get though from the API Gateway event (e.g. 'event.requestContext.stage')
         AWS_STAGE: ${self:provider.stage}
+        
+        # needed to communicate with the API Lambda
         AWS_LAMBDA_API: ${self:custom.apiLambdaFunction}
         AWS_LAMBDA_API_SECRET: ${self:custom.apiLambdaFunctionSecret}
+        
+        # needed for auth (register/login)
+        JWT_SECRET: ${file(env.yml):env.JWT_SECRET}
+        AWS_DYNAMODB_ITEMS: ${self:custom.expirationsTable}
+        
         # AWS_PROFILE will allow to uing the serverless-offline plugin and thus 'aws-sdk' will have  proper auth credentials,
         # apart from that it's not used 
         AWS_PROFILE: ${file(env.yml):env.AWS_PROFILE}
-        JWT_SECRET: ${file(env.yml):env.JWT_SECRET}
+        
       
       # Using the 'serverless-iam-roles-per-function' plugin we can
       # easily define IAM roles per function
@@ -170,5 +180,5 @@ functions:
       
 # you can add CloudFormation resource templates here
 resources:
-  # DynamoDB
-  - ${file(dynamodb-table.yml)}
+  - ${file(dynamodb-items.yml)}
+  - ${file(dynamodb-auth.yml)}

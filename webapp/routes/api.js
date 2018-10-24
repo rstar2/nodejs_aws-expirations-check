@@ -51,11 +51,11 @@ const api = (req, res) => {
             }
 
             // the data.body is actually a JSON encoded String so no need to do again JSON.stringify(body)
-            res.status(200).send(body);
+            res.send(body);
         })
         .catch(error => {
             console.error(error);
-            res.status(500).send(JSON.stringify({ error: `Something went wrong: ${error.message}`, }));
+            res.status(500).send({ error: `Something went wrong: ${error.message}`, });
         });
 };
 

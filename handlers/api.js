@@ -1,6 +1,6 @@
 const apiFunctionSecret = process.env.AWS_LAMBDA_API_SECRET;
 
-const db = require('../lib/dynamodb');
+const db = require('../lib/db-items');
 
 const { capitalize, } = require('../utils/string');
 const { createResponse, } = require('../utils/http');

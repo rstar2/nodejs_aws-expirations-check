@@ -8,7 +8,7 @@ const twilioUtils = require('../utils/twilio')(process.env.TWILIO_ACCOUNT_SID,
 
 const awsSesUtils = require('../utils/aws-ses')(process.env.AWS_SES_SENDER);
 
-const { dbList, } = require('../lib/dynamodb');
+const { dbList, } = require('../lib/db-items');
 const { createResponse, } = require('../utils/http');
 const dateUtils = require('../utils/date');
 

@@ -1,14 +1,34 @@
-const jwt = require('../utils/jwt')(process.env.JWT_SECRET);
+const jwt = require('../../utils/jwt')(process.env.JWT_SECRET);
+
+const dbConnect = require('../../lib/db-auth');
 
 module.exports = (app) => {
 
-    // https://medium.freecodecamp.org/a-crash-course-on-securing-serverless-apis-with-json-web-tokens-ff657ab2f5a5
-    
     app.post('/register', (req, res) => {
-        // res.render('index');
+        dbConnect()
+            .then(db => db.register(req.body))
+            .then(user => jwt.sign(user.id))
+            .then(token => {
+                console.log('Newly registered user');
+                res.send({ auth: true, token, });
+            })
+            .catch(error => {
+                console.error(error);
+                res.status(500).send({ error: `Something went wrong: ${error.message}`, });
+            });
     });
 
     app.post('/login', (req, res) => {
-        // res.render('index');
+        dbConnect()
+            .then(db => db.login(req.body))
+            .then(user => jwt.sign(user.id))
+            .then(token => {
+                console.log('Newly logged in user');
+                res.send({ auth: true, token, });
+            })
+            .catch(error => {
+                console.error(error);
+                res.status(500).send({ error: `Something went wrong: ${error.message}`, });
+            });
     });
 };
