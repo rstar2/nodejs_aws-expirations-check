@@ -4,10 +4,12 @@ const serverless = require('serverless-http');
 const stage = process.env.AWS_STAGE;
 const app = require('../webapp/app')(stage);
 
-// exports.handler = serverless(app);
-exports.handler = (event, context, callback) => {
-    console.log("Event:");
-    console.dir(event);
+exports.handler = serverless(app);
 
-    return serverless(app)(event, context, callback);
-};
+// for debugging
+// exports.handler = (event, context, callback) => {
+//     console.log("Event:");
+//     console.dir(event);
+
+//     return serverless(app)(event, context, callback);
+// };

@@ -1,14 +1,33 @@
+// For Lambda authorizers of the TOKEN type, API Gateway passes the source token to the Lambda function as the event.authorizationToken.
+// Based on the value of this token, the preceding authorizer function returns an Allow IAM policy on a specified method
+// if the token value is 'allow'. This permits a caller to invoke the specified method.
+// The caller receives a 200 OK response. The authorizer function returns a Deny policy against the specified method
+// if the authorization token has a 'deny' value. This blocks the caller from calling the method.
+// The client receives a 403 Forbidden response. If the token is 'unauthorized', the client receives a 401 Unauthorized response.
+// If the token is 'fail' or anything else, the client receives a 500 Internal Server Error response.
+// In both of the last two cases, no IAM policy is generated and the calls fail.
+
 module.exports.handler = (event, context, callback) => {
+    // console.log('AUTH: Check');
+    // console.log(event);
+    // it's of the type if we send HTTP header "Authorization: Bearer 4674cc54-bd05-11e7-abc4-cec278b6b50b"
+    // { 
+    //     type: 'TOKEN',
+    //     methodArn: 'arn:aws:execute-api:eu-west-1:592755008084:0hg9u4bp35/dev/GET/api/check',
+    //     authorizationToken: 'Bearer 4674cc54-bd05-11e7-abc4-cec278b6b50b'
+    // }   
 
     // Get Token
     if (typeof event.authorizationToken === 'undefined') {
         console.log('AUTH: No token');
+        // Return a 401 Unauthorized response
         return callback('Unauthorized');
     }
-    
+
     const split = event.authorizationToken.split('Bearer');
     if (split.length !== 2) {
         console.log('AUTH: no token in Bearer');
+        // Return a 401 Unauthorized response
         return callback('Unauthorized');
     }
     const token = split[1].trim();
@@ -42,17 +61,16 @@ const authorize = (token, resource) => {
          */
         switch (token) {
             case '4674cc54-bd05-11e7-abc4-cec278b6b50a':
-                resolve(generatePolicy('user123', EFFECT_ALLOW, resource));
+                resolve(generateAllow('user123', resource));
                 break;
             case '4674cc54-bd05-11e7-abc4-cec278b6b50b':
-                resolve(generatePolicy('user123', EFFECT_DENY, resource));
+                resolve(generateDeny('user123', resource));
                 break;
             default:
                 reject('Unauthorized');
         }
     });
-
-}
+};
 
 const EFFECT_ALLOW = 'Allow';
 const EFFECT_DENY = 'Deny';
@@ -77,5 +95,23 @@ const generatePolicy = (principalId, effect, resource) => {
         authResponse.policyDocument = policyDocument;
     }
 
+    // Optional output with custom properties of the String, Number or Boolean type.
+    authResponse.context = {
+        'stringKey': 'stringval',
+        'numberKey': 123,
+        'booleanKey': true,
+    };
+    // These keys can be accessed in the backend Lambda function as part of the input event
+    // $event.requestContext.authorizer.<key>.
+    // BUT their values are stringified, for example, "stringval", "123", or "true", respectively.
+
     return authResponse;
+};
+
+const generateAllow = (principalId, resource) => {
+    return generatePolicy(principalId, EFFECT_ALLOW, resource);
+};
+
+const generateDeny = (principalId, resource) => {
+    return generatePolicy(principalId, EFFECT_DENY, resource);
 };

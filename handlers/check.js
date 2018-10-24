@@ -1,6 +1,6 @@
 const moment = require('moment');
 
-const dateUtils = require('../utils/date');
+const apiFunctionSecret = process.env.AWS_LAMBDA_API_SECRET;
 
 // initialize a Twilio client to send SMS
 const twilioUtils = require('../utils/twilio')(process.env.TWILIO_ACCOUNT_SID,
@@ -9,12 +9,12 @@ const twilioUtils = require('../utils/twilio')(process.env.TWILIO_ACCOUNT_SID,
 const awsSesUtils = require('../utils/aws-ses')(process.env.AWS_SES_SENDER);
 
 const { dbList, } = require('../lib/dynamodb');
-
 const { createResponse, } = require('../utils/http');
+const dateUtils = require('../utils/date');
 
 module.exports.handler = async (event, context, callback) => {
-    console.log("Event:");
-    console.dir(event);
+    // console.log("Event:");
+    // console.dir(event);
 
     let response;
     console.time('Invoking function check took');
@@ -28,20 +28,20 @@ module.exports.handler = async (event, context, callback) => {
 
     if (event['detail-type'] === 'Scheduled Event') {
         // if this is Scheduled event - send real SMS
-        const message = expired.reduce((acc, item) => {
+        response = expired.reduce((acc, item) => {
             return acc + '\n' + item.name + ' expires/d on ' + moment(item.expiresAt).format('MMM Do YY');
         }, '');
 
-        if (message) {
-            console.log('Message ', message);
+        if (response) {
+            console.log('Message ', response);
             try {
-                await awsSesUtils.sendSMS(process.env.AWS_SES_RECEIVER, message);
+                await awsSesUtils.sendSMS(process.env.AWS_SES_RECEIVER, response);
             } catch (e) {
                 console.warn('Failed to send Email with AWS SES Service');
             }
 
             try {
-                await twilioUtils.sendSMS(process.env.TWILIO_RECEIVER, message);
+                await twilioUtils.sendSMS(process.env.TWILIO_RECEIVER, response);
             } catch (e) {
                 console.warn('Failed to send SMS with Twilio Service');
             }
@@ -60,7 +60,14 @@ module.exports.handler = async (event, context, callback) => {
             // context,
             // env: process.env,
         });
+    } else if (event.secret === apiFunctionSecret) {
+        // again return a HTTP response
+        response = createResponse(200, {
+            checked: `Checked on ${moment().format('MMM Do YY')}`,
+            expired,
+        });
     }
+    
     console.timeEnd('Invoking function check took');
     console.log(`Checked on ${Date.now()} : ${moment().format('MMM Do YY')} - expired: ${expired.length}`);
     callback(null, response);

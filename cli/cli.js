@@ -45,19 +45,16 @@ if (expiresAt) {
     expiresAt = new Date(expiresAt).getTime();
 }
 
-let event = {
-    action,
-    path: '/' + action,
-};
+let event = {};
 let func = 'api';
-let data;
+let data, httpMethod;
 switch (action) {
     case 'check':
-        event.httpMethod = 'GET';
+        httpMethod = 'GET';
         func = 'check';
         break;
     case 'list':
-        event.httpMethod = 'GET';
+        httpMethod = 'GET';
         break;
     case 'add':
         if (!name) {
@@ -66,14 +63,14 @@ switch (action) {
         if (!expiresAt) {
             exit('Missing \'--expire\' argument for the \'add\' action.');
         }
-        event.httpMethod = 'POST';
+        httpMethod = 'POST';
         data = { name, expiresAt, };
         break;
     case 'delete':
         if (!id) {
             exit('Missing \'--id\' argument for the \'delete\' action.');
         }
-        event.httpMethod = 'POST';
+        httpMethod = 'POST';
         data = { id, };
         break;
     case 'update':
@@ -84,17 +81,25 @@ switch (action) {
             exit('Missing either \'--name\' and/or \'--expire\' argument for the \'update\' action.');
         }
 
-        event.httpMethod = 'POST';
+        httpMethod = 'POST';
         data = { id, name, expiresAt, };
-        break;    
+        break;
     default:
         exit(`No valid action ${action}`);
 }
 
-if (data) {
+if (isLocalInvoke) {
+    // for direct/local invoke event
     Object.assign(event, {
+        action,
         data,
-        body: JSON.stringify(data),
+    });
+} else {
+    // for fake or real HTTP event request
+    Object.assign(event, {
+        httpMethod,
+        path: '/api/' + action,
+        body: data && JSON.stringify(data),
     });
 }
 
@@ -113,7 +118,7 @@ if (isLocalInvoke || isLocalHttp) {
     // merge with "real" env variables, eg. if any is already set DO NOT overwrite it
     Object.keys(env).forEach((key) => process.env[key] = process.env[key] || env[key]);
 
-    const handler = require('../handler')[func];
+    const handler = require(`../handlers/${func}`).handler;
 
     if (isLocalInvoke) {
         // add the "auth"/identification secret/token

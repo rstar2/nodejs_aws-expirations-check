@@ -38,8 +38,8 @@ module.exports = (stage) => {
 
     // configure routes
     const apiRouter = express.Router();
-    app.use('/api', apiRouter);
     require('./routes/api')(apiRouter);
+    app.use('/invoke/api', apiRouter);
 
     const viewsRouter = express.Router();
     require('./routes/views')(viewsRouter);

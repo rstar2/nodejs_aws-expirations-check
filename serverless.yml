@@ -12,7 +12,7 @@ custom:
 
   # implementing custom authorization
   authorizer:
-    users:
+    user:
       name: authorizerUser
       type: TOKEN
       identitySource: method.request.header.Authorization
@@ -72,43 +72,49 @@ provider:
   environment: ${file(env.yml):${self:provider.stage}, file(env.yml):default}
 
 functions:
+  # the custom authorizer function (that's placed before a API Gateway event)
+  - authorizerUser:
+      handler: handlers/authorizer.handler
+
   - check:
       handler: handlers/check.handler
       events:
         - http:
-            path: check
+            path: api/check
             method: GET
             cors: true
             authorizer: aws_iam
+            # authorizer: ${self:custom.authorizer.user}
         # - schedule: rate(10 minutes) # Run every 10 minutes
         - schedule: cron(15 8 * * ? *) # Run at 8:15 am (UTC) every day
   
-  - authorizerUser:
-      handler: handlers/authorizer.handler
-
   - api:
       handler: handlers/api.handler
       events:
         - http:
-            path: list
+            path: api/list
             method: GET
             cors: true
             authorizer: aws_iam
+            # authorizer: ${self:custom.authorizer.user}
         - http:
-            path: add
+            path: api/add
             method: POST
             cors: true
             authorizer: aws_iam
+            # authorizer: ${self:custom.authorizer.user}
         - http:
-            path: delete
+            path: api/delete
             method: POST
             cors: true
             authorizer: aws_iam
+            # authorizer: ${self:custom.authorizer.user}
         - http:
-            path: update
+            path: api/update
             method: POST
             cors: true
             authorizer: aws_iam
+            # authorizer: ${self:custom.authorizer.user}
             
 
       # provide these env vars to the function as she'll need it
@@ -120,14 +126,20 @@ functions:
       timeout: 30
       events:
         # all routes get proxied to the Express router
-        - http: ANY /
-          cors: true
-          # authorizer: aws_iam
-          authorizer: ${self:custom.authorizer.users}
-        - http: 'ANY {proxy+}'
-          cors: true
-          # authorizer: aws_iam
-          authorizer: ${self:custom.authorizer.users}
+        - http:
+            method: ANY
+            path: /invoke/api/{action+}
+            cors: true
+            # authorizer: aws_iam
+            authorizer: ${self:custom.authorizer.user}  
+        - http: 
+            path: / # this matches the base path
+            method: ANY
+            cors: true
+        - http:
+            path: /{any+}  # this matches any path, the token 'any' doesn't mean anything special. Note it's greedy path parameter (The + sign indicates whichever child resources are appended to it)
+            method: ANY
+            cors: true
           
       # provide these env vars to the function as she'll need it
       environment:

@@ -27,10 +27,9 @@
 </template>
 
 <script>
-
-import api from './services/api';
-import DialogAdd from './components/DialogAdd';
-import Notifications from './components/Notifications';
+import api from "./services/api";
+import DialogAdd from "./components/DialogAdd";
+import Notifications from "./components/Notifications";
 
 export default {
   components: {
@@ -83,33 +82,42 @@ export default {
   },
   methods: {
     apiRefresh() {
-      api(`${APP_CONTEXT_PATH}/api/list`)
+      api(`${APP_CONTEXT_PATH}/invoke/api/list`)
         .then(data => (this.list = data.Items))
-        .then(() => (this.info = "Refreshed"));
+        .then(() => (this.info = "Refreshed"))
+        .catch(() => (this.info = "Failed to refresh"));
     },
     apiAdd({ name, expiresAt }) {
-      api(`${APP_CONTEXT_PATH}/api/add`, { name, expiresAt })
+      api(`${APP_CONTEXT_PATH}/invoke/api/add`, { name, expiresAt })
         .then(data => data.Item)
         .then(Item => (this.list = [...this.list, Item]))
-        .then(() => (this.info = "Added"));
+        .then(() => (this.info = "Added"))
+        .catch(() => (this.info = "Failed to add"));
     },
     apiDelete(id) {
       // delete is reserved JS keyword
-      api(`${APP_CONTEXT_PATH}/api/delete`, { id })
+      api(`${APP_CONTEXT_PATH}/invoke/api/delete`, { id })
         .then(data => data.id)
         .then(
           ItemId => (this.list = this.list.filter(item => item.id !== ItemId))
         )
-        .then(() => (this.info = "Deleted"));
+        .then(() => (this.info = "Deleted"))
+        .catch(() => (this.info = "Failed to delete"));
     },
     apiUpdate({ id, name, expiresAt }) {
       // delete is reserved JS keyword
-      api(`${APP_CONTEXT_PATH}/api/update`, { id, name, expiresAt })
+      api(`${APP_CONTEXT_PATH}/invoke/api/update`, { id, name, expiresAt })
         .then(data => data.Item)
-        .then(
-          Item => (this.list = this.list.filter(item => item.id !== Item.id))
+        .then(Item =>
+          this.list.some(item => {
+            if (item.id === Item.id) {
+              Object.assign(item, { ...Item });
+              return true;
+            }
+          })
         )
-        .then(() => (this.info = "Updated"));
+        .then(() => (this.info = "Updated"))
+        .catch(() => (this.info = "Failed to update"));
     },
     apiAddUpdate(item) {
       if (item.id) {

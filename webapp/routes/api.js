@@ -36,6 +36,7 @@ const api = (req, res) => {
         .then(data => JSON.parse(data))
         .then(data => {
             console.log('Received response from lambda API');
+            //console.dir(data);
 
             const { statusCode, body, } = data;
 
