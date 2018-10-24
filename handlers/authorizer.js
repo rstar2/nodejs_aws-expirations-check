@@ -1,3 +1,7 @@
+const jwt = require('../utils/jwt')(process.env.JWT_SECRET);
+
+
+
 // For Lambda authorizers of the TOKEN type, API Gateway passes the source token to the Lambda function as the event.authorizationToken.
 // Based on the value of this token, the preceding authorizer function returns an Allow IAM policy on a specified method
 // if the token value is 'allow'. This permits a caller to invoke the specified method.
@@ -6,8 +10,7 @@
 // The client receives a 403 Forbidden response. If the token is 'unauthorized', the client receives a 401 Unauthorized response.
 // If the token is 'fail' or anything else, the client receives a 500 Internal Server Error response.
 // In both of the last two cases, no IAM policy is generated and the calls fail.
-
-module.exports.handler = (event, context, callback) => {
+module.exports.handler = async (event, context, callback) => {
     // console.log('AUTH: Check');
     // console.log(event);
     // it's of the type if we send HTTP header "Authorization: Bearer 4674cc54-bd05-11e7-abc4-cec278b6b50b"
@@ -21,39 +24,47 @@ module.exports.handler = (event, context, callback) => {
     if (typeof event.authorizationToken === 'undefined') {
         console.log('AUTH: No token');
         // Return a 401 Unauthorized response
-        return callback('Unauthorized');
+        return callback('Unauthorized: No token');
     }
 
     const split = event.authorizationToken.split('Bearer');
     if (split.length !== 2) {
         console.log('AUTH: no token in Bearer');
         // Return a 401 Unauthorized response
-        return callback('Unauthorized');
+        return callback('Unauthorized: No token in Bearer');
     }
-    const token = split[1].trim();
+    
+    const token = split[1].trim().toLowerCase();
 
     // with Node8.10 Lambda we can return directly a promise
     // https://aws.amazon.com/blogs/compute/node-js-8-10-runtime-now-available-in-aws-lambda/
-    return authorize(token, event.methodArn)
-        .then((data => {
-            console.log(`Authorized call with token ${token} for ${data.principalId}`);
-            return data;
+    return authorizeDummy(token, event.methodArn)
+        .then((policy => {
+            console.log(`Authorized call with token ${token} for ${policy.principalId}`);
+            return policy;
         }))
         .catch(err => {
             console.log(`Unauthorized call for token ${token}`);
-            throw err;
+            throw 'Unauthorized: ' + err;
         });
+
+    // for Node6.10 - just call the callback
+    // try {
+    //     const policy = await authorizeDummy(token, event.methodArn);
+    //     console.log(`Authorized call with token ${token} for ${policy.principalId}`);
+    //     callback(null, policy);
+    // } catch (err) {
+    //     console.log(`Unauthorized call for token ${token}`);
+    //     callback('Unauthorized: ' + err);
+    // }
 };
 
 /**
- * 
  * @param {String} token 
  * @return {Promise} 
  */
-const authorize = (token, resource) => {
+const authorizeDummy = (token, resource) => {
     return new Promise((resolve, reject) => {
-
-
         /*
          * extra custom authorization logic here: OAUTH, JWT ... etc
          * search token in database and check if valid
@@ -64,10 +75,27 @@ const authorize = (token, resource) => {
                 resolve(generateAllow('user123', resource));
                 break;
             case '4674cc54-bd05-11e7-abc4-cec278b6b50b':
-                resolve(generateDeny('user123', resource));
+                resolve(generateDeny('user456', resource));
                 break;
             default:
-                reject('Unauthorized');
+                reject('Not allowed token: ' + token);
+        }
+    });
+};
+
+/**
+ * @param {String} token 
+ * @return {Promise} 
+ */
+const authorizeJWT = (jsonWebToken, resource) => {
+    return jwt.verify(jsonWebToken).then(id => {
+        if (!id) throw 'No id decoded from the JWT';
+
+        switch (id) {
+            case 'user123':
+                return generateAllow(id, resource);
+            default:
+                return generateDeny(id, resource);
         }
     });
 };

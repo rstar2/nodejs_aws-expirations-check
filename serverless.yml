@@ -17,6 +17,7 @@ custom:
       type: TOKEN
       identitySource: method.request.header.Authorization
       identityValidationExpression: Bearer (.*)
+      resultTtlInSeconds: 1
 
 plugins:
   - serverless-iam-roles-per-function
@@ -75,6 +76,9 @@ functions:
   # the custom authorizer function (that's placed before a API Gateway event)
   - authorizerUser:
       handler: handlers/authorizer.handler
+      # provide these env vars to the function as she'll need it
+      environment:
+        JWT_SECRET: ${file(env.yml):env.JWT_SECRET}
 
   - check:
       handler: handlers/check.handler
@@ -115,7 +119,6 @@ functions:
             cors: true
             authorizer: aws_iam
             # authorizer: ${self:custom.authorizer.user}
-            
 
       # provide these env vars to the function as she'll need it
       environment:
@@ -149,6 +152,7 @@ functions:
         # AWS_PROFILE will allow to uing the serverless-offline plugin and thus 'aws-sdk' will have  proper auth credentials,
         # apart from that it's not used 
         AWS_PROFILE: ${file(env.yml):env.AWS_PROFILE}
+        JWT_SECRET: ${file(env.yml):env.JWT_SECRET}
       
       # Using the 'serverless-iam-roles-per-function' plugin we can
       # easily define IAM roles per function

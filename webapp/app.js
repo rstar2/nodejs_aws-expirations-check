@@ -41,6 +41,10 @@ module.exports = (stage) => {
     require('./routes/api')(apiRouter);
     app.use('/invoke/api', apiRouter);
 
+    const authRouter = express.Router();
+    require('./routes/auth')(authRouter);
+    app.use('/auth', authRouter);
+
     const viewsRouter = express.Router();
     require('./routes/views')(viewsRouter);
     app.use('/', viewsRouter);
