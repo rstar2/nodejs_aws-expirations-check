@@ -118,6 +118,11 @@ if (isLocalInvoke || isLocalHttp) {
     // merge with "real" env variables, eg. if any is already set DO NOT overwrite it
     Object.keys(env).forEach((key) => process.env[key] = process.env[key] || env[key]);
 
+    // TODO: get from the serverless.yml so then it's defined in only one place
+    if (!process.env.AWS_DYNAMODB_ITEMS) {
+        process.env.AWS_DYNAMODB_ITEMS = `my-expirations-check-${stage}-expirations`;
+    }
+
     const handler = require(`../handlers/${func}`).handler;
 
     if (isLocalInvoke) {

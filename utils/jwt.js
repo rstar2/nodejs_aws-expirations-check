@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 const jwtOptionsDef = {
-    expiresIn: 86400,  // 24 hours in seconds
+    expiresIn: 86400,  // 24 hours in seconds - could be 
 };
 
 module.exports = (jwtSecret, jwtOptions = jwtOptionsDef) => {

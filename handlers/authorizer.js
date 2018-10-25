@@ -30,7 +30,7 @@ module.exports.handler = async (event, context, callback) => {
         return callback('Unauthorized: No token in Bearer');
     }
 
-    const token = split[1].trim().toLowerCase();
+    const token = split[1].trim();
 
     // with Node8.10 Lambda we can return directly a promise
     // https://aws.amazon.com/blogs/compute/node-js-8-10-runtime-now-available-in-aws-lambda/
@@ -39,9 +39,9 @@ module.exports.handler = async (event, context, callback) => {
             console.log(`Authorized call with token ${token} for ${policy.principalId}`);
             return policy;
         }))
-        .catch(err => {
-            console.log(`Unauthorized call for token ${token}`);
-            throw 'Unauthorized: ' + err;
+        .catch(error => {
+            console.log(`Unauthorized call for token ${token}`, error);
+            throw 'Unauthorized: ' + error;
         });
 
     // for Node6.10 - just call the callback
@@ -49,9 +49,9 @@ module.exports.handler = async (event, context, callback) => {
     //     const policy = await authorizeJWT(token, event.methodArn);
     //     console.log(`Authorized call with token ${token} for ${policy.principalId}`);
     //     callback(null, policy);
-    // } catch (err) {
+    // } catch (error) {
     //     console.log(`Unauthorized call for token ${token}`);
-    //     callback('Unauthorized: ' + err);
+    //     callback('Unauthorized: ' + error);
     // }
 };
 
@@ -83,7 +83,7 @@ const authorizeDummy = (token, resource) => {
 
 
 const jwt = require('../utils/jwt')(process.env.AUTH_JWT_SECRET);
-const dbConnect = require('../lib/auth');
+const dbConnect = require('../lib/db-auth');
 
 /**
  * @param {String} token
@@ -96,7 +96,7 @@ const authorizeJWT = (jsonWebToken, resource) => {
             if (!id) throw 'No id decoded from the JWT';
             return id;
         })
-        .then(id => Promise.all(id, dbConnect()))
+        .then(id => Promise.all([id, dbConnect(),]))
         .then(([id, db,]) => db.authorize(id)
             .then(authorized => generatePolicy(id, authorized ? EFFECT_ALLOW : EFFECT_DENY, resource)));
 };

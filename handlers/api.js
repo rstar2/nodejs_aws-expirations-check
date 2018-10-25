@@ -10,6 +10,7 @@ const MAP_METHODS = {
     'POST': ['add', 'delete', 'update',],
 };
 
+// eslint-disable-next-line
 module.exports.handler = async (event, context, callback) => {
     // console.log("Event:");
     // console.dir(event);
@@ -60,7 +61,7 @@ module.exports.handler = async (event, context, callback) => {
  * @param {Object} data
  * @return {Promise<String>}
  */
-const doAction = (action, data) => {
+const doAction = async (action, data) => {
     switch (action) {
         case 'list':
         case 'add':

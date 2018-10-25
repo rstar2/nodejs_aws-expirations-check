@@ -2,7 +2,8 @@
   "id1": {
     "name": "Rumen Neshev",
     "email": "rstar@abv.bg",
-    "password": "$2a$10$IdR/8d.i3HBuFL6nT4Gi8eHzrLUyVe9GyX82hcuvQJ6e4oRZRy2i2"
+    "password": "$2a$10$IdR/8d.i3HBuFL6nT4Gi8eHzrLUyVe9GyX82hcuvQJ6e4oRZRy2i2",
+    "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImlkMSIsImlhdCI6MTU0MDQ2NDMyNSwiZXhwIjoxNTQwNTUwNzI1fQ.RVGsIaEqzWyw116-MUTE4j_vuEx-kFu78Jb-xFdgHG8"
   },
   "id2": {
     "name": "Rumen Neshev 2",

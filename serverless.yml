@@ -78,9 +78,9 @@ functions:
   - authorizerUser:
       handler: handlers/authorizer.handler
       environment:
-      # needed for auth (register/login)
+        # needed for auth (register/login)
         AUTH_JWT_SECRET: ${file(env.yml):env.AUTH_JWT_SECRET}
-        AWS_DYNAMODB_ITEMS: ${self:custom.expirationsTable}
+        AWS_DYNAMODB_AUTH: ${self:custom.authTable}
 
   - check:
       handler: handlers/check.handler
@@ -93,7 +93,10 @@ functions:
             # authorizer: ${self:custom.authorizer.user}
         # - schedule: rate(10 minutes) # Run every 10 minutes
         - schedule: cron(15 8 * * ? *) # Run at 8:15 am (UTC) every day
-  
+      environment:
+        # needed to access the necessary DynamoDB table
+        AWS_DYNAMODB_ITEMS: ${self:custom.expirationsTable}
+
   - api:
       handler: handlers/api.handler
       events:
@@ -125,6 +128,8 @@ functions:
       environment:
         # needed to communicate with the API Lambda
         AWS_LAMBDA_API_SECRET: ${self:custom.apiLambdaFunctionSecret}
+        # needed to access the necessary DynamoDB table
+        AWS_DYNAMODB_ITEMS: ${self:custom.expirationsTable}
 
   - webapp:
       handler: handlers/webapp.handler
@@ -157,7 +162,8 @@ functions:
         
         # needed for auth (register/login)
         AUTH_JWT_SECRET: ${file(env.yml):env.AUTH_JWT_SECRET}
-        AWS_DYNAMODB_ITEMS: ${self:custom.expirationsTable}
+        AUTH_PASSWORD_SALT: ${file(env.yml):env.AUTH_PASSWORD_SALT}
+        AWS_DYNAMODB_AUTH: ${self:custom.authTable}
         
         # AWS_PROFILE will allow to uing the serverless-offline plugin and thus 'aws-sdk' will have  proper auth credentials,
         # apart from that it's not used 
