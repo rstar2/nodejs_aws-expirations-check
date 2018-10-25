@@ -14,8 +14,10 @@ Resources:
         # !!! They SHOULD NOT be added/uncommented in the configuration, ONLY KeySchema attributes are to be described here
         # - AttributeName: name
         #   AttributeType: S      
-        # - AttributeName: expiresAt
-        #   AttributeType: N      
+        # - AttributeName: email
+        #   AttributeType: S      
+        # - AttributeName: password
+        #   AttributeType: S      
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1

@@ -22,7 +22,7 @@
 
 			<md-field :class="validateClass('password')">
                 <label>Password</label>
-                <md-input v-model="user.password"></md-input>
+                <md-input v-model="user.password" type="password"></md-input>
                 <span class="md-error" v-if="!$v.user.password.required">The password is required</span>
                 <span class="md-error" v-else-if="!$v.user.password.minlength">Password must have at least
                     {{$v.user.password.$params.minLength.min}} letters.</span>
