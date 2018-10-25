@@ -1,4 +1,4 @@
-const jwt = require('../../utils/jwt')(process.env.JWT_SECRET);
+const jwt = require('../../utils/jwt')(process.env.AUTH_JWT_SECRET);
 
 const dbConnect = require('../../lib/db-auth');
 

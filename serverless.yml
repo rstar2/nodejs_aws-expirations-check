@@ -79,7 +79,7 @@ functions:
       handler: handlers/authorizer.handler
       environment:
       # needed for auth (register/login)
-        JWT_SECRET: ${file(env.yml):env.JWT_SECRET}
+        AUTH_JWT_SECRET: ${file(env.yml):env.AUTH_JWT_SECRET}
         AWS_DYNAMODB_ITEMS: ${self:custom.expirationsTable}
 
   - check:
@@ -156,7 +156,7 @@ functions:
         AWS_LAMBDA_API_SECRET: ${self:custom.apiLambdaFunctionSecret}
         
         # needed for auth (register/login)
-        JWT_SECRET: ${file(env.yml):env.JWT_SECRET}
+        AUTH_JWT_SECRET: ${file(env.yml):env.AUTH_JWT_SECRET}
         AWS_DYNAMODB_ITEMS: ${self:custom.expirationsTable}
         
         # AWS_PROFILE will allow to uing the serverless-offline plugin and thus 'aws-sdk' will have  proper auth credentials,
