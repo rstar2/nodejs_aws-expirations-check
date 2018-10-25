@@ -28,7 +28,7 @@ module.exports = (app) => {
             })
             .catch(error => {
                 console.error(error);
-                res.status(500).send({ error: `Something went wrong: ${error.message}`, });
+                res.status(500).send({ error, });
             });
     });
 };

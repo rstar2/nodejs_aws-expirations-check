@@ -7,6 +7,8 @@
             <div class="md-toolbar-section-end">
                 <md-button @click="apiRefresh" class="md-primary md-raised">Refresh</md-button>
                 <md-button @click="showDialogAdd = true" class="md-primary md-raised">Add</md-button>
+                <md-button v-if="!auth" @click="dialogAuth.isRegister = true; dialogAuth.show = true;" class="md-primary md-raised">Register</md-button>
+                <md-button v-if="!auth" @click="dialogAuth.isRegister = false; dialogAuth.show = true;" class="md-primary md-raised">Login</md-button>
             </div>
         </md-toolbar>
     
@@ -19,6 +21,9 @@
             </md-list-item>
         </md-list>
     
+		<app-dialog-auth v-model="dialogAuth.show" :isRegister="dialogAuth.isRegister" @action="apiAuth">
+        </app-dialog-auth>
+
         <app-dialog-add v-model="showDialogAdd" :show-item="updateItem" @action="apiAddUpdate">
         </app-dialog-add>
     
@@ -28,11 +33,13 @@
 
 <script>
 import api from "./services/api";
+import DialogAuth from "./components/DialogAuth";
 import DialogAdd from "./components/DialogAdd";
 import Notifications from "./components/Notifications";
 
 export default {
   components: {
+    "app-dialog-auth": DialogAuth,
     "app-dialog-add": DialogAdd,
     "app-notifications": Notifications
   },
@@ -54,9 +61,9 @@ export default {
       // describes the current list
       list: [
         {
-          id: "asdasd",
+          id: "dummy",
           expiresAt: 1539637200000,
-          name: "test"
+          name: "Dummy"
         }
       ],
 
@@ -65,7 +72,16 @@ export default {
 
       // describes whether to open/show the DialogAdd/Update
       showDialogAdd: false,
-      updateItem: null
+      updateItem: null,
+
+	  auth: false,
+	  // TODO: store it in cookie/localStorage and use it
+	  authJWT: null,
+
+      dialogAuth: {
+        show: false,
+        isRgister: false
+      }
     };
   },
   watch: {
@@ -125,9 +141,38 @@ export default {
       } else {
         this.apiAdd(item);
       }
+    },
+
+    apiAuth(user) {
+      // delete is reserved JS keyword
+      const action = this.dialogAuth.isRegister ? "register" : "login";
+      api(`${APP_CONTEXT_PATH}/auth/${action}`, user)
+        .then(({ auth, token }) => {
+          this.auth = auth;
+          this.authJWT = token;
+        })
+        .then(
+          () =>
+            (this.info = this.dialogAuth.isRegister
+              ? "Registered"
+              : "Logged in")
+        )
+        .catch(data => {
+          // error response must be of the form { error: 'xxxxx' }
+          this.info =
+            (data && data.error) ||
+            (this.dialogAuth.isRegister
+              ? "Failed to register"
+              : "Failed to login");
+        });
     }
   },
-  mounted() {}
+  mounted() {
+	  // TODO: restore it from cookie/localStorage
+	  this.authJWT = null;
+	  // TODO: check if it's still valid
+	  this.auth = false;
+  }
 };
 </script>
 
