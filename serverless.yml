@@ -13,8 +13,8 @@ custom:
 
   # implementing custom authorization
   authorizer:
-    user:
-      name: authorizerUser
+    jwt:
+      name: authorizerJWT
       type: TOKEN
       identitySource: method.request.header.Authorization
       identityValidationExpression: Bearer (.*)
@@ -29,9 +29,21 @@ custom:
     # Disable the authorizers
     # noAuth: true
 
+  # Configuration for the serverless-log-forwarding plugin https://github.com/amplify-education/serverless-log-forwarding
+  logForwarding:
+    destinationARN: '[ARN of Lambda Function to forward logs to]'
+    # optional: 
+    filterPattern: '[filter pattern for logs that are sent to Lambda function]'
+    normalizedFilterID: true # whether to use normalized function name as filter ID 
+    stages: ${self:provider.stage}
+
 plugins:
+  # plugin for assigning additioanl roles per function
   - serverless-iam-roles-per-function
+  # plugin for testing all offline , without need to deploy it (sls deploy) all the time to AWS
   - serverless-offline
+  # plugin for forwarding CloudWatch logs to another Lambda function
+  # - serverless-log-forwarding
 
 package:
   exclude:
@@ -66,30 +78,32 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      # allow access to ONLY the needed DynamoDB Table - better design
+      # allow access to ONLY the needed DynamoDB Tables - better design
       # Resource: "arn:aws:dynamodb:${self:provider.region}:*:table:${self:custom.expirationsTable}"
+      # Resource: "arn:aws:dynamodb:${self:provider.region}:*:table:${self:custom.authTable}"
       Resource:
         - "Fn::GetAtt": [ ExpirationsTable, Arn ]
+        - "Fn::GetAtt": [ AuthTable, Arn ]
       # allow access to ALL DynamoDB Tables
       # Resource: "arn:aws:dynamodb:${self:provider.region}:*:*"
 
-    - Effect: "Allow"
-      Action:
-        - "ses:SendEmail"
-      Resource: ["*"]
-  
   # Load environment variables externally from 'env.yml' depending on the stage,
   # Fallback to default if it is not in specified stage.
   environment: ${file(env.yml):${self:provider.stage}, file(env.yml):default}
 
 functions:
   # the custom authorizer function (that's placed before a API Gateway event)
-  - authorizerUser:
+  - authorizerJWT:
       handler: handlers/authorizer.handler
       environment:
         # needed for auth (register/login)
         AUTH_JWT_SECRET: ${file(env.yml):env.AUTH_JWT_SECRET}
         AWS_DYNAMODB_AUTH: ${self:custom.authTable}
+
+      # optional properties for per-function configuration:
+      # logForwarding:
+        # set enabled to false to disable log forwarding for a single given function
+        # enabled: false  
 
   - check:
       handler: handlers/check.handler
@@ -99,12 +113,19 @@ functions:
             method: GET
             cors: true
             authorizer: aws_iam
-            # authorizer: ${self:custom.authorizer.user}
         # - schedule: rate(10 minutes) # Run every 10 minutes
         - schedule: cron(15 8 * * ? *) # Run at 8:15 am (UTC) every day
       environment:
         # needed to access the necessary DynamoDB table
         AWS_DYNAMODB_ITEMS: ${self:custom.expirationsTable}
+
+      # defined additional role/permissions for this function
+      iamRoleStatementsInherit: true
+      iamRoleStatements:
+        - Effect: "Allow"
+          Action:
+            - "ses:SendEmail"
+          Resource: ["*"]
 
   - api:
       handler: handlers/api.handler
@@ -114,26 +135,25 @@ functions:
             method: GET
             cors: true
             authorizer: aws_iam
-            # authorizer: ${self:custom.authorizer.user}
+            # authorizer: ${self:custom.authorizer.jwt}
         - http:
             path: api/add
             method: POST
             cors: true
             authorizer: aws_iam
-            # authorizer: ${self:custom.authorizer.user}
+            # authorizer: ${self:custom.authorizer.jwt}
         - http:
             path: api/delete
             method: POST
             cors: true
             authorizer: aws_iam
-            # authorizer: ${self:custom.authorizer.user}
+            # authorizer: ${self:custom.authorizer.jwt}
         - http:
             path: api/update
             method: POST
             cors: true
             authorizer: aws_iam
-            # authorizer: ${self:custom.authorizer.user}
-
+            # authorizer: ${self:custom.authorizer.jwt}
       environment:
         # needed to communicate with the API Lambda
         AWS_LAMBDA_API_SECRET: ${self:custom.apiLambdaFunctionSecret}
@@ -150,7 +170,7 @@ functions:
             path: /invoke/api/{action+}
             cors: true
             # authorizer: aws_iam
-            authorizer: ${self:custom.authorizer.user}  
+            authorizer: ${self:custom.authorizer.jwt}  
         - http: 
             path: / # this matches the base path
             method: ANY
@@ -159,7 +179,7 @@ functions:
             path: /{any+}  # this matches any path, the token 'any' doesn't mean anything special. Note it's greedy path parameter (The + sign indicates whichever child resources are appended to it)
             method: ANY
             cors: true
-          
+      
       environment:
         # needed by the Express HTTP server (to send it to the client for a context path)
         # this could be get though from the API Gateway event (e.g. 'event.requestContext.stage')
@@ -177,7 +197,6 @@ functions:
         # AWS_PROFILE will allow to uing the serverless-offline plugin and thus 'aws-sdk' will have  proper auth credentials,
         # apart from that it's not used 
         AWS_PROFILE: ${file(env.yml):env.AWS_PROFILE}
-        
       
       # Using the 'serverless-iam-roles-per-function' plugin we can
       # easily define IAM roles per function
@@ -197,3 +216,7 @@ functions:
 resources:
   - ${file(dynamodb-items.yml)}
   - ${file(dynamodb-auth.yml)}
+
+  # Cognito
+  # - ${file(cognito-user-pool.yml)}
+  # - ${file(cognito-identity-pool.yml)}

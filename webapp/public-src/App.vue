@@ -110,14 +110,22 @@ export default {
     }
   },
   methods: {
+    apiRequest() {
+		const args = Array.prototype.slice.call(arguments);
+		if (args.length === 1) {
+			args.push(null);
+		}
+		args.push(this.authJWT);
+		return api.apply(null, args);
+	},
     apiRefresh() {
-      api(`${APP_CONTEXT_PATH}/invoke/api/list`)
+      this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/list`)
         .then(data => (this.list = data.Items))
         .then(() => (this.info = "Refreshed"))
         .catch(() => (this.info = "Failed to refresh"));
     },
     apiAdd({ name, expiresAt }) {
-      api(`${APP_CONTEXT_PATH}/invoke/api/add`, { name, expiresAt })
+      this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/add`, { name, expiresAt })
         .then(data => data.Item)
         .then(Item => (this.list = [...this.list, Item]))
         .then(() => (this.info = "Added"))
@@ -125,7 +133,7 @@ export default {
     },
     apiDelete(id) {
       // delete is reserved JS keyword
-      api(`${APP_CONTEXT_PATH}/invoke/api/delete`, { id })
+      this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/delete`, { id })
         .then(data => data.id)
         .then(
           ItemId => (this.list = this.list.filter(item => item.id !== ItemId))
@@ -135,7 +143,7 @@ export default {
     },
     apiUpdate({ id, name, expiresAt }) {
       // delete is reserved JS keyword
-      api(`${APP_CONTEXT_PATH}/invoke/api/update`, { id, name, expiresAt })
+      this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/update`, { id, name, expiresAt })
         .then(data => data.Item)
         .then(Item =>
           this.list.some(item => {
@@ -159,7 +167,7 @@ export default {
     apiAuth(user) {
       // delete is reserved JS keyword
       const action = this.dialogAuth.isRegister ? "register" : "login";
-      api(`${APP_CONTEXT_PATH}/auth/${action}`, user)
+      this.apiRequest(`${APP_CONTEXT_PATH}/auth/${action}`, user)
         .then(({ token }) => (this.authJWT = token))
         .then(
           () =>

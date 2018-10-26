@@ -1,16 +1,28 @@
 // eslint-disable-next-line
-const api = (url, data) => {
+const api = (url, data, authToken) => {
+    const opts = {
+        headers: {},
+    };
+
+    if (authToken) {
+        Object.assign(opts.headers, {
+            'Authorization': 'Bearer ' + authToken,
+        });
+    }
+    
     // if sending data as JSON body must be JSON encoded string
     // AND !!! 'Content-Type' header must be valid JSON one
-    const opts = data && {
-        method: 'POST',
-        body: JSON.stringify(data),
-
+    if (data) {
+        Object.assign(opts, {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
         // !!! this is obligatory for JSON encoded data so that the Express 'body-parser' to parse it properly
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    };
+        Object.assign(opts.headers, {
+            'Content-Type': 'application/json',
+        });
+    }
+
 
     return fetch(url, opts)
         .then(res => {

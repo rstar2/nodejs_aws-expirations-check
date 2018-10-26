@@ -26,6 +26,7 @@
     "aws-sdk": "^2.335.0",
     "jest": "^23.6.0",
     "serverless-iam-roles-per-function": "^1.0.4",
+    "serverless-log-forwarding": "^1.2.1",
     "serverless-offline": "^3.29.0"
   }
 }
