@@ -20,6 +20,15 @@ custom:
       identityValidationExpression: Bearer (.*)
       resultTtlInSeconds: 1
 
+  # Configuration for the serverless-offline plugin https://github.com/dherault/serverless-offline
+  serverless-offline:
+    host: localhost
+    port: 3000
+    # Adds a prefix to every path, to send your requests to http://localhost:3000/[prefix]/[your_path] instead. E.g. -p dev
+    # prefix: ${self:provider.stage}
+    # Disable the authorizers
+    # noAuth: true
+
 plugins:
   - serverless-iam-roles-per-function
   - serverless-offline

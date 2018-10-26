@@ -36,11 +36,11 @@ module.exports.handler = async (event, context, callback) => {
     // https://aws.amazon.com/blogs/compute/node-js-8-10-runtime-now-available-in-aws-lambda/
     return authorizeJWT(token, event.methodArn)
         .then((policy => {
-            console.log(`Authorized call with token ${token} for ${policy.principalId}`);
+            console.log(`Authorized call with token '${token}' for '${policy.principalId}'`);
             return policy;
         }))
         .catch(error => {
-            console.log(`Unauthorized call for token ${token}`, error);
+            console.log(`Unauthorized call for token '${token}' - error: ${error}`);
             throw 'Unauthorized: ' + error;
         });
 

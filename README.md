@@ -28,4 +28,23 @@ $ node cli update --localHttp --id=ab18a7a0-5839-11e8-a4ce-a5f3659aa8fd --expire
 ```
 
 
+## Securing with custom authorizer
+
+Currently there's a bug in serverless-offline plugin that don't add the AWS_REGION environment variable to the authorizer handler.
+To fix locally until there's official fix: https://github.com/dherault/serverless-offline/pull/491
+Add in _serverless-offline/src/createAuthScheme.js_:
+```
+Object.assign(
+            process.env,
+            { AWS_REGION: serverless.service.provider.region });
+        handler = functionHelper.createHandler(funOptions, options);
+```
+instead of just
+```
+        handler = functionHelper.createHandler(funOptions, options);
+```
+
 ## Securing with IAM (AWS Cognito and etc)
+
+
+##
