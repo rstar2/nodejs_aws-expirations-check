@@ -14,7 +14,7 @@ module.exports = (app) => {
             })
             .catch(error => {
                 console.error(error);
-                res.status(500).send({ error, });
+                res.status(500).send({ auth: false, error, });
             });
     });
 
@@ -28,7 +28,7 @@ module.exports = (app) => {
             })
             .catch(error => {
                 console.error(error);
-                res.status(500).send({ error, });
+                res.status(500).send({ auth: false, error, });
             });
     });
 };
