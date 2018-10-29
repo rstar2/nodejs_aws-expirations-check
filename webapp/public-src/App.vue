@@ -16,14 +16,29 @@
             </div>
         </md-toolbar>
     
-        <md-list class="md-layout-item md-size-100">
+        <!-- <md-list class="md-layout-item md-size-100">
             <md-list-item v-for="item in list" :key="item.id">
                 <span class="md-list-item-text">{{item.expiresAt | date}}</span>
                 <span class="md-list-item-text">{{item.name}}</span>
                 <md-button @click="updateItem = item" class="md-default md-raised md-list-action">Update</md-button>
                 <md-button @click="apiDelete(item.id)" class="md-accent md-raised md-list-action">Delete</md-button>
             </md-list-item>
-        </md-list>
+        </md-list> -->
+		<md-table v-model="list" md-sort="name" md-sort-order="asc" md-card md-fixed-header
+					class="md-layout-item md-size-100 md-alignment-center-left">
+      		<!-- <md-table-toolbar>
+        		<h1 class="md-title">Items</h1>
+      		</md-table-toolbar> -->
+
+      		<md-table-row slot="md-table-row" slot-scope="{ item }">
+      			<md-table-cell md-label="Name" md-sort-by="name">{{ item.name }}</md-table-cell>
+      		  	<md-table-cell md-label="Expires At" md-sort-by="expiresAt">{{item.expiresAt | date}}</md-table-cell>
+      		  	<md-table-cell md-label="Actions">
+					<md-button @click="updateItem = item" class="md-default md-raised md-list-action">Update</md-button>
+            		<md-button @click="apiDelete(item.id)" class="md-accent md-raised md-list-action">Delete</md-button>
+				</md-table-cell>	
+      		</md-table-row>
+    	</md-table>
     
 		<app-dialog-auth v-model="dialogAuth.show" :isRegister="dialogAuth.isRegister" @action="apiAuth">
         </app-dialog-auth>
@@ -56,8 +71,9 @@ export default {
       expiresAt = +expiresAt;
       if (!expiresAt) return "";
       // make it to Date
-      const dt = new Date(expiresAt);
-      return dt.toLocaleDateString();
+	  const dt = new Date(expiresAt);
+	  var options = { year: 'numeric', month: 'long', day: 'numeric' };
+      return dt.toLocaleDateString('en-US', options);
     }
   },
   data() {
