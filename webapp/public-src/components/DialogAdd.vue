@@ -17,6 +17,8 @@
                 <label>Expires At</label>
                 <span class="md-error" v-if="!$v.item.expiresAtDate.required">The expire-date is required</span>
             </md-datepicker>
+
+			<md-switch v-model="item.enabled">Enabled</md-switch>
     
             <md-dialog-actions>
                 <md-button class="md-primary" @click="active = false">Close</md-button>
@@ -97,7 +99,8 @@ export default {
       return {
         name: null,
         expiresAt: null,
-        expiresAtDate: null
+		expiresAtDate: null,
+		enabled: true
       };
     },
     doAction() {

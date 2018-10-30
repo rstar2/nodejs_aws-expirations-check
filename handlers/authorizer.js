@@ -1,9 +1,9 @@
 // For Lambda authorizers of the TOKEN type, API Gateway passes the source token to the Lambda function as the event.authorizationToken.
 // Based on the value of this token, the preceding authorizer function returns an Allow IAM policy on a specified method
-// if the token value is 'allow'. This permits a caller to invoke the specified method.
-// The caller receives a 200 OK response. The authorizer function returns a Deny policy against the specified method
-// if the authorization token has a 'deny' value. This blocks the caller from calling the method.
-// The client receives a 403 Forbidden response. If the token is 'unauthorized', the client receives a 401 Unauthorized response.
+// if the token value is 'allow'. This permits a caller to invoke the specified method and the caller receives a 200 OK response.
+// The authorizer function returns a Deny policy against the specified method if the authorization token has a 'deny' value.
+// This blocks the caller from calling the method. The client receives a 403 Forbidden response.
+// If the token is 'unauthorized', the client receives a 401 Unauthorized response.
 // If the token is 'fail' or anything else, the client receives a 500 Internal Server Error response.
 // In both of the last two cases, no IAM policy is generated and the calls fail.
 module.exports.handler = async (event, context, callback) => {
@@ -20,14 +20,14 @@ module.exports.handler = async (event, context, callback) => {
     if (typeof event.authorizationToken === 'undefined') {
         console.log('AUTH: No token');
         // Return a 401 Unauthorized response
-        return callback('Unauthorized: No token');
+        return callback('Unauthorized');
     }
 
     const split = event.authorizationToken.split('Bearer');
     if (split.length !== 2) {
         console.log('AUTH: no token in Bearer');
         // Return a 401 Unauthorized response
-        return callback('Unauthorized: No token in Bearer');
+        return callback('Unauthorized');
     }
 
     const token = split[1].trim();
@@ -41,7 +41,10 @@ module.exports.handler = async (event, context, callback) => {
         }))
         .catch(error => {
             console.log(`Unauthorized call for token '${token}' - error: ${error}`);
-            throw 'Unauthorized: ' + error;
+            // HTTP status code of 401
+            throw 'Unauthorized'; // rejecting with 'Unauthorized' or callback('Unauthorized')
+
+            // NOTE: if returned other string/error then then HTTP status code will be 500 
         });
 
     // for Node6.10 - just call the callback
@@ -51,7 +54,7 @@ module.exports.handler = async (event, context, callback) => {
     //     callback(null, policy);
     // } catch (error) {
     //     console.log(`Unauthorized call for token ${token}`);
-    //     callback('Unauthorized: ' + error);
+    //     callback('Unauthorized');
     // }
 };
 

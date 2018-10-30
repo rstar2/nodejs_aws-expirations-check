@@ -26,6 +26,10 @@ const api = (url, data, authToken) => {
 
     return fetch(url, opts)
         .then(res => {
+            if (res.status >= 400 && res.status < 500) {
+                return Promise.reject(ERROR_UNAUTHORIZED);
+            }
+
             if (!res.ok) {
                 return res.json().then(err => Promise.reject(err));
             }
@@ -33,5 +37,6 @@ const api = (url, data, authToken) => {
         })
         .then(res => res.json());
 };
+export const ERROR_UNAUTHORIZED = 'Unauthorized';
 
 export default api;

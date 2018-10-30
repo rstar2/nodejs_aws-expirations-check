@@ -31,9 +31,13 @@
       		</md-table-toolbar> -->
 
       		<md-table-row slot="md-table-row" slot-scope="{ item }">
+				<md-table-cell md-label="Enabled" md-sort-by="enabled">
+					<md-checkbox :model="item.enabled | itemEnabled" disabled></md-checkbox>
+				</md-table-cell>
       			<md-table-cell md-label="Name" md-sort-by="name">{{ item.name }}</md-table-cell>
       		  	<md-table-cell md-label="Expires At" md-sort-by="expiresAt">{{item.expiresAt | date}}</md-table-cell>
-      		  	<md-table-cell md-label="Actions" class="asd">
+      		  	
+      		  	<md-table-cell md-label="Actions">
 					<md-button @click="dialogAdd.updateItem = item" class="md-default md-raised md-list-action">Update</md-button>
             		<md-button @click="apiDelete(item.id)" class="md-accent md-raised md-list-action">Delete</md-button>
 				</md-table-cell>	
@@ -52,9 +56,11 @@
 
 <script>
 import api from "./services/api";
+import { ERROR_UNAUTHORIZED } from "./services/api";
 import DialogAuth from "./components/DialogAuth";
 import DialogAdd from "./components/DialogAdd";
 import Notifications from "./components/Notifications";
+import { throws } from 'assert';
 
 export default {
   components: {
@@ -74,6 +80,9 @@ export default {
       const dt = new Date(expiresAt);
       var options = { year: "numeric", month: "long", day: "numeric" };
       return dt.toLocaleDateString("en-US", options);
+    },
+    itemEnabled(enabled) {
+      return enabled !== false;
     }
   },
   data() {
@@ -114,12 +123,12 @@ export default {
       if (newValue) localStorage.setItem("authJWT", newValue);
       else localStorage.removeItem("authJWT");
     },
-    "dialogAdd.show" (newValue) {
+    "dialogAdd.show"(newValue) {
       if (!newValue) {
         this.dialogAdd.updateItem = null;
       }
     },
-    "dialogAdd.updateItem" (newValue) {
+    "dialogAdd.updateItem"(newValue) {
       if (newValue) {
         this.dialogAdd.show = true;
       }
@@ -132,7 +141,15 @@ export default {
         args.push(null);
       }
       args.push(this.authJWT);
-      return api.apply(null, args);
+      return api.apply(null, args).catch(err => {
+		  // if API returns 'Unauthorizedd' error then invalidate the token 
+		  if (err === ERROR_UNAUTHORIZED) {
+			  this.authJWT = null;
+		  }
+
+		  // rethrow the rejected promise
+		  throw err;
+	  });
     },
     apiRefresh() {
       this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/list`)
@@ -140,7 +157,7 @@ export default {
         .then(() => (this.info = "Refreshed"))
         .catch(() => (this.info = "Failed to refresh"));
     },
-    apiAdd({ name, expiresAt }) {
+    apiAdd({ name, expiresAt, enabled = true }) {
       this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/add`, { name, expiresAt })
         .then(data => data.Item)
         .then(Item => (this.list = [...this.list, Item]))
@@ -157,7 +174,7 @@ export default {
         .then(() => (this.info = "Deleted"))
         .catch(() => (this.info = "Failed to delete"));
     },
-    apiUpdate({ id, name, expiresAt }) {
+    apiUpdate({ id, name, expiresAt, enabled }) {
       // delete is reserved JS keyword
       this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/update`, {
         id,
@@ -218,9 +235,6 @@ export default {
 
     //https://stormpath.com/blog/where-to-store-your-jwts-cookies-vs-html5-web-storage
     this.authJWT = localStorage.getItem("authJWT");
-
-    // TODO: when api request responds with Unauthorized then clear/invalidate the stored token
-    //this.authJWT = null;
   }
 };
 </script>

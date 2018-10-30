@@ -7,7 +7,7 @@
     "test": "jest",
     "client:dev": "cd webapp && npm run dev",
     "client:build": "cd webapp && npm run build",
-    "dev": "npm run client:dev && sls offline start",
+    "dev": "(npm run client:dev &) && sls offline start",
     "deploy": "npm run client:build && sls deploy"
   },
   "keywords": [],
