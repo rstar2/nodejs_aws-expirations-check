@@ -36,7 +36,7 @@ import { required, minLength } from "vuelidate/lib/validators";
 export default {
   props: {
     show: { type: Boolean, default: false },
-    showItem: { type: Object, default: {} }
+    showItem: { type: Object, default: null }
   },
   model: {
     prop: "show",
@@ -70,28 +70,21 @@ export default {
   },
   data() {
     return {
-      item: {
-        name: null,
-        expiresAt: null,
-        expiresAtDate: null
-      }
+      item: this.emptyItem()
     };
   },
   watch: {
-    // TODO: fix the mess
     showItem(newValue) {
-      this.item = newValue ? Object.assign(this.item, newValue) : {};
-    },
-    "item.name": function(newValue, oldValue) {
-      console.log("Name", this.item.name);
-    },
+      this.item = newValue ? Object.assign(this.item, newValue) : this.emptyItem();
+	},
+	
+	// watch a nested property
     "item.expiresAt": function(expiresAt, old) {
       if (expiresAt === old) return;
 
       // 'expiresAt' is Number object, so create a 'expiresAtDate' as Date
       this.item.expiresAtDate = expiresAt ? new Date(expiresAt) : null;
     },
-    // watch a nested property
     "item.expiresAtDate": function(expiresAtDate, old) {
       if (expiresAtDate === old) return;
 
@@ -100,6 +93,13 @@ export default {
     }
   },
   methods: {
+    emptyItem() {
+      return {
+        name: null,
+        expiresAt: null,
+        expiresAtDate: null
+      };
+    },
     doAction() {
       // validate first and if any invalid field then return
       this.$v.item.$touch();
@@ -111,7 +111,7 @@ export default {
 
       const item = this.item;
 
-      this.item = {};
+      this.item = this.emptyItem();
       this.$v.item.$reset();
 
       this.active = false;

@@ -7,7 +7,7 @@
             <div class="md-toolbar-section-end">
                 <template v-if="auth" >
 					<md-button @click="apiRefresh" class="md-primary md-raised">Refresh</md-button>
-                	<md-button @click="showDialogAdd = true" class="md-primary md-raised">Add</md-button>
+                	<md-button @click="dialogAdd.show = true" class="md-primary md-raised">Add</md-button>
 				</template>
 				<template v-else>
                 	<md-button @click="dialogAuth.isRegister = true; dialogAuth.show = true;" class="md-primary md-raised">Register</md-button>
@@ -24,8 +24,8 @@
                 <md-button @click="apiDelete(item.id)" class="md-accent md-raised md-list-action">Delete</md-button>
             </md-list-item>
         </md-list> -->
-		<md-table v-model="list" md-sort="name" md-sort-order="asc" md-card md-fixed-header
-					class="md-layout-item md-size-100 md-alignment-center-left">
+		<md-table v-model="list" md-sort="name" md-sort-order="asc" md-fixed-header
+					class="md-layout-item md-size-100">
       		<!-- <md-table-toolbar>
         		<h1 class="md-title">Items</h1>
       		</md-table-toolbar> -->
@@ -33,8 +33,8 @@
       		<md-table-row slot="md-table-row" slot-scope="{ item }">
       			<md-table-cell md-label="Name" md-sort-by="name">{{ item.name }}</md-table-cell>
       		  	<md-table-cell md-label="Expires At" md-sort-by="expiresAt">{{item.expiresAt | date}}</md-table-cell>
-      		  	<md-table-cell md-label="Actions">
-					<md-button @click="updateItem = item" class="md-default md-raised md-list-action">Update</md-button>
+      		  	<md-table-cell md-label="Actions" class="asd">
+					<md-button @click="dialogAdd.updateItem = item" class="md-default md-raised md-list-action">Update</md-button>
             		<md-button @click="apiDelete(item.id)" class="md-accent md-raised md-list-action">Delete</md-button>
 				</md-table-cell>	
       		</md-table-row>
@@ -43,7 +43,7 @@
 		<app-dialog-auth v-model="dialogAuth.show" :isRegister="dialogAuth.isRegister" @action="apiAuth">
         </app-dialog-auth>
 
-        <app-dialog-add v-model="showDialogAdd" :show-item="updateItem" @action="apiAddUpdate">
+        <app-dialog-add v-model="dialogAdd.show" :show-item="dialogAdd.updateItem" @action="apiAddUpdate">
         </app-dialog-add>
     
         <app-notifications v-model="info"></app-notifications>
@@ -71,9 +71,9 @@ export default {
       expiresAt = +expiresAt;
       if (!expiresAt) return "";
       // make it to Date
-	  const dt = new Date(expiresAt);
-	  var options = { year: 'numeric', month: 'long', day: 'numeric' };
-      return dt.toLocaleDateString('en-US', options);
+      const dt = new Date(expiresAt);
+      var options = { year: "numeric", month: "long", day: "numeric" };
+      return dt.toLocaleDateString("en-US", options);
     }
   },
   data() {
@@ -97,10 +97,10 @@ export default {
         isRgister: false
       },
 
-      // TODO: fix the mess
-      // describes whether to open/show the DialogAdd/Update
-      showDialogAdd: false,
-      updateItem: null
+      dialogAdd: {
+        show: false,
+        updateItem: null
+      }
     };
   },
   computed: {
@@ -114,26 +114,26 @@ export default {
       if (newValue) localStorage.setItem("authJWT", newValue);
       else localStorage.removeItem("authJWT");
     },
-    showDialogAdd(newValue) {
+    "dialogAdd.show" (newValue) {
       if (!newValue) {
-        this.updateItem = null;
+        this.dialogAdd.updateItem = null;
       }
     },
-    updateItem(newValue) {
+    "dialogAdd.updateItem" (newValue) {
       if (newValue) {
-        this.showDialogAdd = true;
+        this.dialogAdd.show = true;
       }
     }
   },
   methods: {
     apiRequest() {
-		const args = Array.prototype.slice.call(arguments);
-		if (args.length === 1) {
-			args.push(null);
-		}
-		args.push(this.authJWT);
-		return api.apply(null, args);
-	},
+      const args = Array.prototype.slice.call(arguments);
+      if (args.length === 1) {
+        args.push(null);
+      }
+      args.push(this.authJWT);
+      return api.apply(null, args);
+    },
     apiRefresh() {
       this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/list`)
         .then(data => (this.list = data.Items))
@@ -159,7 +159,11 @@ export default {
     },
     apiUpdate({ id, name, expiresAt }) {
       // delete is reserved JS keyword
-      this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/update`, { id, name, expiresAt })
+      this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/update`, {
+        id,
+        name,
+        expiresAt
+      })
         .then(data => data.Item)
         .then(Item =>
           this.list.some(item => {

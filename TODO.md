@@ -12,12 +12,15 @@
 		- https://medium.freecodecamp.org/a-crash-course-on-securing-serverless-apis-with-json-web-tokens-ff657ab2f5a5
 		- https://blog.usejournal.com/sessionless-authentication-withe-jwts-with-node-express-passport-js-69b059e4b22c
 		- check '@websanova/vue-auth' VueJS package
-	- using AWS IAM/Cognito
-		- https://cloudly.tech/blog/serverless-authorizers-2/
-		- https://serverless-stack.com/chapters/create-a-cognito-user-pool.html
-		- https://www.tonytruong.net/serverless-framework-authentication-and-logging-with-aws-cognito/
+	- when JWT token expires and is not validated in the authorizer when Webapp client calls authorized API ('invoke/api')
+		then it should be invalidated in the Webapp client
+		(proper Unauthorized 403 error has to come to the client, not just 500)
 
 4. ~~Add 'update' item functionality~~
+
+5. Add 'active' item functionality - e.g. skip inactive items when checked for expiration
+
+6. Allow updating the "expiration" window time-frame
 
 
 ## For the CLI tool
