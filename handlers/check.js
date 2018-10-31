@@ -24,7 +24,9 @@ module.exports.handler = async (event, context, callback) => {
     const list = data.Items;
 
     // filter those expiring the next 7 days
-    let expired = (list && list.filter(item => dateUtils.isExpiredDay(item.expiresAt, 7))) || [];
+    let expired = (list && list
+        .filter(item => item.enabled !== false) // some items may not have 'enabled' field - assume them as "enabled"
+        .filter(item => dateUtils.isExpiredDay(item.expiresAt, 7))) || [];
 
     if (event['detail-type'] === 'Scheduled Event') {
         // if this is Scheduled event - send real SMS
