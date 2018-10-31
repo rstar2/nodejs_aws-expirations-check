@@ -7,8 +7,10 @@
     "test": "jest",
     "client:dev": "cd webapp && npm run dev",
     "client:build": "cd webapp && npm run build",
-    "dev": "(npm run client:dev &) && sls offline start",
-    "deploy": "npm run client:build && sls deploy"
+    "sls:dev": "sls offline start",
+    "sls:deploy": "sls deploy",
+    "dev": "(npm run client:dev &) && sls:dev",
+    "deploy": "npm run client:build && sls:deploy"
   },
   "keywords": [],
   "author": "Rumen Neshev <rstardev@abv.bg>",

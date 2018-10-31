@@ -179,7 +179,8 @@ export default {
       this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/update`, {
         id,
         name,
-        expiresAt
+		expiresAt,
+		enabled
       })
         .then(data => data.Item)
         .then(Item =>
