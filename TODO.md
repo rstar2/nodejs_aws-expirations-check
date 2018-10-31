@@ -22,6 +22,5 @@
 
 6. Allow updating the "expiration" window time-frame
 
-
 ## For the CLI tool
 1. Finish the 'cli.js' to request the API-function directly with HTTP requests (using the 'request' module) 
