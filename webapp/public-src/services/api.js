@@ -9,7 +9,7 @@ const api = (url, data, authToken) => {
             'Authorization': 'Bearer ' + authToken,
         });
     }
-    
+
     // if sending data as JSON body must be JSON encoded string
     // AND !!! 'Content-Type' header must be valid JSON one
     if (data) {
@@ -26,8 +26,10 @@ const api = (url, data, authToken) => {
 
     return fetch(url, opts)
         .then(res => {
-            if (res.status >= 400 && res.status < 500) {
-                return Promise.reject(ERROR_UNAUTHORIZED);
+            switch (res.status) {
+                case 401: // Unauthorized
+                case 403: // Forbidden
+                    return Promise.reject(ERROR_UNAUTHORIZED);
             }
 
             if (!res.ok) {
