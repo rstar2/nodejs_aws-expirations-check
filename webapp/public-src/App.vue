@@ -1,66 +1,89 @@
 <template>
-	<div class="md-layout">
-        <md-toolbar class="md-layout-item md-size-100 md-dense">
-            <div class="md-toolbar-section-start">
-                <h3 class="md-title">Expirations list</h3>
-            </div>
-            <div class="md-toolbar-section-end">
-                <template v-if="auth" >
-					<md-button @click="apiRefresh" class="md-primary md-raised">Refresh</md-button>
-                	<md-button @click="dialogAdd.show = true" class="md-primary md-raised">Add</md-button>
-				</template>
-				<template v-else>
-                	<md-button @click="dialogAuth.isRegister = true; dialogAuth.show = true;" class="md-primary md-raised">Register</md-button>
-                	<md-button @click="dialogAuth.isRegister = false; dialogAuth.show = true;" class="md-primary md-raised">Login</md-button>
-				</template>
-            </div>
-        </md-toolbar>
-    
-        <!-- <md-list class="md-layout-item md-size-100">
+  <div class="md-layout">
+    <md-toolbar class="md-layout-item md-size-100 md-dense">
+      <div class="md-toolbar-section-start">
+        <h3 class="md-title">Expirations list</h3>
+      </div>
+      <div class="md-toolbar-section-end">
+        <template v-if="auth">
+          <md-button @click="apiRefresh" class="md-primary md-raised">Refresh</md-button>
+          <md-button @click="dialogAdd.show = true" class="md-primary md-raised">Add</md-button>
+          <md-button @click="apiLogout" class="md-primary md-raised">Logout</md-button>
+        </template>
+        <template v-else>
+          <md-button
+            @click="dialogAuth.isRegister = true; dialogAuth.show = true;"
+            class="md-primary md-raised"
+          >Register</md-button>
+          <md-button
+            @click="dialogAuth.isRegister = false; dialogAuth.show = true;"
+            class="md-primary md-raised"
+          >Login</md-button>
+        </template>
+      </div>
+    </md-toolbar>
+
+    <md-content>
+      <!-- <md-list class="md-layout-item md-size-100">
             <md-list-item v-for="item in list" :key="item.id">
                 <span class="md-list-item-text">{{item.expiresAt | date}}</span>
                 <span class="md-list-item-text">{{item.name}}</span>
                 <md-button @click="updateItem = item" class="md-default md-raised md-list-action">Update</md-button>
                 <md-button @click="apiDelete(item.id)" class="md-accent md-raised md-list-action">Delete</md-button>
             </md-list-item>
-        </md-list> -->
-		<md-table v-model="list" md-sort="name" md-sort-order="asc" md-fixed-header
-					class="md-layout-item md-size-100">
-      		<!-- <md-table-toolbar>
+      </md-list>-->
+      <md-table
+        v-model="list"
+        md-sort="name"
+        md-sort-order="asc"
+        md-fixed-header
+        class="md-layout-item md-size-100"
+      >
+        <!-- <md-table-toolbar>
         		<h1 class="md-title">Items</h1>
-      		</md-table-toolbar> -->
+        </md-table-toolbar>-->
+        <md-table-row slot="md-table-row" slot-scope="{ item }">
+          <md-table-cell md-label="Enabled" md-sort-by="enabled">
+            <md-checkbox :model="item.enabled | itemEnabled" disabled></md-checkbox>
+          </md-table-cell>
+          <md-table-cell md-label="Name" md-sort-by="name">{{ item.name }}</md-table-cell>
+          <md-table-cell md-label="Expires At" md-sort-by="expiresAt">{{item.expiresAt | date}}</md-table-cell>
 
-      		<md-table-row slot="md-table-row" slot-scope="{ item }">
-				<md-table-cell md-label="Enabled" md-sort-by="enabled">
-					<md-checkbox :model="item.enabled | itemEnabled" disabled></md-checkbox>
-				</md-table-cell>
-      			<md-table-cell md-label="Name" md-sort-by="name">{{ item.name }}</md-table-cell>
-      		  	<md-table-cell md-label="Expires At" md-sort-by="expiresAt">{{item.expiresAt | date}}</md-table-cell>
-      		  	
-      		  	<md-table-cell md-label="Actions">
-					<md-button @click="dialogAdd.updateItem = item" class="md-default md-raised md-list-action">Update</md-button>
-            		<md-button @click="apiDelete(item.id)" class="md-accent md-raised md-list-action">Delete</md-button>
-				</md-table-cell>	
-      		</md-table-row>
-    	</md-table>
-    
-		<app-dialog-auth v-model="dialogAuth.show" :isRegister="dialogAuth.isRegister" @action="apiAuth">
-        </app-dialog-auth>
+          <md-table-cell md-label="Actions">
+            <md-button
+              @click="dialogAdd.updateItem = item"
+              class="md-default md-raised md-list-action"
+            >Update</md-button>
+            <md-button @click="apiDelete(item.id)" class="md-accent md-raised md-list-action">Delete</md-button>
+          </md-table-cell>
+        </md-table-row>
+      </md-table>
 
-        <app-dialog-add v-model="dialogAdd.show" :show-item="dialogAdd.updateItem" @action="apiAddUpdate">
-        </app-dialog-add>
-    
-        <app-notifications v-model="info"></app-notifications>
-    </div>
+      <app-dialog-auth
+        v-model="dialogAuth.show"
+        :isRegister="dialogAuth.isRegister"
+        @action="apiAuth"
+      ></app-dialog-auth>
+
+      <app-dialog-add
+        v-model="dialogAdd.show"
+        :show-item="dialogAdd.updateItem"
+        @action="apiAddUpdate"
+      ></app-dialog-add>
+    </md-content>
+	
+    <app-notifications v-model="info"></app-notifications>
+  </div>
 </template>
 
 <script>
+import jwtDecode from "jwt-decode";
+
 import api from "./services/api";
 import { ERROR_UNAUTHORIZED } from "./services/api";
 import DialogAuth from "./components/DialogAuth";
 import DialogAdd from "./components/DialogAdd";
 import Notifications from "./components/Notifications";
-import { throws } from 'assert';
 
 export default {
   components: {
@@ -142,20 +165,23 @@ export default {
       }
       args.push(this.authJWT);
       return api.apply(null, args).catch(err => {
-		  // if API returns 'Unauthorizedd' error then invalidate the token 
-		  if (err === ERROR_UNAUTHORIZED) {
-			  this.authJWT = null;
-		  }
+        // if API returns 'Unauthorizedd' error then invalidate the token
+        if (err === ERROR_UNAUTHORIZED) {
+          this.authJWT = null;
+        }
 
-		  // rethrow the rejected promise
-		  throw err;
-	  });
+        // rethrow the rejected promise
+        throw err;
+      });
     },
     apiRefresh() {
       this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/list`)
         .then(data => (this.list = data.Items))
         .then(() => (this.info = "Refreshed"))
         .catch(() => (this.info = "Failed to refresh"));
+    },
+    apiLogout() {
+      this.authJWT = null;
     },
     apiAdd({ name, expiresAt, enabled = true }) {
       this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/add`, { name, expiresAt })
@@ -179,8 +205,8 @@ export default {
       this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/update`, {
         id,
         name,
-		expiresAt,
-		enabled
+        expiresAt,
+        enabled
       })
         .then(data => data.Item)
         .then(Item =>
@@ -235,7 +261,21 @@ export default {
     // The header will — by default — not be set for cross-domain requests. This prevents unauthorized servers (e.g. malicious or compromised 3rd-party APIs) from gaining access to your users' XSRF tokens and exposing them to Cross Site Request Forgery. If you want to, you can whitelist additional origins to also receive the XSRF token, by adding them to xsrfWhitelistedOrigins. This might be useful, for example, if your application, served from example.com, needs to access your API at api.example.com. See $httpProvider.xsrfWhitelistedOrigins for more details.
 
     //https://stormpath.com/blog/where-to-store-your-jwts-cookies-vs-html5-web-storage
-    this.authJWT = localStorage.getItem("authJWT");
+    const authJWT = localStorage.getItem("authJWT");
+
+    // we can validate just the expiration date in the client
+    const decoded = jwtDecode(authJWT);
+    let expired = false;
+    if (decoded.exp) {
+      const current_time = Date.now() / 1000;
+      if (decoded.exp < current_time) {
+        expired = true;
+      }
+    }
+
+    if (!expired) {
+      this.authJWT = authJWT;
+    }
   }
 };
 </script>
