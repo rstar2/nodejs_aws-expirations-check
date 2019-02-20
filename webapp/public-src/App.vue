@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <!-- <v-navigation-drawer app></v-navigation-drawer> -->
-    <v-toolbar color="indigo" dense fixed app>
+    <v-toolbar color="indigo white--text" dense fixed app>
       <v-toolbar-title class="mr-5 align-center">
         <span class="title">Expirations list</span>
       </v-toolbar-title>
