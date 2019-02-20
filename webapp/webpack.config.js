@@ -6,7 +6,7 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 const options = {
     entry: {
-        // this is bundle for the Vue/VueMaterial
+        // this is bundle for the Vue, VueMaterial (or Vuetify)
         // 'vue': './public-src/vue.js',
 
         // this is bundle for the main app
@@ -57,7 +57,7 @@ const options = {
         hints: false,
     },
     plugins: [
-        // extract the 'boot' entry, the one containing Vue and VueMaterial as
+        // extract the 'boot' entry, the one containing Vue and VueMaterial (or Vuetify) as
         // it will be included in every page
         // new webpack.optimize.CommonsChunkPlugin({
         //     name: 'vue',

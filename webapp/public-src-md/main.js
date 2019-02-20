@@ -1,6 +1,7 @@
 import Vue from 'vue';
 
 import VueMaterialDesign from './md';
+
 import App from './App';
 
 Vue.use(VueMaterialDesign);

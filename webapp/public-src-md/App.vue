@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <div class="md-layout">
     <md-toolbar class="md-layout-item md-size-100 md-dense">
       <div class="md-toolbar-section-start">
         <h3 class="md-title">Expirations list</h3>
@@ -73,7 +73,7 @@
     </md-content>
 	
     <app-notifications v-model="info"></app-notifications>
-  </v-app>
+  </div>
 </template>
 
 <script>
