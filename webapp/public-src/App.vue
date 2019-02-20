@@ -1,78 +1,49 @@
 <template>
   <v-app>
-    <md-toolbar class="md-layout-item md-size-100 md-dense">
-      <div class="md-toolbar-section-start">
-        <h3 class="md-title">Expirations list</h3>
-      </div>
-      <div class="md-toolbar-section-end">
-        <template v-if="auth">
-          <md-button @click="apiRefresh" class="md-primary md-raised">Refresh</md-button>
-          <md-button @click="dialogAdd.show = true" class="md-primary md-raised">Add</md-button>
-          <md-button @click="apiLogout" class="md-primary md-raised">Logout</md-button>
-        </template>
-        <template v-else>
-          <md-button
-            @click="dialogAuth.isRegister = true; dialogAuth.show = true;"
-            class="md-primary md-raised"
-          >Register</md-button>
-          <md-button
-            @click="dialogAuth.isRegister = false; dialogAuth.show = true;"
-            class="md-primary md-raised"
-          >Login</md-button>
-        </template>
-      </div>
-    </md-toolbar>
+    <!-- <v-navigation-drawer app></v-navigation-drawer> -->
+    <v-toolbar color="indigo" dense fixed app>
+      <v-toolbar-title class="mr-5 align-center">
+        <span class="title">Expirations list</span>
+      </v-toolbar-title>
+      <v-spacer></v-spacer>
 
-    <md-content>
-      <!-- <md-list class="md-layout-item md-size-100">
-            <md-list-item v-for="item in list" :key="item.id">
-                <span class="md-list-item-text">{{item.expiresAt | date}}</span>
-                <span class="md-list-item-text">{{item.name}}</span>
-                <md-button @click="updateItem = item" class="md-default md-raised md-list-action">Update</md-button>
-                <md-button @click="apiDelete(item.id)" class="md-accent md-raised md-list-action">Delete</md-button>
-            </md-list-item>
-      </md-list>-->
-      <md-table
-        v-model="list"
-        md-sort="name"
-        md-sort-order="asc"
-        md-fixed-header
-        class="md-layout-item md-size-100"
-      >
-        <!-- <md-table-toolbar>
-        		<h1 class="md-title">Items</h1>
-        </md-table-toolbar>-->
-        <md-table-row slot="md-table-row" slot-scope="{ item }">
-          <md-table-cell md-label="Enabled" md-sort-by="enabled">
-            <md-checkbox :model="item.enabled | itemEnabled" disabled></md-checkbox>
-          </md-table-cell>
-          <md-table-cell md-label="Name" md-sort-by="name">{{ item.name }}</md-table-cell>
-          <md-table-cell md-label="Expires At" md-sort-by="expiresAt">{{item.expiresAt | date}}</md-table-cell>
+      <!-- <v-toolbar-items> -->
+      <template v-if="auth">
+        <v-btn color="success" small @click="apiRefresh">Refresh</v-btn>
+        <v-btn color="secondary" small @click="dialogAdd.show = true">Add</v-btn>
+        <v-btn color="error" small @click="apiLogout">Logout</v-btn>
+      </template>
+      <template v-else>
+        <v-btn
+          color="success"
+          small
+          @click="dialogAuth.isRegister = true; dialogAuth.show = true;"
+        >Register</v-btn>
+        <v-btn
+          color="secondary"
+          small
+          @click="dialogAuth.isRegister = false; dialogAuth.show = true;"
+        >Login</v-btn>
+      </template>
+      <!-- </v-toolbar-items> -->
+    </v-toolbar>
 
-          <md-table-cell md-label="Actions">
-            <md-button
-              @click="dialogAdd.updateItem = item"
-              class="md-default md-raised md-list-action"
-            >Update</md-button>
-            <md-button @click="apiDelete(item.id)" class="md-accent md-raised md-list-action">Delete</md-button>
-          </md-table-cell>
-        </md-table-row>
-      </md-table>
+    <v-content>
+      <v-container fluid>
+        <app-dialog-auth
+          v-model="dialogAuth.show"
+          :isRegister="dialogAuth.isRegister"
+          @action="apiAuth"
+        ></app-dialog-auth>
 
-      <app-dialog-auth
-        v-model="dialogAuth.show"
-        :isRegister="dialogAuth.isRegister"
-        @action="apiAuth"
-      ></app-dialog-auth>
-
-      <app-dialog-add
+        <!-- <app-dialog-add
         v-model="dialogAdd.show"
         :show-item="dialogAdd.updateItem"
         @action="apiAddUpdate"
-      ></app-dialog-add>
-    </md-content>
-	
-    <app-notifications v-model="info"></app-notifications>
+        ></app-dialog-add>-->
+      </v-container>
+    </v-content>
+    <!-- <v-footer app></v-footer> -->
   </v-app>
 </template>
 
@@ -82,15 +53,15 @@ import jwtDecode from "jwt-decode";
 import api from "./services/api";
 import { ERROR_UNAUTHORIZED } from "./services/api";
 import DialogAuth from "./components/DialogAuth";
-import DialogAdd from "./components/DialogAdd";
-import Notifications from "./components/Notifications";
+// import DialogAdd from "./components/DialogAdd";
+// import Notifications from "./components/Notifications";
 
 export default {
-  components: {
-    "app-dialog-auth": DialogAuth,
-    "app-dialog-add": DialogAdd,
-    "app-notifications": Notifications
-  },
+    components: {
+      "app-dialog-auth": DialogAuth,
+  //     "app-dialog-add": DialogAdd,
+  //     "app-notifications": Notifications
+    },
   filters: {
     /**
      * @param {Number|String} expiresAt
