@@ -7,13 +7,7 @@
         <v-container grid-list-md>
           <v-layout wrap>
             <v-flex xs12>
-              <v-text-field
-                label="Email*"
-                v-model="user.email"
-                :class="validateClass('email')"
-              ></v-text-field>
-              <span class="md-error" v-if="!$v.user.email.required">The email is required</span>
-              <span class="md-error" v-else-if="!$v.user.email.email">Email must be valid email.</span>
+              <v-text-field label="Email*" v-model="user.email" :errorMessages="validate('email')"></v-text-field>
             </v-flex>
 
             <!-- <md-field v-if="isRegister" :class="validateClass('name')">
@@ -34,7 +28,7 @@
                 Password must have at least
                 {{$v.user.password.$params.minLength.min}} letters.
               </span>
-            </md-field> -->
+            </md-field>-->
           </v-layout>
         </v-container>
       </v-card-text>
@@ -98,9 +92,6 @@ export default {
   methods: {
     doAction() {
       // validate first and if any invalid field then return
-      if (this.isRegister) {
-        this.$v.user;
-      }
       this.$v.user.$touch();
 
       if (this.$v.user.$invalid) {
@@ -118,15 +109,25 @@ export default {
       this.$emit("action", user);
     },
 
-    validateClass(fieldName) {
+    validate(fieldName) {
       const field = this.$v.user[fieldName];
 
-      if (field) {
-        return {
-          "red--text": field.$invalid && field.$dirty
-        };
+      // if not validation for this field
+      if (!field) {
+        return "";
       }
-      return null;
+
+      // if the field has no errors (note it can be invalid already but not dirty)
+      if (!field.$error) {
+        return "";
+	  }
+	  
+	  // TODO: make dynamic by the field
+      return !field.required
+        ? "The email is required"
+        : !field.email
+        ? "Email must be valid email"
+        : "";
     }
   },
 

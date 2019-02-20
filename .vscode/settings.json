@@ -7,8 +7,8 @@
         "webapp"
     ],
     "workbench.colorCustomizations": {
-        "activityBar.background": "#312D20",
-        "titleBar.activeBackground": "#453F2C",
+        "activityBar.background": "#806a22",
+        "titleBar.activeBackground": "#a5892e",
         "titleBar.activeForeground": "#FBFBF9"
     }
 }
