@@ -32,16 +32,18 @@
       <v-container fluid>
         <v-data-table :headers="listHeaders" :items="list" class="elevation-5" hide-actions>
           <template slot="items" slot-scope="{ item }">
-            <td class="text-xs">
-              <v-checkbox :input-value="item.enabled" disabled hide-details></v-checkbox>
-            </td>
-            <td class="text-xs">{{ item.name }}</td>
-            <td class="text-xs">{{ item.expiresAt | date }}</td>
-            <td class="text-xs d-flex">
-              <v-spacer></v-spacer>
-              <v-btn primary @click="dialogAdd.updateItem = item">Update</v-btn>
-              <v-btn color="error" class="mr-0" @click="apiDelete(item.id)">Delete</v-btn>
-            </td>
+            <tr>
+              <td class="text-xs">
+                <v-checkbox :input-value="item.enabled | itemEnabled" disabled hide-details></v-checkbox>
+              </td>
+              <td class="text-xs">{{ item.name }}</td>
+              <td class="text-xs">{{ item.expiresAt | date }}</td>
+              <td class="text-xs d-flex">
+                <v-spacer></v-spacer>
+                <v-btn primary @click="dialogAdd.updateItem = item">Update</v-btn>
+                <v-btn color="error" class="mr-0" @click="apiDelete(item.id)">Delete</v-btn>
+              </td>
+            </tr>
           </template>
         </v-data-table>
 
@@ -107,7 +109,7 @@ export default {
         },
         { text: "Name", value: "name" },
         { text: "Expires At", value: "expiresAt" },
-        { text: "Actions", align: "right", }
+        { text: "Actions", value: "_actions", sortable: false, align: "right" }
       ],
       list: [
         {

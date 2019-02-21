@@ -53,6 +53,7 @@ package:
     - '**/__mocks__/**'
     - webapp/node_modules/**
     - webapp/public-src/**
+    - webapp/public-src-md/**
     - webapp/app-local.js
     - webapp/package-lock.json
     - webapp/package.json
