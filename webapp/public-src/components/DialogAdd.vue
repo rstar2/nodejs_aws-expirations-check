@@ -1,40 +1,60 @@
 <template>
-	<md-dialog :md-active.sync="active">
-        <md-dialog-title> {{ title }} </md-dialog-title>
-    
-        <md-dialog-content>
-            <!-- <form novalidate class="md-layout" @submit.prevent="validateAdd"> -->
-    
-            <md-field :class="validateClass('name')">
-                <label>Name</label>
-                <md-input v-model="item.name"></md-input>
-                <span class="md-error" v-if="!$v.item.name.required">The name is required</span>
-                <span class="md-error" v-else-if="!$v.item.name.minlength">Name must have at least
-                    {{$v.item.name.$params.minLength.min}} letters.</span>
-            </md-field>
-    
-            <md-datepicker v-model="item.expiresAtDate" md-immediately :class="validateClass('expiresAtDate')">
-                <label>Expires At</label>
-                <span class="md-error" v-if="!$v.item.expiresAtDate.required">The expire-date is required</span>
-            </md-datepicker>
+  <v-dialog v-model="active" max-width="450">
+    <v-card>
+      <v-card-title class="headline">{{ title }}</v-card-title>
 
-			<md-switch v-model="item.enabled">Enabled</md-switch>
-    
-            <md-dialog-actions>
-                <md-button class="md-primary" @click="active = false">Close</md-button>
-                <md-button type="submit" class="md-primary" @click="doAction" :disabled="disabled"> {{ action }}
-                </md-button>
-            </md-dialog-actions>
-    
-            <!-- </form> -->
-        </md-dialog-content>
-    </md-dialog>
+      <v-card-text>
+        <v-container grid-list-md>
+          <v-layout wrap>
+            <!-- This time will use the built in v-form validation -->
+            <v-form ref="form" lazy-validation>
+              <v-flex xs12>
+                <v-text-field
+                  label="Name*"
+                  v-model="item.name"
+                  :rules="[
+			  () => !!item.name || 'The name is required',
+			  () => !!item.name && item.name.length >= 5 || 'Name must have at least 5 letters']"
+                ></v-text-field>
+              </v-flex>
+
+              <v-menu
+                v-model="datePicker"
+                :close-on-content-click="false"
+                :nudge-right="40"
+                lazy
+                transition="scale-transition"
+                offset-yfull-widthmin-width="290px"
+              >
+                <v-text-field
+                  slot="activator"
+                  v-model="item.expiresAtStr"
+                  label="Expires At"
+                  prepend-icon="event"
+                  readonly
+                  :rules="[
+			  () => !!item.expiresAtStr || 'The expiery date is required']"
+                ></v-text-field>
+                <v-date-picker v-model="item.expiresAtStr" @input="datePicker = false"></v-date-picker>
+              </v-menu>
+
+              <v-switch v-model="item.enabled" label="Enabled"></v-switch>
+            </v-form>
+          </v-layout>
+        </v-container>
+      </v-card-text>
+
+      <v-card-actions>
+        <!-- Move the buttons to the right -->
+        <v-spacer></v-spacer>
+        <v-btn color="blue darken-1" flat @click="doClose">Close</v-btn>
+        <v-btn color="green darken-1" flat @click="doAction" :disabled="disabled">{{ action }}</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
-import { validationMixin } from "vuelidate";
-import { required, minLength } from "vuelidate/lib/validators";
-
 export default {
   props: {
     show: { type: Boolean, default: false },
@@ -72,78 +92,60 @@ export default {
   },
   data() {
     return {
-      item: this.emptyItem()
+      item: this.emptyItem(),
+      datePicker: false
     };
   },
   watch: {
     showItem(newValue) {
-      this.item = newValue ? Object.assign(this.item, newValue) : this.emptyItem();
-	},
-	
-	// watch a nested property
+      this.item = newValue
+        ? Object.assign(this.item, newValue)
+        : this.emptyItem();
+    },
+
+    // watch a nested property
     "item.expiresAt": function(expiresAt, old) {
       if (expiresAt === old) return;
 
       // 'expiresAt' is Number object, so create a 'expiresAtDate' as Date
-      this.item.expiresAtDate = expiresAt ? new Date(expiresAt) : null;
+      this.item.expiresAtStr = expiresAt ? new Date(expiresAt).toISOString().substr(0, 10) : null;
     },
-    "item.expiresAtDate": function(expiresAtDate, old) {
-      if (expiresAtDate === old) return;
+    "item.expiresAtStr": function(expiresAtStr, old) {
+      if (expiresAtStr === old) return;
 
       // 'expiresAtDate' is Date object, so create a 'expiresAt' as Number
-      this.item.expiresAt = expiresAtDate ? expiresAtDate.getTime() : null;
+      this.item.expiresAt = expiresAtStr ? new Date(expiresAtStr).getTime() : null;
     }
   },
   methods: {
     emptyItem() {
       return {
         name: null,
-        expiresAt: null,
-		expiresAtDate: null,
-		enabled: true
+		expiresAt: null,
+		enabled: true,
+
+		// The Date-picker works with String model
+        expiresAtStr: null,
       };
     },
-    doAction() {
-      // validate first and if any invalid field then return
-      this.$v.item.$touch();
-
-      if (this.$v.item.$invalid) {
-        // validation errors are shown already when this.$v.item.$touch() is called
-        return;
-      }
-
-      const item = this.item;
+    doClose() {
+      this.$refs.form.resetValidation();
 
       this.item = this.emptyItem();
-      this.$v.item.$reset();
 
       this.active = false;
-
-      this.$emit("action", item);
     },
+    doAction() {
+      // this time will use the built in v-form validation
+      if (this.$refs.form.validate()) {
+        this.$refs.form.resetValidation();
 
-    validateClass(fieldName) {
-      const field = this.$v.item[fieldName];
+        const item = this.item;
 
-      if (field) {
-        return {
-          "md-invalid": field.$invalid && field.$dirty
-        };
-      }
-      return null;
-    }
-  },
+        this.item = this.emptyItem();
+        this.active = false;
 
-  // Vuelidate integration
-  mixins: [validationMixin],
-  validations: {
-    item: {
-      name: {
-        required,
-        minLength: minLength(5)
-      },
-      expiresAtDate: {
-        required
+        this.$emit("action", item);
       }
     }
   }

@@ -10,25 +10,17 @@
               <v-text-field label="Email*" v-model="user.email" :errorMessages="validate('email')"></v-text-field>
             </v-flex>
 
-            <!-- <md-field v-if="isRegister" :class="validateClass('name')">
-              <label>Name</label>
-              <md-input v-model="user.name"></md-input>
-              <span class="md-error" v-if="!$v.user.name.required">The name is required</span>
-              <span class="md-error" v-else-if="!$v.user.name.minlength">
-                Name must have at least
-                {{$v.user.name.$params.minLength.min}} letters.
-              </span>
-            </md-field>
+            <v-flex xs12 v-if="isRegister">
+              <v-text-field label="Name*" v-model="user.name" :errorMessages="validate('name')"></v-text-field>
+            </v-flex>
 
-            <md-field :class="validateClass('password')">
-              <label>Password</label>
-              <md-input v-model="user.password" type="password"></md-input>
-              <span class="md-error" v-if="!$v.user.password.required">The password is required</span>
-              <span class="md-error" v-else-if="!$v.user.password.minlength">
-                Password must have at least
-                {{$v.user.password.$params.minLength.min}} letters.
-              </span>
-            </md-field>-->
+            <v-flex xs12>
+              <v-text-field
+                label="Password*"
+                v-model="user.password"
+                :errorMessages="validate('password')"
+              ></v-text-field>
+            </v-flex>
           </v-layout>
         </v-container>
       </v-card-text>
@@ -91,7 +83,7 @@ export default {
   },
   methods: {
     doAction() {
-      // validate first and if any invalid field then return
+      // validate first and if any invalid vField then return
       this.$v.user.$touch();
 
       if (this.$v.user.$invalid) {
@@ -110,24 +102,29 @@ export default {
     },
 
     validate(fieldName) {
-      const field = this.$v.user[fieldName];
-
-      // if not validation for this field
-      if (!field) {
+      const vField = this.$v.user[fieldName];
+      // if not validation for this vField
+      if (!vField) {
+        return "";
+      }
+      // if the vField has no errors (note it can be invalid already but not dirty)
+      if (!vField.$error) {
         return "";
       }
 
-      // if the field has no errors (note it can be invalid already but not dirty)
-      if (!field.$error) {
-        return "";
-	  }
-	  
-	  // TODO: make dynamic by the field
-      return !field.required
-        ? "The email is required"
-        : !field.email
-        ? "Email must be valid email"
-        : "";
+      // make dynamic by the vField
+      const validationErrors = this.validationErrors.user[fieldName];
+
+      const errorStr = validationErrors.checks
+        .map(checkName => {
+          if (!vField[checkName]) {
+            // it's a method thta accepts the vField params for each specific check
+            const errorFn = validationErrors.errors[checkName];
+            return errorFn(vField.$params[checkName]);
+          }
+        })
+        .find(errorStr => !!errorStr); // get the first errorStr
+      return errorStr || "";
     }
   },
 
@@ -160,6 +157,47 @@ export default {
         }
       });
     }
+
+    // create once the validation error strings
+    this.validationErrors = {
+      user: {
+        email: {
+          checks: ["required", "email"],
+          errors: {
+            required() {
+              return "The email is required";
+            },
+            email() {
+              return "Email must be valid email";
+            }
+          }
+        },
+
+        name: {
+          checks: ["required", "minLength"],
+          errors: {
+            required() {
+              return "The name is required";
+            },
+            minLength(params) {
+              return `Name must have at least ${params.min} letters`;
+            }
+          }
+        },
+
+        password: {
+          checks: ["required", "minLength"],
+          errors: {
+            required() {
+              return "The password is required";
+            },
+            minLength(params) {
+              return `Password must have at least ${params.min} letters`;
+            }
+          }
+        }
+      }
+    };
 
     return {
       user

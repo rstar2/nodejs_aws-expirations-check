@@ -30,17 +30,34 @@
 
     <v-content>
       <v-container fluid>
+        <v-data-table :headers="listHeaders" :items="list" class="elevation-5" hide-actions>
+          <template slot="items" slot-scope="{ item }">
+            <td class="text-xs">
+              <v-checkbox :input-value="item.enabled" disabled hide-details></v-checkbox>
+            </td>
+            <td class="text-xs">{{ item.name }}</td>
+            <td class="text-xs">{{ item.expiresAt | date }}</td>
+            <td class="text-xs d-flex">
+              <v-spacer></v-spacer>
+              <v-btn primary @click="dialogAdd.updateItem = item">Update</v-btn>
+              <v-btn color="error" class="mr-0" @click="apiDelete(item.id)">Delete</v-btn>
+            </td>
+          </template>
+        </v-data-table>
+
         <app-dialog-auth
           v-model="dialogAuth.show"
           :isRegister="dialogAuth.isRegister"
           @action="apiAuth"
         ></app-dialog-auth>
 
-        <!-- <app-dialog-add
-        v-model="dialogAdd.show"
-        :show-item="dialogAdd.updateItem"
-        @action="apiAddUpdate"
-        ></app-dialog-add>-->
+        <app-dialog-add
+          v-model="dialogAdd.show"
+          :show-item="dialogAdd.updateItem"
+          @action="apiAddUpdate"
+        ></app-dialog-add>
+
+        <app-notifications v-model="info"></app-notifications>
       </v-container>
     </v-content>
     <!-- <v-footer app></v-footer> -->
@@ -53,15 +70,15 @@ import jwtDecode from "jwt-decode";
 import api from "./services/api";
 import { ERROR_UNAUTHORIZED } from "./services/api";
 import DialogAuth from "./components/DialogAuth";
-// import DialogAdd from "./components/DialogAdd";
-// import Notifications from "./components/Notifications";
+import DialogAdd from "./components/DialogAdd";
+import Notifications from "./components/Notifications";
 
 export default {
-    components: {
-      "app-dialog-auth": DialogAuth,
-  //     "app-dialog-add": DialogAdd,
-  //     "app-notifications": Notifications
-    },
+  components: {
+    "app-dialog-auth": DialogAuth,
+    "app-dialog-add": DialogAdd,
+    "app-notifications": Notifications
+  },
   filters: {
     /**
      * @param {Number|String} expiresAt
@@ -82,11 +99,22 @@ export default {
   data() {
     return {
       // describes the current list
+      listHeaders: [
+        {
+          text: "Enabled",
+          value: "enabled",
+          align: "left"
+        },
+        { text: "Name", value: "name" },
+        { text: "Expires At", value: "expiresAt" },
+        { text: "Actions", align: "right", }
+      ],
       list: [
         {
           id: "dummy",
           expiresAt: 1539637200000,
-          name: "Dummy"
+          name: "Dummy",
+          enabled: true
         }
       ],
 
@@ -155,7 +183,11 @@ export default {
       this.authJWT = null;
     },
     apiAdd({ name, expiresAt, enabled = true }) {
-      this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/add`, { name, expiresAt })
+      this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/add`, {
+        name,
+        expiresAt,
+        enabled
+      })
         .then(data => data.Item)
         .then(Item => (this.list = [...this.list, Item]))
         .then(() => (this.info = "Added"))
@@ -234,18 +266,20 @@ export default {
     //https://stormpath.com/blog/where-to-store-your-jwts-cookies-vs-html5-web-storage
     const authJWT = localStorage.getItem("authJWT");
 
-    // we can validate just the expiration date in the client
-    const decoded = jwtDecode(authJWT);
-    let expired = false;
-    if (decoded.exp) {
-      const current_time = Date.now() / 1000;
-      if (decoded.exp < current_time) {
-        expired = true;
+    if (authJWT) {
+      // we can validate just the expiration date in the client
+      const decoded = jwtDecode(authJWT);
+      let expired = false;
+      if (decoded.exp) {
+        const current_time = Date.now() / 1000;
+        if (decoded.exp < current_time) {
+          expired = true;
+        }
       }
-    }
 
-    if (!expired) {
-      this.authJWT = authJWT;
+      if (!expired) {
+        this.authJWT = authJWT;
+      }
     }
   }
 };

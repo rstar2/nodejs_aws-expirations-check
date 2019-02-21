@@ -1,9 +1,8 @@
 <template>
-	<!-- :md-active.sync needs a boolean prop -->
-    <md-snackbar :md-active.sync="active" md-position="center" :md-duration="3000" md-persistent>
-        <span>{{info}}</span>
-        <md-button class="md-accent" @click="active = false">Dismiss</md-button>
-    </md-snackbar>
+  <v-snackbar v-model="active" :timeout="3000">
+    <span>{{info}}</span>
+    <v-btn class="red--text" flat @click="active = false">Dismiss</v-btn>
+  </v-snackbar>
 </template>
 
 <script>
@@ -19,7 +18,6 @@ export default {
     event: "change"
   },
   computed: {
-    // we need a getter AND a setter as 'active' is set when using :md-active.sync="active", to auto close it
     active: {
       // getter
       get: function() {
