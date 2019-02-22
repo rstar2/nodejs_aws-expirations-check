@@ -30,11 +30,13 @@
 
     <v-content>
       <v-container fluid>
-        <v-data-table 
-		:headers="listHeaders" 
-		:items="list" 
-		:pagination="{sortBy: 'expiresAt', 'rowsPerPage': -1}"
-		class="elevation-5" hide-actions>
+        <v-data-table
+          :headers="listHeaders"
+          :items="list"
+          :pagination="{sortBy: 'expiresAt', 'rowsPerPage': -1}"
+          class="elevation-5"
+          hide-actions
+        >
           <template slot="items" slot-scope="{ item }">
             <tr>
               <td class="text-xs">
@@ -44,8 +46,26 @@
               <td class="text-xs">{{ item.expiresAt | date }}</td>
               <td class="text-xs d-flex align-center">
                 <v-spacer></v-spacer>
-                <v-btn small primary @click="dialogAdd.updateItem = item">Update</v-btn>
-                <v-btn small color="error" class="mr-0" @click="apiDelete(item.id)">Delete</v-btn>
+
+                <v-layout class="hidden-sm-and-down justify-end">
+                  <v-btn small primary @click="dialogAdd.updateItem = item">Update</v-btn>
+                  <v-btn small color="error" class="mr-0" @click="apiDelete(item.id)">Delete</v-btn>
+                </v-layout>
+                <v-layout class="hidden-md-and-up justify-end">
+                  <v-menu>
+                    <v-btn slot="activator" icon>
+                      <v-icon>more_vert</v-icon>
+                    </v-btn>
+                    <v-list>
+                      <v-list-tile @click="dialogAdd.updateItem = item">
+                        <v-list-tile-title>Update</v-list-tile-title>
+                      </v-list-tile>
+                      <v-list-tile @click="apiDelete(item.id)">
+                        <v-list-tile-title>Delete</v-list-tile-title>
+                      </v-list-tile>
+                    </v-list>
+                  </v-menu>
+                </v-layout>
               </td>
             </tr>
           </template>
@@ -119,8 +139,8 @@ export default {
         {
           id: "dummy",
           expiresAt: 1539637200000,
-          name: "Dummy",
-        //   enabled: false
+          name: "Dummy"
+          //   enabled: false
         }
       ],
 
