@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "cross-env NODE_ENV=development webpack --watch",
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
-    "start": "npm run dev"
+    "serve": "node app-local.js",
+    "start": "concurrently \"npm run dev\" \"npm run serve\""
   },
   "keywords": [],
   "author": "Rumen Neshev <rstardev@abv.bg>",
@@ -24,6 +25,7 @@
     "babel-loader": "^7.1.5",
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-3": "^6.24.1",
+    "concurrently": "^4.1.0",
     "cross-env": "^5.2.0",
     "css-loader": "^1.0.0",
     "extract-text-webpack-plugin": "^3.0.2",
