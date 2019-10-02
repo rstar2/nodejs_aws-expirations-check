@@ -31,12 +31,14 @@
     <v-content>
       <v-container fluid>
         <v-data-table
+          v-if="auth"
           :headers="listHeaders"
           :items="list"
           :pagination="{sortBy: 'expiresAt', 'rowsPerPage': -1}"
           class="elevation-5"
           hide-actions
         >
+          <template slot="no-data">No expirations set</template>
           <template slot="items" slot-scope="{ item }">
             <tr>
               <td class="text-xs">
@@ -70,6 +72,7 @@
             </tr>
           </template>
         </v-data-table>
+		<div v-else class="error--text">Not Authorized</div>
 
         <app-dialog-auth
           v-model="dialogAuth.show"
@@ -135,14 +138,7 @@ export default {
         { text: "Expires At", value: "expiresAt" },
         { text: "Actions", value: "_actions", sortable: false, align: "right" }
       ],
-      list: [
-        {
-          id: "dummy",
-          expiresAt: 1539637200000,
-          name: "Dummy"
-          //   enabled: false
-        }
-      ],
+      list: [],
 
       // describes the notification result info to show (e.g. result of the api call)
       info: null,
@@ -201,7 +197,8 @@ export default {
     },
     apiRefresh() {
       this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/list`)
-        .then(data => (this.list = data.Items))
+        .then(data => data.Items)
+        .then(Items => (this.list = Items))
         .then(() => (this.info = "Refreshed"))
         .catch(() => (this.info = "Failed to refresh"));
     },

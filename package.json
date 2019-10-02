@@ -9,8 +9,8 @@
     "client:build": "cd webapp && npm run build",
     "sls:dev": "sls offline start",
     "sls:deploy": "sls deploy",
-    "dev": "(npm run client:dev &) && sls:dev",
-    "deploy": "npm run client:build && sls:deploy"
+    "dev": "(npm run client:dev &) && npm run sls:dev",
+    "deploy": "npm run client:build && npm run sls:deploy"
   },
   "keywords": [],
   "author": "Rumen Neshev <rstardev@abv.bg>",

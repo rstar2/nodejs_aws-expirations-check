@@ -1,8 +1,9 @@
 // set a dummy AWS region
-jest.mock('../lib/dynamodb-utils');
-jest.mock('../lib/twilio-utils');
+jest.mock('../utils/dynamodb');
+jest.mock('../utils/twilio');
 
-const handler = require('../handler');
+const handlerApi = require('../handlers/api').handler;
+const handlerCheck = require('../handlers/api').handler;
 
 describe('Handler suite', () => {
     test('check should pass', async () => {
@@ -16,7 +17,7 @@ describe('Handler suite', () => {
             expect(typeof response.body).toBe('string');
         };
 
-        await handler.check(event, context, callback);
+        await handlerCheck(event, context, callback);
     });
 
     test('api should fail - invalid event', async () => {
@@ -28,7 +29,7 @@ describe('Handler suite', () => {
             expect(response).toBeUndefined();
         };
 
-        await handler.api(event, context, callback);
+        await handlerApi(event, context, callback);
     });
 
     xtest('api should pass', async () => {
@@ -40,7 +41,7 @@ describe('Handler suite', () => {
             expect(typeof response.body).toBe('string');
         };
 
-        await handler.api(event, context, callback);
+        await handlerApi(event, context, callback);
     });
 });
 

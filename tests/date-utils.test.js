@@ -1,4 +1,4 @@
-const dateUtils = require('../lib/date-utils');
+const dateUtils = require('../utils/date');
 
 describe('dateUtils suite', () => {
     test('expiration before', () => {
