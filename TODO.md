@@ -1,5 +1,5 @@
 # For the Webapp client
-1. ~~Use VueMaterial~~
+1. ~~Use Vuetify~~
 
 2. ~~Build the app with webpack~~
 	- ~~move DialogAdd to a separate Vue component~~
