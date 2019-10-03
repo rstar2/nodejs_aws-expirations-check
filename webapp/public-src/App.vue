@@ -72,7 +72,7 @@
             </tr>
           </template>
         </v-data-table>
-        <div v-else class="error--text">Not Authorized</div>
+        <div v-else class="error--text">Not Authorized <v-icon>home</v-icon></div>
 
         <app-dialog-auth
           v-model="dialogAuth.show"

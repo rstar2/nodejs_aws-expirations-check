@@ -1,11 +1,9 @@
 import Vue from 'vue';
 
-import VueMaterialDesign from './md';
+import vuetify from './md';
 import App from './App';
 
-Vue.use(VueMaterialDesign);
-
 new Vue({
-    el: '#app',
+    vuetify,
     render: h => h(App),
-});
+}).$mount('#app');

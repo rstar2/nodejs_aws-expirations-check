@@ -1,10 +1,17 @@
 const path = require('path');
 
 const webpack = require('webpack');
+
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin');
+
+const isProd = process.env.NODE_ENV === 'production';
 
 const options = {
+    mode: isProd ? 'production' : 'development',
     entry: {
         // this is bundle for the Vue, VueMaterial (or Vuetify)
         // 'vue': './public-src/vue.js',
@@ -20,28 +27,62 @@ const options = {
     module: {
         rules: [
             {
-                test: /\.css$/,
-                use: ExtractTextPlugin.extract({
-                    fallback: 'style-loader',
-                    use: 'css-loader',
-                }),
-            },
-
-            {
-                test: /\.js$/,
-                loader: 'babel-loader',
-                exclude: /node_modules/,
-            },
-
-            {
                 test: /\.vue$/,
                 loader: 'vue-loader',
             },
+
+            // this will apply to both plain `.js` files
+            // AND `<script>` blocks in `.vue` files
+            {
+                test: /\.js$/,
+                loader: 'babel-loader',
+                exclude: /node_modules\/(?!(vuetify)\/)/,
+            },
+
+            // TODO:
+            // {
+            //     test: /\.css$/,
+            //     use: ExtractTextPlugin.extract({
+            //         fallback: 'style-loader',
+            //         use: 'css-loader',
+            //     }),
+            // },
+
+            // this will apply to both plain `.css` files
+            // AND `<style>` blocks in `.vue` files
+            {
+                test: /\.css$/,
+                use: [
+                    'vue-style-loader',
+                    'css-loader',
+                ],
+            },
+
+            {
+                test: /\.s(c|a)ss$/,
+                use: [
+                    'vue-style-loader',
+                    'css-loader',
+                    {
+                        loader: 'sass-loader',
+                        // Requires sass-loader@^8.0.0
+                        options: {
+                            implementation: require('sass'),
+                            sassOptions: {
+                                fiber: require('fibers'),
+                                indentedSyntax: true, // optional
+                            },
+                        },
+                    },
+                ],
+            },
+
+
         ],
     },
     resolve: {
         alias: {
-            'vue$': 'vue/dist/vue.esm.js',
+            'vue$': path.resolve(__dirname, './node_modules/vue/dist/vue.runtime.esm.js'),
 
             // this will make '@' available only in the 'app' folder
             '@': path.join(__dirname, 'public-src'),
@@ -57,6 +98,10 @@ const options = {
         hints: false,
     },
     plugins: [
+        new VueLoaderPlugin(),
+
+        new VuetifyLoaderPlugin(),
+
         // extract the 'boot' entry, the one containing Vue and VueMaterial (or Vuetify) as
         // it will be included in every page
         // new webpack.optimize.CommonsChunkPlugin({
@@ -73,18 +118,30 @@ const options = {
         //     // }
         // }),
 
+        // TODO:
         // extract CSS nad LESS into own files
-        new ExtractTextPlugin({ filename: '../styles/build.[name].css', }),
+        // new ExtractTextPlugin({ filename: '../styles/build.[name].css', }),
 
-        new VueLoaderPlugin(),
+        
     ],
     devtool: '#eval-source-map',
+    optimization: {
+        concatenateModules: false,
+    },
 };
 
-if (process.env.NODE_ENV === 'production') {
+if (isProd) {
     // mp source-map
     options.devtool = false;
 
+
+    options.optimization = {
+        minimizer: [
+            new UglifyJsPlugin({
+                test: /\.js(\?.*)?$/i,
+            }),
+        ],
+    };
 
     options.plugins = (options.plugins || []).concat([
         // http://vue-loader.vuejs.org/en/workflow/production.html
@@ -94,20 +151,6 @@ if (process.env.NODE_ENV === 'production') {
             'process.env': {
                 NODE_ENV: '"production"',
             },
-        }),
-
-        // Uglify and compress
-        new webpack.optimize.UglifyJsPlugin({
-            sourceMap: !!options.devtool,
-            compress: {
-                warnings: false,
-            },
-        }),
-
-        // The LoaderOptionsPlugin is unlike other plugins in that
-        // it is built for migration from webpack 1 to 2
-        new webpack.LoaderOptionsPlugin({
-            minimize: true,
         }),
     ]);
 }
