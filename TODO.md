@@ -1,12 +1,13 @@
 # For the Webapp client
-1. ~~Use Vuetify~~
 
-2. ~~Build the app with webpack~~
+- ~~Use Vuetify~~
+
+- ~~Build the app with webpack~~
 	- ~~move DialogAdd to a separate Vue component~~
 	- ~~use npm packages and not CDN~~
 	- ~~deploy in AWS only the distribution build~~
 
-3. ~~Add authorization(register/login/logout/auth)~~
+- ~~Add authorization(register/login/logout/auth)~~
 	- ~~using custom authorizers and JWT tokens~~ (no need for logout)
 		- https://cloudly.tech/blog/serverless-authorizers-1/
 		- https://medium.freecodecamp.org/a-crash-course-on-securing-serverless-apis-with-json-web-tokens-ff657ab2f5a5
@@ -16,11 +17,18 @@
 		then it should be invalidated in the Webapp client
 		(proper Unauthorized 403 error has to come to the client, not just 500)~~
 
-4. ~~Add 'update' item functionality~~
+- ~~Add 'update' item functionality~~
 
-5. ~~Add 'active' item functionality - e.g. skip inactive items when checked for expiration~~
+- ~~Add 'active' item functionality - e.g. skip inactive items when checked for expiration~~
 
-6. Allow updating the "expiration" window time-frame
+- Allow updating the "expiration" window time-frame
+
+- Upload Vuetify to version 2
+
+- Allow different users
+  - Should have different expiration lists
+  - Should have different notification email
 
 ## For the CLI tool
-1. Finish the 'cli.js' to request the API-function directly with HTTP requests (using the 'request' module) 
+
+- Finish the 'cli.js' to request the API-function directly with HTTP requests (using the 'request' module)

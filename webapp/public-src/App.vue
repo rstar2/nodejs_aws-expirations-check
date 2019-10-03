@@ -72,7 +72,7 @@
             </tr>
           </template>
         </v-data-table>
-		<div v-else class="error--text">Not Authorized</div>
+        <div v-else class="error--text">Not Authorized</div>
 
         <app-dialog-auth
           v-model="dialogAuth.show"
@@ -163,9 +163,18 @@ export default {
   },
   watch: {
     authJWT(newValue) {
+      // anyway always clear currernt list
+      this.list = [];
+
       // store it in cookie/localStorage (see the notes about it in mounted())
-      if (newValue) localStorage.setItem("authJWT", newValue);
-      else localStorage.removeItem("authJWT");
+      if (newValue) {
+		localStorage.setItem("authJWT", newValue);
+
+		this.apiRefresh();
+		
+      } else {
+        localStorage.removeItem("authJWT");
+      }
     },
     "dialogAdd.show"(newValue) {
       if (!newValue) {

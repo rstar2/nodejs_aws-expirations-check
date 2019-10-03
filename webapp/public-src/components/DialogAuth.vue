@@ -7,18 +7,30 @@
         <v-container grid-list-md>
           <v-layout wrap>
             <v-flex xs12>
-              <v-text-field label="Email*" v-model="user.email" :errorMessages="validate('email')"></v-text-field>
+              <v-text-field
+                label="Email*"
+                v-model="user.email"
+                :errorMessages="validate('email')"
+                @keydown.enter="doAction"
+              ></v-text-field>
             </v-flex>
 
             <v-flex xs12 v-if="isRegister">
-              <v-text-field label="Name*" v-model="user.name" :errorMessages="validate('name')"></v-text-field>
+              <v-text-field
+                label="Name*"
+                v-model="user.name"
+                :errorMessages="validate('name')"
+                @keydown.enter="doAction"
+              ></v-text-field>
             </v-flex>
 
             <v-flex xs12>
               <v-text-field
                 label="Password*"
+				type="password"
                 v-model="user.password"
                 :errorMessages="validate('password')"
+                @keydown.enter="doAction"
               ></v-text-field>
             </v-flex>
           </v-layout>
@@ -83,6 +95,8 @@ export default {
   },
   methods: {
     doAction() {
+      if (this.disabled) return;
+
       // validate first and if any invalid vField then return
       this.$v.user.$touch();
 
