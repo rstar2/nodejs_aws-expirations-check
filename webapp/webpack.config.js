@@ -2,8 +2,9 @@ const path = require('path');
 
 const webpack = require('webpack');
 
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const TerserJSPlugin = require('terser-webpack-plugin');
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin');
@@ -13,9 +14,6 @@ const isProd = process.env.NODE_ENV === 'production';
 const options = {
     mode: isProd ? 'production' : 'development',
     entry: {
-        // this is bundle for the Vue, VueMaterial (or Vuetify)
-        // 'vue': './public-src/vue.js',
-
         // this is bundle for the main app
         'app': './public-src/main.js',
     },
@@ -39,21 +37,20 @@ const options = {
                 exclude: /node_modules\/(?!(vuetify)\/)/,
             },
 
-            // TODO:
-            // {
-            //     test: /\.css$/,
-            //     use: ExtractTextPlugin.extract({
-            //         fallback: 'style-loader',
-            //         use: 'css-loader',
-            //     }),
-            // },
-
             // this will apply to both plain `.css` files
             // AND `<style>` blocks in `.vue` files
             {
                 test: /\.css$/,
                 use: [
-                    'vue-style-loader',
+                    {
+                        loader: MiniCssExtractPlugin.loader,
+                        options: {
+                        // you can specify a publicPath here
+                        // by default it uses publicPath in webpackOptions.output
+                            // publicPath: '../',
+                            hmr: !isProd,
+                        },
+                    },
                     'css-loader',
                 ],
             },
@@ -102,6 +99,7 @@ const options = {
 
         new VuetifyLoaderPlugin(),
 
+        // TODO: 
         // extract the 'boot' entry, the one containing Vue and VueMaterial (or Vuetify) as
         // it will be included in every page
         // new webpack.optimize.CommonsChunkPlugin({
@@ -118,11 +116,13 @@ const options = {
         //     // }
         // }),
 
-        // TODO:
-        // extract CSS nad LESS into own files
-        // new ExtractTextPlugin({ filename: '../styles/build.[name].css', }),
-
-        
+        new MiniCssExtractPlugin({
+            // Options similar to the same options in webpackOptions.output
+            // all options are optional
+            filename: '../styles/build.[name].css',
+            chunkFilename: '../styles/build.[id].css',
+            ignoreOrder: false, // Enable to remove warnings about conflicting order
+        }),
     ],
     devtool: '#eval-source-map',
     optimization: {
@@ -134,12 +134,10 @@ if (isProd) {
     // mp source-map
     options.devtool = false;
 
-
     options.optimization = {
         minimizer: [
-            new UglifyJsPlugin({
-                test: /\.js(\?.*)?$/i,
-            }),
+            new TerserJSPlugin({}),
+            new OptimizeCSSAssetsPlugin({}),
         ],
     };
 

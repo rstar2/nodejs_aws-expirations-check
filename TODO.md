@@ -23,7 +23,7 @@
 
 - Allow updating the "expiration" window time-frame
 
-- Upload Vuetify to version 2
+- ~~Update Vuetify to version 2~~
 
 - Allow different users
   - Should have different expiration lists

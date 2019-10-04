@@ -1,21 +1,21 @@
 <template>
   <v-app>
     <!-- <v-navigation-drawer app></v-navigation-drawer> -->
-    <v-toolbar color="indigo white--text" dense fixed app>
-      <v-toolbar-title class="mr-5 align-center">
-        <span class="title">Expirations list</span>
-      </v-toolbar-title>
+
+	<v-app-bar color="indigo white--text" dense fixed app>
+      <v-toolbar-title>Expirations list</v-toolbar-title>
+
       <v-spacer></v-spacer>
 
-      <!-- <v-toolbar-items> -->
       <template v-if="auth">
-        <v-btn color="success" small @click="apiRefresh">Refresh</v-btn>
-        <v-btn color="secondary" small @click="dialogAdd.show = true">Add</v-btn>
+        <v-btn class="mx-3" color="success" small @click="apiRefresh">Refresh</v-btn>
+        <v-btn class="mx-3" color="secondary" small @click="dialogAdd.show = true">Add</v-btn>
         <v-btn color="error" small @click="apiLogout">Logout</v-btn>
       </template>
       <template v-else>
         <v-btn
-          color="success"
+          class="mx-3"
+		  color="success"
           small
           @click="dialogAuth.isRegister = true; dialogAuth.show = true;"
         >Register</v-btn>
@@ -25,8 +25,7 @@
           @click="dialogAuth.isRegister = false; dialogAuth.show = true;"
         >Login</v-btn>
       </template>
-      <!-- </v-toolbar-items> -->
-    </v-toolbar>
+    </v-app-bar>
 
     <v-content>
       <v-container fluid>
@@ -39,7 +38,7 @@
           hide-actions
         >
           <template slot="no-data">No expirations set</template>
-          <template slot="items" slot-scope="{ item }">
+          <template slot="item" slot-scope="{ item }">
             <tr>
               <td class="text-xs">
                 <v-checkbox :input-value="item.enabled | itemEnabled" disabled hide-details></v-checkbox>
