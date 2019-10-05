@@ -5,7 +5,7 @@ const argv = require('minimist')(process.argv.slice(2), { boolean: true, string:
 
 // usage:
 const help =
-    `Usage: 
+`Usage: 
 	cli <action> [--name=XXX] [--expire=YYY] [--id=YYY] [--localHttp] [--localInvoke]
 Note:
     --localHttp option will invoke the function handler locally by faking a dummy HTTP event,
@@ -105,23 +105,7 @@ if (isLocalInvoke) {
 
 if (isLocalInvoke || isLocalHttp) {
     // invoke by sending "fake" another-function event  or  "fake" HTTP event 
-
-    // this will load the necessary ENV variables from env.yml
-    const fs = require('fs');
-    const yaml = require('js-yaml');
-    const parsedEnvYaml = yaml.load(fs.readFileSync('../env.yml'));
-
-    let env = parsedEnvYaml['env'];
-    const stage = process.env.NODE_ENV || 'dev';
-    const stageEnv = parsedEnvYaml[stage] || parsedEnvYaml['default'];
-    env = { ...env, ...stageEnv, }; // destructuring objects will take care if env or stageEnv is null/undefined
-    // merge with "real" env variables, eg. if any is already set DO NOT overwrite it
-    Object.keys(env).forEach((key) => process.env[key] = process.env[key] || env[key]);
-
-    // TODO: get from the serverless.yml so then it's defined in only one place
-    if (!process.env.AWS_DYNAMODB_ITEMS) {
-        process.env.AWS_DYNAMODB_ITEMS = `my-expirations-check-${stage}-expirations`;
-    }
+    require('./utils').config('../env.yml');
 
     const handler = require(`../handlers/${func}`).handler;
 

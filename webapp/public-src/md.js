@@ -3,11 +3,12 @@ import 'babel-polyfill';
 
 import Vue from 'vue';
 
-
-import Vuetify from 'vuetify/lib';
+// this will load the whole Vuetify
 // import Vuetify from 'vuetify';
 // import 'vuetify/dist/vuetify.min.css';
 
+// this just the sources that will be tree-shaken by the vuetify-loader Webpack plugin
+import Vuetify from 'vuetify/lib';
 // import colors from 'vuetify/lib/util/colors';
 
 // custom CSS

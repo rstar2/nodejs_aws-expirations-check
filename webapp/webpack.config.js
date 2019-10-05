@@ -5,6 +5,7 @@ const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin');
@@ -92,7 +93,7 @@ const options = {
         overlay: true,
     },
     performance: {
-        hints: false,
+        hints: true,
     },
     plugins: [
         new VueLoaderPlugin(),
@@ -123,6 +124,11 @@ const options = {
             chunkFilename: '../styles/build.[id].css',
             ignoreOrder: false, // Enable to remove warnings about conflicting order
         }),
+
+        new BundleAnalyzerPlugin({
+            analyzerMode: 'static',
+            openAnalyzer: false,
+        }),
     ],
     devtool: '#eval-source-map',
     optimization: {
@@ -139,6 +145,10 @@ if (isProd) {
             new TerserJSPlugin({}),
             new OptimizeCSSAssetsPlugin({}),
         ],
+    };
+
+    options.performance = {
+        hints: false,
     };
 
     options.plugins = (options.plugins || []).concat([
