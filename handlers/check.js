@@ -21,15 +21,20 @@ module.exports.handler = async (event, context, callback) => {
 
     const data = await dbList();
     // data of the type { "Items":[...], "Count": 1, "ScannedCount":1 }
-    const list = data.Items;
+    const /*Array*/ list = data.Items;
 
     // filter those expiring the next 7 days
-    let expired = (list && list
+    const expired = (list && list
         .filter(item => item.enabled !== false) // some items may not have 'enabled' field - assume them as "enabled"
-        .filter(item => dateUtils.isExpiredDay(item.expiresAt, 7))) || [];
+        .filter(item => dateUtils.isExpiredDay(item.expiresAt, item.dayBefore || 7))) || [];
 
     if (event['detail-type'] === 'Scheduled Event') {
         // if this is Scheduled event - send real SMS
+        // const users = new Map();
+        // expired.forEach(Item => {
+        //     const user = users.get(Item.email)
+        // });
+
         response = expired.reduce((acc, item) => {
             return acc + '\n' + item.name + ' expires/d on ' + moment(item.expiresAt).format('MMM Do YY');
         }, '');
