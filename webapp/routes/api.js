@@ -7,9 +7,10 @@ const apiFunctionSecret = process.env.AWS_LAMBDA_API_SECRET;
 const lambda = new AWS.Lambda();
 
 
-const createEventPayload = ({ action, data, }) => {
+const createEventPayload = ({ user, action, data, }) => {
     return {
         secret: apiFunctionSecret,
+        user,
         action,
         data,
     };
@@ -17,9 +18,10 @@ const createEventPayload = ({ action, data, }) => {
 
 const api = (req, res) => {
     const action = req.path.substring(1);
-    const data = req.body || undefined;
+    const data = req.body;
+    const user = req.user;
 
-    const event = createEventPayload({ action, data, });
+    const event = createEventPayload({ user, action, data, });
 
     console.log('Invoking the lambda API with', event);
     // invoke the api Lambda function
@@ -36,7 +38,7 @@ const api = (req, res) => {
         .then(data => JSON.parse(data))
         .then(data => {
             console.log('Received response from lambda API');
-            //console.dir(data);
+            // console.dir(data);
 
             const { statusCode, body, } = data;
 

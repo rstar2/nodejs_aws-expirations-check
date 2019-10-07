@@ -8,9 +8,49 @@ const twilioUtils = require('../utils/twilio')(process.env.TWILIO_ACCOUNT_SID,
 
 const awsSesUtils = require('../utils/aws-ses')(process.env.AWS_SES_SENDER);
 
+const dbAuth = require('../lib/db-auth');
 const { dbList, } = require('../lib/db-items');
 const { createResponse, } = require('../utils/http');
 const dateUtils = require('../utils/date');
+
+/**
+ * 
+ * @param {String} userId 
+ * @param {Item[]} items
+ * @return {String}
+ */
+const notifyUser = async (userId, items, toSend = true) => {
+    // get user details
+    const db = await dbAuth();
+    const user = await db.get(userId);
+    console.log(`Notifying user: ${JSON.stringify(user)}`);
+
+    const response = items.reduce((acc, item) => {
+        return acc + '\n' + item.name + ' expires/d on ' + moment(item.expiresAt).format('MMM Do YY');
+    }, '');
+    console.log('Message ', response);
+
+    if (response && toSend) {
+        
+        try {
+            await awsSesUtils.sendSMS(user.email || process.env.AWS_SES_RECEIVER, response);
+        } catch (e) {
+            console.warn('Failed to send Email with AWS SES Service',e);
+        }
+
+        try {
+            await twilioUtils.sendSMS(user.phone || process.env.TWILIO_RECEIVER, response);
+        } catch (e) {
+            console.warn('Failed to send SMS with Twilio Service');
+        }
+    }
+    return response;
+};
+
+/**
+ * @return {String}
+ */
+const now = () => moment().format('MMM Do YY');
 
 module.exports.handler = async (event, context, callback) => {
     // console.log("Event:");
@@ -19,6 +59,8 @@ module.exports.handler = async (event, context, callback) => {
     let response;
     console.time('Invoking function check took');
 
+
+
     const data = await dbList();
     // data of the type { "Items":[...], "Count": 1, "ScannedCount":1 }
     const /*Array*/ list = data.Items;
@@ -26,40 +68,35 @@ module.exports.handler = async (event, context, callback) => {
     // filter those expiring the next 7 days
     const expired = (list && list
         .filter(item => item.enabled !== false) // some items may not have 'enabled' field - assume them as "enabled"
-        .filter(item => dateUtils.isExpiredDay(item.expiresAt, item.dayBefore || 7))) || [];
+        .filter(item => dateUtils.isExpiredDay(item.expiresAt, item.daysBefore || 7))) || [];
 
     if (event['detail-type'] === 'Scheduled Event') {
         // if this is Scheduled event - send real SMS
-        // const users = new Map();
-        // expired.forEach(Item => {
-        //     const user = users.get(Item.email)
-        // });
 
-        response = expired.reduce((acc, item) => {
-            return acc + '\n' + item.name + ' expires/d on ' + moment(item.expiresAt).format('MMM Do YY');
-        }, '');
-
-        if (response) {
-            console.log('Message ', response);
-            try {
-                await awsSesUtils.sendSMS(process.env.AWS_SES_RECEIVER, response);
-            } catch (e) {
-                console.warn('Failed to send Email with AWS SES Service');
+        // separate users and notify each of them separately
+        const users = new Map();
+        expired.forEach(Item => {
+            let items;
+            if (!users.has(Item.user)) {
+                items = [];
+                users.set(Item.user, items);
+            } else {
+                items = users.get(Item.user);
             }
+            items.push(Item);
+        });
 
-            try {
-                await twilioUtils.sendSMS(process.env.TWILIO_RECEIVER, response);
-            } catch (e) {
-                console.warn('Failed to send SMS with Twilio Service');
-            }
-        }
+        response = '';
+        users.forEach((/*Item[]*/items, /*String*/user) => {
+            response += notifyUser(user, items);
+        });
     } else if (event.httpMethod) {
         // this Lambda with HTTP gateway is secured with 'authorizer: aws_iam'
         console.log(`Authenticated user identity: ${event.requestContext.identity.cognitoIdentityId}`);
 
         // if this is HTTP request
         response = createResponse(200, {
-            checked: `Checked on ${moment().format('MMM Do YY')}`,
+            checked: `Checked on ${now()}`,
             expired,
 
             // just to see what AWS sends
@@ -70,13 +107,17 @@ module.exports.handler = async (event, context, callback) => {
     } else if (event.secret === apiFunctionSecret) {
         // again return a HTTP response
         response = createResponse(200, {
-            checked: `Checked on ${moment().format('MMM Do YY')}`,
+            checked: `Checked on ${now()}`,
             expired,
+        });
+
+        expired.forEach(Item => {
+            notifyUser(Item.user, [Item,], false);
         });
     }
     
     console.timeEnd('Invoking function check took');
-    console.log(`Checked on ${Date.now()} : ${moment().format('MMM Do YY')} - expired: ${expired.length}`);
+    console.log(`Checked on ${now()} - expired: ${expired.length}`);
     callback(null, response);
 };
 

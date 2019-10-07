@@ -6,8 +6,8 @@ const { capitalize, } = require('../utils/string');
 const { createResponse, } = require('../utils/http');
 
 const MAP_METHODS = {
-    'GET': ['list',],
-    'POST': ['add', 'delete', 'update',],
+    GET: ['list',],
+    POST: ['add', 'delete', 'update',],
 };
 
 // eslint-disable-next-line
@@ -27,21 +27,43 @@ module.exports.handler = async (event, context, callback) => {
         // this is event from another function
         action = event.action;
         data = event.data;
+        data.user = event.user;
+        // there should be 'user' in data always
     } else {
         // this is normal API HTTP Gateway event
 
         // this Lambda with HTTP gateway is secured with 'authorizer: aws_iam'
-        console.log(`Authenticated user identity: ${event.requestContext.identity.cognitoIdentityId}`);
+        console.log(
+            `Authenticated user identity: ${event.requestContext.identity.cognitoIdentityId}`
+        );
 
         // strip the '/api/' from the full path '/api/xxx'
         action = event.path.substring('/api/'.length);
 
-        if (!MAP_METHODS[event.httpMethod] || -1 === MAP_METHODS[event.httpMethod].indexOf(action)) {
-            return callback(`Unsupported API gateway with HTTP method ${event.httpMethod} and path ${event.path}`);
+        if (
+            !MAP_METHODS[event.httpMethod] ||
+            -1 === MAP_METHODS[event.httpMethod].indexOf(action)
+        ) {
+            return callback(
+                `Unsupported API gateway with HTTP method ${event.httpMethod} and path ${event.path}`
+            );
         }
 
         // assume it's JSON ("application/json")
         data = event.body && JSON.parse(event.body);
+
+        // set the user who is executing this api
+        data.user = event.requestContext.identity.cognitoIdentityId;
+    }
+
+    // there should be 'user' in data always -  this is the authenticated user
+    if (!data.user) {
+        callback(
+            null,
+            createResponse(500, {
+                error: new Error(`Not authorized api action: ${action}`),
+            })
+        );
     }
 
     try {
@@ -56,7 +78,7 @@ module.exports.handler = async (event, context, callback) => {
 };
 
 /**
- * 
+ *
  * @param {String} action
  * @param {Object} data
  * @return {Promise<String>}

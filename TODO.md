@@ -25,10 +25,14 @@
 
 - ~~Update Vuetify to version 2~~
 
-- Allow different users
-  - Should have different expiration lists
-  - Should have different notification email
+- ~~Allow different users~~
+  - ~~Should have different expiration lists~~
+  - ~~Should have different notification email~~
+
+- Allow different "daysBefore" for each expired item
+
+- Implement client bundle splitting in chunks and thus caching - no need to always stream the JS/CSS/IMAGES if they are not changed
 
 ## For the CLI tool
 
-- Finish the 'cli.js' to request the API-function directly with HTTP requests (using the 'request' module)
+- Finish the 'cli.js' to request the API-function directly with HTTP requests (using the 'request/axios/node-fetch' module)

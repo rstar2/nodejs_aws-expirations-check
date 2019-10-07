@@ -20,4 +20,8 @@ module.exports.config = (envFile = 'env.yml') => {
     if (!process.env.AWS_DYNAMODB_ITEMS) {
         process.env.AWS_DYNAMODB_ITEMS = `my-expirations-check-${stage}-expirations`;
     }
+    // TODO: get from the serverless.yml so then it's defined in only one place
+    if (!process.env.AWS_DYNAMODB_AUTH) {
+        process.env.AWS_DYNAMODB_AUTH = `my-expirations-check-${stage}-auth`;
+    }
 };
