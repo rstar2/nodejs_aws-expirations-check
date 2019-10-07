@@ -93,7 +93,7 @@ const options = {
         overlay: true,
     },
     performance: {
-        hints: true,
+        hints: 'warning',
     },
     plugins: [
         new VueLoaderPlugin(),

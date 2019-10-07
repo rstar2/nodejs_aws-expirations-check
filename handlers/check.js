@@ -59,16 +59,14 @@ module.exports.handler = async (event, context, callback) => {
     let response;
     console.time('Invoking function check took');
 
-
-
     const data = await dbList();
     // data of the type { "Items":[...], "Count": 1, "ScannedCount":1 }
     const /*Array*/ list = data.Items;
 
     // filter those expiring the next 7 days
     const expired = (list && list
-        .filter(item => item.enabled !== false) // some items may not have 'enabled' field - assume them as "enabled"
-        .filter(item => dateUtils.isExpiredDay(item.expiresAt, item.daysBefore || 7))) || [];
+        .filter(Item => Item.enabled !== false) // some items may not have 'enabled' field - assume them as "enabled"
+        .filter(Item => dateUtils.isExpiredDay(Item.expiresAt, Item.daysBefore || 7))) || [];
 
     if (event['detail-type'] === 'Scheduled Event') {
         // if this is Scheduled event - send real SMS
@@ -87,8 +85,8 @@ module.exports.handler = async (event, context, callback) => {
         });
 
         response = '';
-        users.forEach((/*Item[]*/items, /*String*/user) => {
-            response += notifyUser(user, items);
+        users.forEach((/*Item[]*/Items, /*String*/user) => {
+            response += notifyUser(user, Items);
         });
     } else if (event.httpMethod) {
         // this Lambda with HTTP gateway is secured with 'authorizer: aws_iam'
@@ -112,6 +110,9 @@ module.exports.handler = async (event, context, callback) => {
         });
 
         expired.forEach(Item => {
+            console.log('daysBefore');
+            
+            dateUtils.isExpiredDay(Item.expiresAt, Item.daysBefore || 7)
             notifyUser(Item.user, [Item,], false);
         });
     }

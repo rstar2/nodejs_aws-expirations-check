@@ -38,7 +38,9 @@
                 <v-date-picker v-model="item.expiresAtStr" @input="datePicker = false"></v-date-picker>
               </v-menu>
 
-              <v-switch v-model="item.enabled" label="Enabled"></v-switch>
+			  <v-slider v-model="item.daysBefore" thumb-label="always" :min="1" :max="14"/>
+
+              <v-switch v-model="item.enabled" label="Enabled" />
             </v-form>
           </v-layout>
         </v-container>
@@ -125,7 +127,9 @@ export default {
 		enabled: true,
 
 		// The Date-picker works with String model
-        expiresAtStr: null,
+		expiresAtStr: null,
+		
+        daysBefore: 7,
       };
     },
     doClose() {
