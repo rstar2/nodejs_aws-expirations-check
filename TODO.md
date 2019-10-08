@@ -27,6 +27,10 @@
 
 - ~~Allow different "daysBefore" for each expired item
 
+- Confirmation on Delete
+
+- Better Vuetify-DatePicker
+
 - Implement client bundle splitting in chunks and thus caching - no need to always stream the JS/CSS/IMAGES if they are not changed
 - Host static files in S3
 - ? Use ApplicationLoadBalancer (ALB) for triggering the Lambda functions
@@ -34,3 +38,7 @@
 ## For the CLI tool
 
 - Finish the 'cli.js' to request the API-function directly with HTTP requests (using the 'request/axios/node-fetch' module)
+
+## Bugs
+
+- New items are not added with the 'user' field

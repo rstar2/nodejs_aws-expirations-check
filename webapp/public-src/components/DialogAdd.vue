@@ -19,10 +19,9 @@
               </v-flex>
 
               <v-menu
-                v-model="datePicker"
+                v-model="datePicker.active"
                 :close-on-content-click="false"
-                :nudge-right="40"
-                lazy
+                offset-y
                 transition="scale-transition"
                 offset-yfull-widthmin-width="290px"
               >
@@ -31,12 +30,21 @@
                     v-on="on"
                     v-model="item.expiresAtStr"
                     label="Expires At"
+                    hint="MM/DD/YYYY format"
                     prepend-icon="event"
-                    readonly
+                    @blur="void 0"
                     :rules="[() => !!item.expiresAtStr || 'The expiry date is required']"
                   ></v-text-field>
                 </template>
-                <v-date-picker v-model="item.expiresAtStr" @input="datePicker = false" no-title scrollable></v-date-picker>
+                <v-date-picker
+                  v-model="item.expiresAtStr"
+                  @input="datePicker.active = false"
+                  :min="datePickerMin"
+                  :max="datePickerMax"
+                  :picker-date="datePickerDate"
+                  no-title
+                  scrollable
+                ></v-date-picker>
               </v-menu>
 
               <v-slider
@@ -56,14 +64,20 @@
       <v-card-actions>
         <!-- Move the buttons to the right -->
         <v-spacer></v-spacer>
-        <v-btn color="blue darken-1" flat @click="doClose">Close</v-btn>
-        <v-btn color="green darken-1" flat @click="doAction" :disabled="disabled">{{ action }}</v-btn>
+        <v-btn color="blue darken-1" text @click="doClose">Close</v-btn>
+        <v-btn color="green darken-1" text @click="doAction" :disabled="disabled">{{ action }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
+/**
+ * @param {Date} date
+ * @return {String}
+ */
+const isoFormat = date => date.toISOString().substr(0, 10);
+
 export default {
   props: {
     show: { type: Boolean, default: false },
@@ -72,6 +86,15 @@ export default {
   model: {
     prop: "show",
     event: "close"
+  },
+  data() {
+    return {
+      item: this.emptyItem(),
+
+      datePicker: {
+        active: false
+      }
+    };
   },
   computed: {
     title() {
@@ -97,13 +120,24 @@ export default {
     disabled() {
       return false;
       // return this.$v.item.$invalid;
+    },
+    datePickerMin() {
+      return isoFormat(new Date());
+    },
+    datePickerMax() {
+      const minDate = new Date(this.datePickerMin);
+      minDate.setFullYear(minDate.getFullYear() + 3);
+      return isoFormat(minDate);
+    },
+    datePickerDate() {
+      const asd =  this.datePickerMin
+        .split("-")
+        .slice(0, 2)
+		.join("-");
+		console.log(asd);
+		return asd;
+		
     }
-  },
-  data() {
-    return {
-      item: this.emptyItem(),
-      datePicker: false
-    };
   },
   watch: {
     showItem(newItem) {
@@ -116,9 +150,9 @@ export default {
     "item.expiresAt": function(expiresAt, old) {
       if (expiresAt === old) return;
 
-      // 'expiresAt' is Number object, so create a 'expiresAtDate' as Date
+      // 'expiresAt' is Number object, so create a 'expiresAtStr' as String
       this.item.expiresAtStr = expiresAt
-        ? new Date(expiresAt).toISOString().substr(0, 10)
+        ? isoFormat(new Date(expiresAt))
         : null;
     },
     "item.expiresAtStr": function(expiresAtStr, old) {
@@ -137,8 +171,9 @@ export default {
         expiresAt: null,
         enabled: true,
 
+        // TODO: move into the data()
         // The Date-picker works with String model
-        expiresAtStr: null,
+        expiresAtStr: "",
 
         daysBefore: 7
       };

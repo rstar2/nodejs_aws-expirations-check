@@ -2,7 +2,7 @@
   <v-app>
     <!-- <v-navigation-drawer app></v-navigation-drawer> -->
 
-	<v-app-bar color="indigo white--text" dense fixed app>
+    <v-app-bar color="indigo white--text" dense fixed app>
       <v-toolbar-title>Expirations list</v-toolbar-title>
 
       <v-spacer></v-spacer>
@@ -15,7 +15,7 @@
       <template v-else>
         <v-btn
           class="mx-3"
-		  color="success"
+          color="success"
           small
           @click="dialogAuth.isRegister = true; dialogAuth.show = true;"
         >Register</v-btn>
@@ -34,10 +34,10 @@
           :headers="listHeaders"
           :items="list"
           :items-per-page="100"
-		  sort-by="expiresAt"
-    	  :sort-desc="false"
+          sort-by="expiresAt"
+          :sort-desc="false"
           class="elevation-5"
-          hide-actions
+          hide-default-footer
         >
           <template slot="no-data">No expirations set</template>
           <template slot="item" slot-scope="{ item }">
@@ -56,16 +56,18 @@
                 </v-layout>
                 <v-layout class="hidden-md-and-up justify-end">
                   <v-menu>
-                    <v-btn slot="activator" icon>
-                      <v-icon>more_vert</v-icon>
-                    </v-btn>
+                    <template v-slot:activator="{ on }">
+                      <v-btn v-on="on" icon>
+                        <v-icon>more_vert</v-icon>
+                      </v-btn>
+                    </template>
                     <v-list>
-                      <v-list-tile @click="dialogAdd.updateItem = item">
-                        <v-list-tile-title>Update</v-list-tile-title>
-                      </v-list-tile>
-                      <v-list-tile @click="apiDelete(item.id)">
-                        <v-list-tile-title>Delete</v-list-tile-title>
-                      </v-list-tile>
+                      <v-list-item @click="dialogAdd.updateItem = item">
+                        <v-list-item-title>Update</v-list-item-title>
+                      </v-list-item>
+                      <v-list-item @click="apiDelete(item.id)">
+                        <v-list-item-title>Delete</v-list-item-title>
+                      </v-list-item>
                     </v-list>
                   </v-menu>
                 </v-layout>
@@ -73,7 +75,10 @@
             </tr>
           </template>
         </v-data-table>
-        <div v-else class="error--text">Not Authorized <v-icon>home</v-icon></div>
+        <div v-else class="error--text">
+          Not Authorized
+          <v-icon>home</v-icon>
+        </div>
 
         <app-dialog-auth
           v-model="dialogAuth.show"
@@ -169,10 +174,9 @@ export default {
 
       // store it in cookie/localStorage (see the notes about it in mounted())
       if (newValue) {
-		localStorage.setItem("authJWT", newValue);
+        localStorage.setItem("authJWT", newValue);
 
-		this.apiRefresh();
-		
+        this.apiRefresh();
       } else {
         localStorage.removeItem("authJWT");
       }
