@@ -26,19 +26,26 @@
                 transition="scale-transition"
                 offset-yfull-widthmin-width="290px"
               >
-                <v-text-field
-                  slot="activator"
-                  v-model="item.expiresAtStr"
-                  label="Expires At"
-                  prepend-icon="event"
-                  readonly
-                  :rules="[
-			  () => !!item.expiresAtStr || 'The expiery date is required']"
-                ></v-text-field>
-                <v-date-picker v-model="item.expiresAtStr" @input="datePicker = false"></v-date-picker>
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    v-on="on"
+                    v-model="item.expiresAtStr"
+                    label="Expires At"
+                    prepend-icon="event"
+                    readonly
+                    :rules="[() => !!item.expiresAtStr || 'The expiry date is required']"
+                  ></v-text-field>
+                </template>
+                <v-date-picker v-model="item.expiresAtStr" @input="datePicker = false" no-title scrollable></v-date-picker>
               </v-menu>
 
-			  <v-slider v-model="item.daysBefore" :min="1" :max="14" thumb-label="always" :thumb-size="16" />
+              <v-slider
+                v-model="item.daysBefore"
+                :min="1"
+                :max="14"
+                thumb-label="always"
+                :thumb-size="16"
+              />
 
               <v-switch v-model="item.enabled" label="Enabled" />
             </v-form>
@@ -83,7 +90,7 @@ export default {
       // setter
       set: function(newValue) {
         if (!newValue) {
-          this.$emit("close");
+          this.$emit("close", false);
         }
       }
     },
@@ -110,26 +117,30 @@ export default {
       if (expiresAt === old) return;
 
       // 'expiresAt' is Number object, so create a 'expiresAtDate' as Date
-      this.item.expiresAtStr = expiresAt ? new Date(expiresAt).toISOString().substr(0, 10) : null;
+      this.item.expiresAtStr = expiresAt
+        ? new Date(expiresAt).toISOString().substr(0, 10)
+        : null;
     },
     "item.expiresAtStr": function(expiresAtStr, old) {
       if (expiresAtStr === old) return;
 
       // 'expiresAtDate' is Date object, so create a 'expiresAt' as Number
-      this.item.expiresAt = expiresAtStr ? new Date(expiresAtStr).getTime() : null;
+      this.item.expiresAt = expiresAtStr
+        ? new Date(expiresAtStr).getTime()
+        : null;
     }
   },
   methods: {
     emptyItem() {
       return {
         name: null,
-		expiresAt: null,
-		enabled: true,
+        expiresAt: null,
+        enabled: true,
 
-		// The Date-picker works with String model
-		expiresAtStr: null,
-		
-        daysBefore: 7,
+        // The Date-picker works with String model
+        expiresAtStr: null,
+
+        daysBefore: 7
       };
     },
     doClose() {
