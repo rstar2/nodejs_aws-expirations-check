@@ -33,7 +33,9 @@
           v-if="auth"
           :headers="listHeaders"
           :items="list"
-          :pagination="{sortBy: 'expiresAt', 'rowsPerPage': -1}"
+          :items-per-page="100"
+		  sort-by="expiresAt"
+    	  :sort-desc="false"
           class="elevation-5"
           hide-actions
         >
@@ -213,12 +215,8 @@ export default {
     apiLogout() {
       this.authJWT = null;
     },
-    apiAdd({ name, expiresAt, enabled = true }) {
-      this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/add`, {
-        name,
-        expiresAt,
-        enabled
-      })
+    apiAdd(item) {
+      this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/add`, item)
         .then(data => data.Item)
         .then(Item => (this.list = [...this.list, Item]))
         .then(() => (this.info = "Added"))
@@ -234,14 +232,9 @@ export default {
         .then(() => (this.info = "Deleted"))
         .catch(() => (this.info = "Failed to delete"));
     },
-    apiUpdate({ id, name, expiresAt, enabled }) {
+    apiUpdate(item) {
       // delete is reserved JS keyword
-      this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/update`, {
-        id,
-        name,
-        expiresAt,
-        enabled
-      })
+      this.apiRequest(`${APP_CONTEXT_PATH}/invoke/api/update`, item)
         .then(data => data.Item)
         .then(Item =>
           this.list.some(item => {

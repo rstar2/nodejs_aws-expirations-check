@@ -38,7 +38,7 @@
                 <v-date-picker v-model="item.expiresAtStr" @input="datePicker = false"></v-date-picker>
               </v-menu>
 
-			  <v-slider v-model="item.daysBefore" thumb-label="always" :min="1" :max="14"/>
+			  <v-slider v-model="item.daysBefore" :min="1" :max="14" thumb-label="always" :thumb-size="16" />
 
               <v-switch v-model="item.enabled" label="Enabled" />
             </v-form>
@@ -99,9 +99,9 @@ export default {
     };
   },
   watch: {
-    showItem(newValue) {
-      this.item = newValue
-        ? Object.assign(this.item, newValue)
+    showItem(newItem) {
+      this.item = newItem
+        ? Object.assign(this.item, newItem)
         : this.emptyItem();
     },
 

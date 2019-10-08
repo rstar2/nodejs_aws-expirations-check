@@ -18,20 +18,18 @@
 		(proper Unauthorized 403 error has to come to the client, not just 500)~~
 
 - ~~Add 'update' item functionality~~
-
 - ~~Add 'active' item functionality - e.g. skip inactive items when checked for expiration~~
-
-- Allow updating the "expiration" window time-frame
-
 - ~~Update Vuetify to version 2~~
 
 - ~~Allow different users~~
   - ~~Should have different expiration lists~~
   - ~~Should have different notification email~~
 
-- Allow different "daysBefore" for each expired item
+- ~~Allow different "daysBefore" for each expired item
 
 - Implement client bundle splitting in chunks and thus caching - no need to always stream the JS/CSS/IMAGES if they are not changed
+- Host static files in S3
+- ? Use ApplicationLoadBalancer (ALB) for triggering the Lambda functions
 
 ## For the CLI tool
 
