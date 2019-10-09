@@ -27,9 +27,9 @@
 
 - ~~Allow different "daysBefore" for each expired item
 
-- Confirmation on Delete
+- ~~Confirmation on Delete~~
 
-- Better Vuetify-DatePicker
+- ~~Better Vuetify-DatePicker handling~~
 
 - Implement client bundle splitting in chunks and thus caching - no need to always stream the JS/CSS/IMAGES if they are not changed
 - Host static files in S3
@@ -41,4 +41,11 @@
 
 ## Bugs
 
-- New items are not added with the 'user' field
+### Backend
+
+- ~~New items are not added with the 'user' field~~
+
+### Client
+
+- The 'Enabled' checkbox in the the table is not centered
+- When on mobile the rows are not visually good (offset-ed a little) when the name is on more lines

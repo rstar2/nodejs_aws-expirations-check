@@ -52,7 +52,7 @@
 
                 <v-layout class="hidden-sm-and-down justify-end">
                   <v-btn small primary @click="dialogAdd.updateItem = item">Update</v-btn>
-                  <v-btn small color="error" class="mr-0" @click="apiDelete(item.id)">Delete</v-btn>
+                  <v-btn small color="error" class="ml-3" @click="tryDelete(item.id)">Delete</v-btn>
                 </v-layout>
                 <v-layout class="hidden-md-and-up justify-end">
                   <v-menu>
@@ -65,7 +65,7 @@
                       <v-list-item @click="dialogAdd.updateItem = item">
                         <v-list-item-title>Update</v-list-item-title>
                       </v-list-item>
-                      <v-list-item @click="apiDelete(item.id)">
+                      <v-list-item @click="tryDelete(item.id)">
                         <v-list-item-title>Delete</v-list-item-title>
                       </v-list-item>
                     </v-list>
@@ -278,7 +278,13 @@ export default {
               ? "Failed to register"
               : "Failed to login");
         });
-    }
+	},
+	
+	async tryDelete(id) {
+		if (await this.$confirm('Delete?', {title: 'Confirmation Warning'})) {
+			this.apiDelete(id);
+		}
+	}
   },
   mounted() {
     // restore it from cookie/localStorage

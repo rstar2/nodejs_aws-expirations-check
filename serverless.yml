@@ -119,6 +119,7 @@ functions:
       environment:
         # needed to access the necessary DynamoDB table
         AWS_DYNAMODB_ITEMS: ${self:custom.expirationsTable}
+        AWS_DYNAMODB_AUTH: ${self:custom.authTable}
 
       # defined additional role/permissions for this function
       iamRoleStatementsInherit: true

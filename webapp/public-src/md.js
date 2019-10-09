@@ -14,12 +14,13 @@ import Vuetify from 'vuetify/lib';
 // custom CSS
 import './md.css';
 
-Vue.use(Vuetify);
+// import a 'confirmation' plugin
+import VuetifyConfirm from 'vuetify-confirm';
 
 /**
  * This is the main Vue Vuetify plugin
  */
-export default new Vuetify({
+const vuetify = new Vuetify({
     theme: {
         dark: false,
         themes: {
@@ -50,3 +51,20 @@ export default new Vuetify({
         iconfont: 'md'
     }
 });
+
+Vue.use(Vuetify);
+
+// Usage:
+// this.$confirm('Do you really want to exit?', { title: 'Warning!'}).then(res => {});
+Vue.use(VuetifyConfirm, { 
+    vuetify,
+    // buttonTrueText: 'Accept',
+    // buttonFalseText: 'Discard',
+    // color: 'warning',
+    // icon: 'warning',
+    // title: 'Warning',
+    // width: 350,
+    // property: '$confirm'
+});
+
+export default vuetify;

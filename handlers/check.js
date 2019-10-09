@@ -17,7 +17,7 @@ const dateUtils = require('../utils/date');
  * 
  * @param {String} userId 
  * @param {Item[]} items
- * @return {String}
+ * @return {Promise<String>}
  */
 const notifyUser = async (userId, items, toSend = true) => {
     // get user details
@@ -84,10 +84,11 @@ module.exports.handler = async (event, context, callback) => {
             items.push(Item);
         });
 
-        response = '';
-        users.forEach((/*Item[]*/Items, /*String*/user) => {
-            response += notifyUser(user, Items);
+        const promises = [];
+        users.forEach(async (/*Item[]*/Items, /*String*/user) => {
+            promises.push(await notifyUser(user, Items));
         });
+        await promises;
     } else if (event.httpMethod) {
         // this Lambda with HTTP gateway is secured with 'authorizer: aws_iam'
         console.log(`Authenticated user identity: ${event.requestContext.identity.cognitoIdentityId}`);
@@ -109,16 +110,19 @@ module.exports.handler = async (event, context, callback) => {
             expired,
         });
 
-        expired.forEach(Item => {
-            console.log('daysBefore');
-            
-            dateUtils.isExpiredDay(Item.expiresAt, Item.daysBefore || 7)
-            notifyUser(Item.user, [Item,], false);
-        });
+        // check if we have to filter by single user
+        const user = event.data.user;
+        await Promise.all(expired.map(async (Item) => {
+            if (user && user !== Item.user) return;
+
+            dateUtils.isExpiredDay(Item.expiresAt, Item.daysBefore || 7);
+            await notifyUser(Item.user, [Item,], false);
+        }));
     }
     
     console.timeEnd('Invoking function check took');
     console.log(`Checked on ${now()} - expired: ${expired.length}`);
+    
     callback(null, response);
 };
 

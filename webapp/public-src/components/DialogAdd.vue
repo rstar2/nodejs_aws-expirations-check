@@ -33,7 +33,7 @@
                     hint="MM/DD/YYYY format"
                     prepend-icon="event"
                     @blur="void 0"
-                    :rules="[() => !!item.expiresAtStr || 'The expiry date is required']"
+                    :rules="[() => !!item.expiresAtStr || 'Expiry date is required']"
                   ></v-text-field>
                 </template>
                 <v-date-picker
@@ -41,7 +41,7 @@
                   @input="datePicker.active = false"
                   :min="datePickerMin"
                   :max="datePickerMax"
-                  :picker-date="datePickerDate"
+                  :picker-date.sync="datePicker.pickerDate"
                   no-title
                   scrollable
                 ></v-date-picker>
@@ -64,8 +64,8 @@
       <v-card-actions>
         <!-- Move the buttons to the right -->
         <v-spacer></v-spacer>
-        <v-btn color="blue darken-1" text @click="doClose">Close</v-btn>
-        <v-btn color="green darken-1" text @click="doAction" :disabled="disabled">{{ action }}</v-btn>
+        <v-btn color="blue darken-1" text @click="_doClose">Close</v-btn>
+        <v-btn color="green darken-1" text @click="_doAction" :disabled="disabled">{{ action }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -89,10 +89,11 @@ export default {
   },
   data() {
     return {
-      item: this.emptyItem(),
+      item: this._emptyItem(),
 
       datePicker: {
-        active: false
+        active: false,
+        pickerDate: null
       }
     };
   },
@@ -128,22 +129,22 @@ export default {
       const minDate = new Date(this.datePickerMin);
       minDate.setFullYear(minDate.getFullYear() + 3);
       return isoFormat(minDate);
-    },
-    datePickerDate() {
-      const asd =  this.datePickerMin
-        .split("-")
-        .slice(0, 2)
-		.join("-");
-		console.log(asd);
-		return asd;
-		
     }
   },
   watch: {
+    show(isShown) {
+      // on each show of the dialog - reset the DatePicker initial year-month date
+      if (isShown) {
+        this.datePicker.pickerDate = this.datePickerMin.split("-").slice(0, 2).join("-");
+      } else {
+		this.$refs.form.resetValidation();
+		this.item = this._emptyItem();
+	  }
+    },
     showItem(newItem) {
       this.item = newItem
         ? Object.assign(this.item, newItem)
-        : this.emptyItem();
+        : this._emptyItem();
     },
 
     // watch a nested property
@@ -165,7 +166,7 @@ export default {
     }
   },
   methods: {
-    emptyItem() {
+    _emptyItem() {
       return {
         name: null,
         expiresAt: null,
@@ -178,24 +179,15 @@ export default {
         daysBefore: 7
       };
     },
-    doClose() {
-      this.$refs.form.resetValidation();
-
-      this.item = this.emptyItem();
-
+    _doClose() {
       this.active = false;
     },
-    doAction() {
+    _doAction() {
       // this time will use the built in v-form validation
       if (this.$refs.form.validate()) {
-        this.$refs.form.resetValidation();
+        this._doClose();
 
-        const item = this.item;
-
-        this.item = this.emptyItem();
-        this.active = false;
-
-        this.$emit("action", item);
+        this.$emit("action", this.item);
       }
     }
   }

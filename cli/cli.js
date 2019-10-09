@@ -20,7 +20,7 @@ Examples:
 	cli add --name=XXXX --expire="Feb 17, 2019"
 	cli delete --id=XXXXX
     cli update --id=XXXXX --expire="Feb 17, 2019"
-    cli check --user=XXXXXX
+    cli check --user=XXXXXX --localInvoke
 `;
 const action = argv._[0];
 const isLocalHttp = !!argv['localHttp']; // locally invoke the function handler
@@ -94,9 +94,13 @@ switch (action) {
         exit(`No valid action ${action}`);
 }
 
+require('./utils').config('../env.yml');
+
 if (isLocalInvoke) {
     // for direct/local invoke event
     Object.assign(event, {
+        // add the "auth"/identification secret/token
+        secret: process.env.AWS_LAMBDA_API_SECRET,
         action,
         data,
     });
@@ -110,17 +114,8 @@ if (isLocalInvoke) {
 }
 
 if (isLocalInvoke || isLocalHttp) {
-    // invoke by sending "fake" another-function event  or  "fake" HTTP event 
-    require('./utils').config('../env.yml');
-
+    // invoke by sending a "fake" event to another-function event 
     const handler = require(`../handlers/${func}`).handler;
-
-    if (isLocalInvoke) {
-        // add the "auth"/identification secret/token
-        Object.assign(event, {
-            secret: process.env.AWS_LAMBDA_API_SECRET,
-        });
-    }
     handler(event, null, (error, response) => {
         if (error) {
             console.error('Finished with error', error);
