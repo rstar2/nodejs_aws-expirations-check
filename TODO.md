@@ -47,5 +47,5 @@
 
 ### Client
 
-- The 'Enabled' checkbox in the the table is not centered
+- ~~The 'Enabled' checkbox in the the table is not centered~~
 - When on mobile the rows are not visually good (offset-ed a little) when the name is on more lines

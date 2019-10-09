@@ -40,8 +40,8 @@
       <v-card-actions>
         <!-- Move the buttons to the right -->
         <v-spacer></v-spacer>
-        <v-btn color="blue darken-1" flat @click="active = false">Close</v-btn>
-        <v-btn color="green darken-1" flat @click="doAction" :disabled="disabled">{{ action }}</v-btn>
+        <v-btn color="blue darken-1" text @click="active = false">Close</v-btn>
+        <v-btn color="green darken-1" text @click="doAction" :disabled="disabled">{{ action }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

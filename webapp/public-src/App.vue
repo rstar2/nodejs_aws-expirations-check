@@ -43,7 +43,7 @@
           <template slot="item" slot-scope="{ item }">
             <tr>
               <td class="text-xs">
-                <v-checkbox :input-value="item.enabled | itemEnabled" disabled hide-details></v-checkbox>
+                <v-checkbox :input-value="item.enabled | itemEnabled" disabled hide-details class="ma-0 pa-0"></v-checkbox>
               </td>
               <td class="text-xs">{{ item.name }}</td>
               <td class="text-xs">{{ item.expiresAt | date }}</td>
