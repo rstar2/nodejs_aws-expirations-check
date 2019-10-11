@@ -19,7 +19,7 @@ const dateUtils = require('../utils/date');
  * @param {Item[]} items
  * @return {Promise<String>}
  */
-const notifyUser = async (userId, items, toSend = true) => {
+const notifyUser = async (userId, items, toSend = true, webUrl = null) => {
     // get user details
     const db = await dbAuth();
     const user = await db.get(userId);
@@ -33,7 +33,12 @@ const notifyUser = async (userId, items, toSend = true) => {
     if (response && toSend) {
         
         try {
-            await awsSesUtils.sendSMS(user.email || process.env.AWS_SES_RECEIVER, response);
+            const email = webUrl ? 
+            `${response}
+            --------------
+            Edit on: ${url}` :
+            response;
+            await awsSesUtils.sendSMS(user.email || process.env.AWS_SES_RECEIVER, email);
         } catch (e) {
             console.warn('Failed to send Email with AWS SES Service',e);
         }
@@ -56,6 +61,22 @@ module.exports.handler = async (event, context, callback) => {
     // console.log("Event:");
     // console.dir(event);
 
+    // natively provided by AWS
+    const region = process.env.AWS_REGION;
+    // custom env variable set in serverless.yml
+    const stage = process.env.AWS_STAGE;
+    // TODO: get the REST API id
+    // const { promisify, } = require('util');
+    // const AWS = require('aws-sdk');
+    // const awsApigateway = new AWS.APIGateway({apiVersion: '2015-07-09',});
+    // const getRestApis = promisify(awsApigateway.getRestApis.bind(awsApigateway));
+    // const restAPis = await getRestApis();
+    // console.dir(restAPis);
+    const restApiId = '8i00jlvjlj';
+    // https://8i00jlvjlj.execute-api.eu-west-1.amazonaws.com/dev
+    // https://<restApiId>.execute-api.<awsRegion>.amazonaws.com/<stageName>
+    const webUrl = `https://${restApiId}.execute-api.${region}.amazonaws.com/${stage}/`;
+
     let response;
     console.time('Invoking function check took');
 
@@ -68,9 +89,11 @@ module.exports.handler = async (event, context, callback) => {
         .filter(Item => Item.enabled !== false) // some items may not have 'enabled' field - assume them as "enabled"
         .filter(Item => dateUtils.isExpiredDay(Item.expiresAt, Item.daysBefore || 7))) || [];
 
+    
+
     if (event['detail-type'] === 'Scheduled Event') {
         // if this is Scheduled event - send real SMS
-
+        
         // separate users and notify each of them separately
         const users = new Map();
         expired.forEach(Item => {
@@ -84,9 +107,12 @@ module.exports.handler = async (event, context, callback) => {
             items.push(Item);
         });
 
+        // for testing purposes there's a Test Scheduled Event with this 'test' field set
+        const isTest = !!event.test;
+
         const promises = [];
         users.forEach(async (/*Item[]*/Items, /*String*/user) => {
-            promises.push(await notifyUser(user, Items));
+            promises.push(await notifyUser(user, Items, isTest, webUrl));
         });
         await promises;
     } else if (event.httpMethod) {
