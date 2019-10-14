@@ -36,6 +36,9 @@ module.exports = (stage) => {
         app.locals['context-path'] = stage ? '/' + stage : '';
     }
 
+    app.locals['ga-id'] = process.env.GOOGLE_ANALYTICS_ID;
+    
+
     // configure routes
     const apiRouter = express.Router();
     require('./routes/api')(apiRouter);
