@@ -1,3 +1,5 @@
+const path = require('path');
+
 const { promisify, } = require('util');
 
 const bcrypt = require('bcryptjs');
@@ -9,13 +11,8 @@ if (!password) {
     process.exit(1);
 }
 
-const fs = require('fs');
-if (fs.existsSync('../env.yml')) {
-    const yaml = require('js-yaml');
-    const parsedEnvYaml = yaml.load(fs.readFileSync('../env.yml'));
-    const env = parsedEnvYaml['env'];
-    Object.keys(env).forEach((key) => process.env[key] = process.env[key] || env[key]);
-}
+// parse and configure the env variables
+require('../utils/env').config(path.resolve(__dirname, '../env.yml'));
 
 promisify(bcrypt.hash)(password, process.env.AUTH_PASSWORD_SALT)
     .then(hashPass => `Generated hash for password '${password}' -> '${hashPass}'`)

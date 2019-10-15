@@ -14,7 +14,7 @@ custom:
   # implementing custom authorization
   authorizer:
     jwt:
-      name: authorizerJWT
+      name: authorizerJWT  # name must be a defined function name
       type: TOKEN
       identitySource: method.request.header.Authorization
       identityValidationExpression: Bearer (.*)
@@ -48,6 +48,7 @@ plugins:
 package:
   exclude:
     - .vscode/**
+    - analytics/**
     - cli/**
     - tests/**
     - '**/__mocks__/**'
@@ -196,7 +197,7 @@ functions:
         AUTH_PASSWORD_SALT: ${file(env.yml):env.AUTH_PASSWORD_SALT}
         AWS_DYNAMODB_AUTH: ${self:custom.authTable}
         
-        # AWS_PROFILE will allow to uing the serverless-offline plugin and thus 'aws-sdk' will have  proper auth credentials,
+        # AWS_PROFILE will allow using the serverless-offline plugin and thus 'aws-sdk' will have  proper auth credentials,
         # apart from that it's not used 
         AWS_PROFILE: ${file(env.yml):env.AWS_PROFILE}
       

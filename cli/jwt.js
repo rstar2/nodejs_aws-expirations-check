@@ -1,18 +1,15 @@
+const path = require('path');
+
 const id = process.argv[2];
 if (!id) {
     console.error('No id argument provided');
     process.exit(1);
 }
 
-const fs = require('fs');
-if (fs.existsSync('../env.yml')) {
-    const yaml = require('js-yaml');
-    const parsedEnvYaml = yaml.load(fs.readFileSync('../env.yml'));
-    const env = parsedEnvYaml['env'];
-    Object.keys(env).forEach((key) => process.env[key] = process.env[key] || env[key]);
-}
+// parse and configure the env variables
+require('../utils/env').config('../env.yml');
 
-const jwt = require('../utils/jwt')(process.env.AUTH_JWT_SECRET);
+const jwt = require(path.resolve(__dirname, '../env.yml'))(process.env.AUTH_JWT_SECRET);
 const main = async () => {
     let token;
     await jwt.sign(id)

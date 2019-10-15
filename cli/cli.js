@@ -1,3 +1,4 @@
+const path = require('path');
 
 // treat the "--id=123" as string "123" always, not as number 123
 // treat the "--local" as boolean value
@@ -12,12 +13,12 @@ Note:
     --localInvoke option will invoke the function handler locally by faking a dummy "secret" event,
       otherwise will request the function public API, e.g. will create real HTTP request
 Examples:
-	cli list
-	cli add --name=XXXX --expire="2 17 2019"
-	cli add --name=XXXX --expire="2/17/2019"
-	cli add --name=XXXX --expire="2-17-2019"
-	cli add --name=XXXX --expire="2019-2-17"
-	cli add --name=XXXX --expire="Feb 17, 2019"
+	cli list --user=XXXXXX
+	cli add --user=XXXXXX --name=XXXX --expire="2 17 2019"
+	cli add --user=XXXXXX --name=XXXX --expire="2/17/2019"
+	cli add --user=XXXXXX --name=XXXX --expire="2-17-2019"
+	cli add --user=XXXXXX --name=XXXX --expire="2019-2-17"
+	cli add --user=XXXXXX --name=XXXX --expire="Feb 17, 2019"
 	cli delete --id=XXXXX
     cli update --id=XXXXX --expire="Feb 17, 2019"
     cli check --user=XXXXXX --localInvoke
@@ -60,17 +61,25 @@ switch (action) {
         data = { user, };
         break;
     case 'list':
+        if (!user) {
+            exit('Missing \'--user\' argument for the \'check\' action.');
+        }
         httpMethod = 'GET';
+        data = { user, };
         break;
     case 'add':
+        if (!user) {
+            exit('Missing \'--user\' argument for the \'check\' action.');
+        }
         if (!name) {
             exit('Missing \'--name\' argument for the \'add\' action.');
         }
         if (!expiresAt) {
             exit('Missing \'--expire\' argument for the \'add\' action.');
         }
+
         httpMethod = 'POST';
-        data = { name, expiresAt, };
+        data = { user, name, expiresAt, };
         break;
     case 'delete':
         if (!id) {
@@ -94,7 +103,8 @@ switch (action) {
         exit(`No valid action ${action}`);
 }
 
-require('./utils').config('../env.yml');
+// parse and configure the env variables
+require('../utils/env').config(path.resolve(__dirname, '../env.yml'));
 
 if (isLocalInvoke) {
     // for direct/local invoke event

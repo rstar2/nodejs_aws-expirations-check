@@ -1,3 +1,5 @@
+const path = require('path');
+
 // set 'user' to all all items in 'my-expirations-check-dev-expirations'
 
 // 874d1d50-d927-11e8-a63b-9bd38c38fe40
@@ -25,8 +27,8 @@ if (!user) {
     exit('No user specified');
 }
 
-// parse and config the env variables
-require('./utils').config('../env.yml');
+// parse and configure the env variables
+require('../utils/env').config(path.resolve(__dirname, '../env.yml'));
 
 const dynamodb_TableName = process.env.AWS_DYNAMODB_ITEMS;
 
