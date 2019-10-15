@@ -1,7 +1,6 @@
 // Config
 const clientEmail = process.env.GOOGLE_ANALYTICS_CLIENT_EMAIL;
-// replace all the \n strings inside as real CR ('\n') chars
-const privateKey = process.env.GOOGLE_ANALYTICS_PRIVATE_KEY.replace(new RegExp('\\\\n', 'g'), '\n');
+const privateKey = process.env.GOOGLE_ANALYTICS_PRIVATE_KEY; // RSA private key (in PEM format with the new lines) as exported by Google API policy
 const viewId = process.env.GOOGLE_ANALYTICS_VIEW_ID;
 const scopes = ['https://www.googleapis.com/auth/analytics.readonly',];
 
@@ -20,6 +19,8 @@ async function randomTimeout() {
     //   0,553453535 * 1000 = 553,453535
     //   Math.trunc(553,453535) = 553
     //   So random 0-1 sec
+
+    // setTimeout has a special Symbol that generates setTimeout as Promise
     return setTimeout[Object.getOwnPropertySymbols(setTimeout)[0]](
         Math.trunc(1000 * Math.random())
     );
@@ -46,8 +47,8 @@ async function getMetric(metric, startDate, endDate) {
 
 /**
  * Normalize metrics name
- * 
- * @param {String} metric 
+ *
+ * @param {String} metric
  * @return {String}
  */
 function normalizeMetric(metric) {
@@ -60,13 +61,17 @@ function normalizeMetric(metric) {
 
 /**
  * Get all the specified metrics
- * 
- * @param {String} metrics 
- * @param {String} startDate 
+ *
+ * @param {String} metrics
+ * @param {String} startDate
  * @param {String} endDate
  * @return {Promise[]}
  */
-function getData(metrics = ['ga:users',], startDate = '30daysAgo', endDate = 'today') {
+function getData(
+    metrics = ['ga:users',],
+    startDate = '30daysAgo',
+    endDate = 'today'
+) {
     // ensure all metrics have ga:
     const results = [];
     for (let i = 0; i < metrics.length; i += 1) {

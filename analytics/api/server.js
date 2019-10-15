@@ -27,24 +27,31 @@ const apiPath = process.env.ANALYTICS_API_PATH || '';
  */
 app.get(`/${apiPath}`, (req, res) => {
     const { metrics, startDate, endDate, } = req.query;
-    
-    console.log(`Requested metrics: ${metrics}; start-date: ${startDate}; end-date: ${endDate}`);
-    
-    Promise.all(getData(metrics ? metrics.split(',') : metrics, startDate, endDate))
-        .then((data) => {
-        // flatten list of objects into one object
+
+    console.log(
+        `Requested metrics: ${metrics}; start-date: ${startDate}; end-date: ${endDate}`
+    );
+
+    Promise.all(
+        getData(metrics ? metrics.split(',') : metrics, startDate, endDate)
+    )
+        .then(data => {
+            // flatten list of objects into one object
             const body = {};
-            Object.values(data).forEach((value) => {
-                Object.keys(value).forEach((key) => {
+            Object.values(data).forEach(value => {
+                Object.keys(value).forEach(key => {
                     body[key] = value[key];
                 });
             });
             res.send({ data: body, });
         })
-        .catch((err) => {
+        .catch(err => {
             console.log('Error:');
             console.log(err);
-            res.status(500).json({ error: 'Error getting a metric', message: `${err}`, });
+            res.status(500).json({
+                error: 'Error getting a metric',
+                message: `${err}`,
+            });
         });
 });
 
@@ -61,17 +68,19 @@ app.get(`/${apiPath}/graph`, (req, res) => {
     }
     promises = [].concat(...promises);
     Promise.all(promises)
-        .then((data) => {
-        // flatten list of objects into one object
+        .then(data => {
+            // flatten list of objects into one object
             const body = {};
             body[metric] = [];
-            Object.values(data).forEach((value) => {
-                body[metric].push(value[metric.startsWith('ga:') ? metric : `ga:${metric}`]);
+            Object.values(data).forEach(value => {
+                body[metric].push(
+                    value[metric.startsWith('ga:') ? metric : `ga:${metric}`]
+                );
             });
             console.log(body);
             res.json({ data: body, });
         })
-        .catch((err) => {
+        .catch(err => {
             console.log('Error:');
             console.log(err);
             res.status(500).json({ error: 'Error', message: `${err}`, });
