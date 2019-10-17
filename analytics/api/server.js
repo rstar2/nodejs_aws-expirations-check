@@ -2,7 +2,7 @@
 // parse and configure the env variables
 const path = require('path');
 
-require('../../utils/env').config(path.resolve(__dirname, '../../env.yml'));
+require('dotenv').config({path : path.resolve(__dirname, '../.env')});
 
 // Server
 const express = require('express');

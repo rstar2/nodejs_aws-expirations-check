@@ -1,14 +1,18 @@
 {
-  "name": "ru-analitics-api-client",
+  "name": "ru-analitics-api-app",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "deploy:now": "now --prod",
+    "deploy": "npm run deploy:now",
+    "dev": "(npm run serve &) && npm --prefix api run dev"
   },
   "dependencies": {
     "core-js": "^2.6.5",
+    "dotenv": "^8.2.0",
     "vue": "^2.6.10"
   },
   "devDependencies": {
