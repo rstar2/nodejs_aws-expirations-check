@@ -2,11 +2,10 @@
   "name": "test",
   "version": 2,
   "builds": [
-    {
-      "src": "package.json",
-      "use": "@now/static-build",
-      "config": { "distDir": "dist" }
-    }
+     { "src": "func.js", "use": "@now/node" },
+     { "src": "funcs/*.js", "use": "@now/node" },
+     { "src": "api/func.js", "use": "@now/node" },
+     { "src": "**/*.html", "use": "@now/static" }
   ],
   "routes": [
     {

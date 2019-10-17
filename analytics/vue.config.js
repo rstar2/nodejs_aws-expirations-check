@@ -21,4 +21,7 @@
 //     apiServerPort !== 80 && apiServerPort != 433 ? `:${apiServerPort}` : ''
 // }/${apiPath}`;
 
+// if this client app and the api are deployed with Now
+process.env.VUE_APP_API_URL = 'api';
+
 module.exports = {};

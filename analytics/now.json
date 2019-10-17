@@ -1,7 +1,21 @@
 {
-  "name": "my-mongodb-api",
+  "name": "test",
   "version": 2,
-  "env": {
-    "MONGODB_URI": "@my-mongodb-uri"
-  }
-}
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@now/static-build",
+      "config": { "distDir": "dist" }
+    },
+    { "src": "api/*.js", "use": "@now/node" }
+  ],
+  "routes": [
+    {
+      "src": "/(js|css|img)/.*",
+      "headers": { "cache-control": "max-age=31536000, immutable" }
+    },
+    { "handle": "filesystem" },
+    { "src": ".*", "dest": "/" }
+  ],
+  "alias": "example.com"
+} 
