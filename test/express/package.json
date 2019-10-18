@@ -1,15 +1,16 @@
 {
-  "name": "now-api-single-funcs",
+  "name": "now-api-express-app",
   "version": "1.0.0",
   "description": "",
-  "main": "func.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
-    "date-fns": "^2.5.0"
+    "cors": "^2.8.5",
+    "express": "^4.17.1"
   }
 }
