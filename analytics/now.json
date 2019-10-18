@@ -1,21 +1,46 @@
 {
-  "name": "test",
+  "name": "run-aws-expiratations-check-analytics",
   "version": 2,
   "builds": [
     {
       "src": "package.json",
       "use": "@now/static-build",
-      "config": { "distDir": "dist" }
+      "config": {
+        "distDir": "dist"
+      }
     },
-    { "src": "api/*.js", "use": "@now/node" }
+    {
+      "src": "api/api*.js",
+      "use": "@now/node"
+    }
   ],
   "routes": [
     {
-      "src": "/(js|css|img)/.*",
-      "headers": { "cache-control": "max-age=31536000, immutable" }
+      "src": "/api/?",
+      "dest": "/api/api.js"
     },
-    { "handle": "filesystem" },
-    { "src": ".*", "dest": "/" }
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/api-$1.js"
+    },
+    {
+      "src": "/(js|css|img)/.*",
+      "headers": {
+        "cache-control": "max-age=31536000, immutable"
+      }
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": ".*",
+      "dest": "/"
+    }
   ],
-  "alias": "example.com"
-} 
+  "env": {
+    "NOT_SO_SECRET_VARIABLE": "No so secret - just variable",
+    "GOOGLE_ANALYTICS_CLIENT_EMAIL": "@run-aws-expiratations-check-analytics-google-analytics_client_email",
+    "GOOGLE_ANALYTICS_PRIVATE_KEY": "@run-aws-expiratations-check-analytics-google-analytics_private_key",
+    "GOOGLE_ANALYTICS_VIEW_ID": "@run-aws-expiratations-check-analytics-google-analytics_view_id"
+  }
+}

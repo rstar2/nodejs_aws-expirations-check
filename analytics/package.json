@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "deploy:now": "now --prod",
+    "deploy:now": "now-dotenv sync --env ./.env.prod && now --prod",
     "deploy": "npm run deploy:now",
     "dev": "(npm run serve &) && npm --prefix api run dev"
   },
