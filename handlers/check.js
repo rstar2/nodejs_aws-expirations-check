@@ -36,7 +36,7 @@ const notifyUser = async (userId, items, toSend = true, webUrl = null) => {
             const email = webUrl ? 
             `${response}
             --------------
-            Edit on: ${url}` :
+            Edit on: ${webUrl}` :
             response;
             await awsSesUtils.sendSMS(user.email || process.env.AWS_SES_RECEIVER, email);
         } catch (e) {
@@ -88,8 +88,6 @@ module.exports.handler = async (event, context, callback) => {
     const expired = (list && list
         .filter(Item => Item.enabled !== false) // some items may not have 'enabled' field - assume them as "enabled"
         .filter(Item => dateUtils.isExpiredDay(Item.expiresAt, Item.daysBefore || 7))) || [];
-
-    
 
     if (event['detail-type'] === 'Scheduled Event') {
         // if this is Scheduled event - send real SMS

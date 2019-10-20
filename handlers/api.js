@@ -12,7 +12,7 @@ const MAP_METHODS = {
 
 // eslint-disable-next-line
 module.exports.handler = async (event, context, callback) => {
-    // console.log("Event:");
+    // console.log('Event:');
     // console.dir(event);
 
     console.time('Invoking function api took');
@@ -22,7 +22,7 @@ module.exports.handler = async (event, context, callback) => {
     // check if this function is not invoked from another "authorized" function
     // here the secret has more meaning of an identified for such event, not as authorization-secret/token
     // as anyway AWS will allow only functions that has IAM permissions to invoke this one
-    if (event.secret === apiFunctionSecret) {
+    if (event.secret && event.secret === apiFunctionSecret) {
         console.log('Invoking function from another authorized function');
         // this is event from another function
         action = event.action;
@@ -32,9 +32,10 @@ module.exports.handler = async (event, context, callback) => {
     } else {
         // this is normal API HTTP Gateway event
 
+        const user = event.requestContext.identity.cognitoIdentityId;
         // this Lambda with HTTP gateway is secured with 'authorizer: aws_iam'
         console.log(
-            `Authenticated user identity: ${event.requestContext.identity.cognitoIdentityId}`
+            `Authenticated user identity: ${user}`
         );
 
         // strip the '/api/' from the full path '/api/xxx'
@@ -53,7 +54,7 @@ module.exports.handler = async (event, context, callback) => {
         data = event.body && JSON.parse(event.body);
 
         // set the user who is executing this api
-        data.user = event.requestContext.identity.cognitoIdentityId;
+        data.user = user;
     }
 
     // there should be 'user' in data always -  this is the authenticated user

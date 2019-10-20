@@ -18,6 +18,9 @@
             "claims": {
                 "sub": "USER-SUB-1234"
             }
+        },
+        "identity": {
+             "cognitoIdentityId": "TESTER"
         }
     }
 }

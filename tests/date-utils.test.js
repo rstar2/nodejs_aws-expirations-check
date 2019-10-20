@@ -12,6 +12,7 @@ describe('dateUtils suite', () => {
         expect(dateUtils.isExpiredDay(dateBefore3Days, -2)).toBe(true);
         expect(dateUtils.isExpiredDay(dateBefore3Days, -3)).toBe(true);
         expect(dateUtils.isExpiredDay(dateBefore3Days, -4)).toBe(false);
+        expect(dateUtils.isExpiredDay(dateBefore3Days, 10)).toBe(true);
     });
 
     test('expiration after', () => {

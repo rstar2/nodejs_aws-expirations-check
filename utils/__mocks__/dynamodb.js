@@ -2,16 +2,19 @@
 let mockItems = [
     {
         id: 0,
+        user: 'TESTER',
         name: 'Expires 8 days before today',
         expiresAt: Date.now() - 1000 * 60 * 60 * 24 * 8,
     },
     {
         id: 1,
+        user: 'TESTER',
         name: 'Expires 6 days before today ',
         expiresAt: Date.now() - 1000 * 60 * 60 * 24 * 6,
     },
     {
         id: 2,
+        user: 'TESTER',
         name: 'Expires today',
         expiresAt: Date.now(),
     },
