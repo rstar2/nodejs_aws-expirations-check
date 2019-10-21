@@ -15,6 +15,10 @@ describe('Handler suite', () => {
 
         const response = await handlerCheck(event, context);
         expect(response).toBeDefined();
+        expect(Array.isArray(response.expired)).toBe(true);
+        console.log(response.expired);
+        
+        expect(response.expired.length).toBe(4);
     });
 
     test('api should fail - invalid event', async () => {

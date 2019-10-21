@@ -8,11 +8,14 @@ describe('dateUtils suite', () => {
         expect(dateUtils.isExpired(today + 3242)).toBe(false);
         expect(dateUtils.isExpired(dateBefore3Days)).toBe(true);
         expect(dateUtils.isExpiredDay(dateBefore3Days)).toBe(true);
+        expect(dateUtils.isExpiredDay(dateBefore3Days, 1)).toBe(true);
+        expect(dateUtils.isExpiredDay(dateBefore3Days, 10)).toBe(true);
+        expect(dateUtils.isExpiredDay(dateBefore3Days, 100)).toBe(true);
         expect(dateUtils.isExpiredDay(dateBefore3Days, -1)).toBe(true);
         expect(dateUtils.isExpiredDay(dateBefore3Days, -2)).toBe(true);
         expect(dateUtils.isExpiredDay(dateBefore3Days, -3)).toBe(true);
         expect(dateUtils.isExpiredDay(dateBefore3Days, -4)).toBe(false);
-        expect(dateUtils.isExpiredDay(dateBefore3Days, 10)).toBe(true);
+        
     });
 
     test('expiration after', () => {
