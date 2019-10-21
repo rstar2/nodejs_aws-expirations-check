@@ -6,7 +6,7 @@
 // If the token is 'unauthorized', the client receives a 401 Unauthorized response.
 // If the token is 'fail' or anything else, the client receives a 500 Internal Server Error response.
 // In both of the last two cases, no IAM policy is generated and the calls fail.
-module.exports.handler = async (event, context, callback) => {
+module.exports.handler = async (event, context) => {
     // console.log('AUTH: Check');
     // console.log(event);
     // it's of the type if we send HTTP header "Authorization: Bearer 4674cc54-bd05-11e7-abc4-cec278b6b50b"
@@ -20,14 +20,14 @@ module.exports.handler = async (event, context, callback) => {
     if (typeof event.authorizationToken === 'undefined') {
         console.log('AUTH: No token');
         // Return a 401 Unauthorized response
-        return callback('Unauthorized');
+        throw 'Unauthorized';  // rejecting with 'Unauthorized' or callback('Unauthorized')
     }
 
     const split = event.authorizationToken.split('Bearer');
     if (split.length !== 2) {
         console.log('AUTH: no token in Bearer');
         // Return a 401 Unauthorized response
-        return callback('Unauthorized');
+        throw 'Unauthorized'; // rejecting with 'Unauthorized' or callback('Unauthorized')
     }
 
     const token = split[1].trim();
@@ -46,16 +46,6 @@ module.exports.handler = async (event, context, callback) => {
 
             // NOTE: if returned other string/error then then HTTP status code will be 500 
         });
-
-    // for Node6.10 - just call the callback
-    // try {
-    //     const policy = await authorizeJWT(token, event.methodArn);
-    //     console.log(`Authorized call with token ${token} for ${policy.principalId}`);
-    //     callback(null, policy);
-    // } catch (error) {
-    //     console.log(`Unauthorized call for token ${token}`);
-    //     callback('Unauthorized');
-    // }
 };
 
 /**

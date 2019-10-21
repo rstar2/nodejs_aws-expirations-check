@@ -57,7 +57,7 @@ const notifyUser = async (userId, items, toSend = true, webUrl = null) => {
  */
 const now = () => moment().format('MMM Do YY');
 
-module.exports.handler = async (event, context, callback) => {
+module.exports.handler = async (event, context) => {
     // console.log("Event:");
     // console.dir(event);
 
@@ -109,13 +109,18 @@ module.exports.handler = async (event, context, callback) => {
         const isTest = !!event.test;
 
         const promises = [];
-        users.forEach(async (/*Item[]*/Items, /*String*/user) => {
-            promises.push(await notifyUser(user, Items, isTest, webUrl));
+        users.forEach((/*Item[]*/Items, /*String*/user) => {
+            promises.push(notifyUser(user, Items, isTest, webUrl));
         });
         await promises;
+        response = {
+            checked: `Checked on ${now()}`,
+            expired,
+        };
     } else if (event.httpMethod) {
         // this Lambda with HTTP gateway is secured with 'authorizer: aws_iam'
-        console.log(`Authenticated user identity: ${event.requestContext.identity.cognitoIdentityId}`);
+        const user = event.requestContext.identity.cognitoIdentityId;
+        console.log(`Authenticated user identity: ${user}`);
 
         // if this is HTTP request
         response = createResponse(200, {
@@ -139,7 +144,7 @@ module.exports.handler = async (event, context, callback) => {
         await Promise.all(expired.map(async (Item) => {
             if (user && user !== Item.user) return;
 
-            dateUtils.isExpiredDay(Item.expiresAt, Item.daysBefore || 7);
+            // just trace the results
             await notifyUser(Item.user, [Item,], false);
         }));
     }
@@ -147,7 +152,7 @@ module.exports.handler = async (event, context, callback) => {
     console.timeEnd('Invoking function check took');
     console.log(`Checked on ${now()} - expired: ${expired.length}`);
     
-    callback(null, response);
+    return response;
 };
 
 

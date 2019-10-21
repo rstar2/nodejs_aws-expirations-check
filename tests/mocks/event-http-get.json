@@ -1,26 +1,26 @@
 {
-    "resource": "/list",
-    "path": "/list",
-    "httpMethod": "GET",
-    "queryStringParameters": null,
-    "pathParameters": null,
-    "stageVariables": null,
-    "body": null,
-    "isBase64Encoded": false,
-    "headers": {
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Accept-Language": "en",
-        "cache-control": "max-age=0"
+  "resource": "/list",
+  "path": "/api/list",
+  "httpMethod": "GET",
+  "queryStringParameters": null,
+  "pathParameters": null,
+  "stageVariables": null,
+  "isBase64Encoded": false,
+  "headers": {
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Accept-Language": "en",
+    "cache-control": "max-age=0"
+  },
+  "requestContext": {
+    "authorizer": {
+      "claims": {
+        "sub": "USER-SUB-1234"
+      }
     },
-    "requestContext": {
-        "authorizer": {
-            "claims": {
-                "sub": "USER-SUB-1234"
-            }
-        },
-        "identity": {
-             "cognitoIdentityId": "TESTER"
-        }
+    "identity": {
+      "cognitoIdentityId": "TESTER"
     }
+  },
+  "body": {}
 }
