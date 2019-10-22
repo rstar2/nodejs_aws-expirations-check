@@ -29,7 +29,6 @@ const notifyUser = async (userId, items, toSend = true, webUrl = null) => {
         return acc + '\n' + item.name + ' expires/d on ' + moment(item.expiresAt).format('MMM Do YY');
     }, '');
     console.log('Message ', response);
-    console.log('webUrl ', webUrl);
 
     if (response && toSend) {
         console.log('Send SMS and email');
