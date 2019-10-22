@@ -23,21 +23,22 @@ const notifyUser = async (userId, items, toSend = true, webUrl = null) => {
     // get user details
     const db = await dbAuth();
     const user = await db.get(userId);
-    console.log(`Notifying user: ${JSON.stringify(user)}`);
+    console.log(`Notifying user: ${JSON.stringify(user, ['id', 'email', 'name',])}`);
 
     const response = items.reduce((acc, item) => {
         return acc + '\n' + item.name + ' expires/d on ' + moment(item.expiresAt).format('MMM Do YY');
     }, '');
     console.log('Message ', response);
+    console.log('webUrl ', webUrl);
 
     if (response && toSend) {
-        
+        console.log('Send SMS and email');
         try {
             const email = webUrl ? 
-            `${response}
+                `${response}
             --------------
             Edit on: ${webUrl}` :
-            response;
+                response;
             await awsSesUtils.sendSMS(user.email || process.env.AWS_SES_RECEIVER, email);
         } catch (e) {
             console.warn('Failed to send Email with AWS SES Service',e);
@@ -110,14 +111,15 @@ module.exports.handler = async (event, context) => {
 
         const promises = [];
         users.forEach((/*Item[]*/Items, /*String*/user) => {
-            promises.push(notifyUser(user, Items, isTest, webUrl));
+            promises.push(notifyUser(user, Items, !isTest, webUrl));
         });
-        await promises;
+        await Promise.all(promises);
         response = {
             checked: `Checked on ${now()}`,
             expired,
         };
     } else if (event.httpMethod) {
+        // TODO: Not used and tested yet
         // this Lambda with HTTP gateway is secured with 'authorizer: aws_iam'
         const user = event.requestContext.identity.cognitoIdentityId;
         console.log(`Authenticated user identity: ${user}`);
@@ -126,11 +128,6 @@ module.exports.handler = async (event, context) => {
         response = createResponse(200, {
             checked: `Checked on ${now()}`,
             expired,
-
-            // just to see what AWS sends
-            // event,
-            // context,
-            // env: process.env,
         });
     } else if (event.secret === apiFunctionSecret) {
         // again return a HTTP response
@@ -141,12 +138,13 @@ module.exports.handler = async (event, context) => {
 
         // check if we have to filter by single user
         const user = event.data.user;
-        await Promise.all(expired.map(async (Item) => {
-            if (user && user !== Item.user) return;
-
-            // just trace the results
-            await notifyUser(Item.user, [Item,], false);
-        }));
+        const toSend = event.data.send === true;
+        await Promise.all(expired
+            .filter(Item =>!user || user === Item.user)
+            .map(Item => {
+                // just trace the results
+                return notifyUser(Item.user, [Item,], toSend, webUrl);
+            }));
     }
     
     console.timeEnd('Invoking function check took');

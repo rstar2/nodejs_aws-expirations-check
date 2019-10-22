@@ -7,7 +7,7 @@ const argv = require('minimist')(process.argv.slice(2), { boolean: true, string:
 // usage:
 const help =
 `Usage: 
-	cli <action> [--name=XXX] [--expire=YYY] [--id=YYY] [--user=YYY] [--localHttp] [--localInvoke]
+	cli <action> [--name=XXX] [--expire=YYY] [--id=YYY] [--user=YYY] [--localHttp] [--localInvoke] [--send]
 Note:
     --localHttp option will invoke the function handler locally by faking a dummy HTTP event,
     --localInvoke option will invoke the function handler locally by faking a dummy "secret" event,
@@ -21,7 +21,7 @@ Examples:
 	cli add --user=XXXXXX --name=XXXX --expire="Feb 17, 2019"
 	cli delete --id=XXXXX
     cli update --id=XXXXX --expire="Feb 17, 2019"
-    cli check --user=XXXXXX --localInvoke
+    cli check --user=XXXXXX --localInvoke --send
 `;
 const action = argv._[0];
 const isLocalHttp = !!argv['localHttp']; // locally invoke the function handler
@@ -30,6 +30,7 @@ const name = argv['name'];
 let expiresAt = argv['expire'];
 const id = argv['id'];
 const user = argv['user'];
+const send = argv['send'];
 
 const exit = (error, printHelp = true) => {
     console.error(error);
@@ -55,10 +56,7 @@ switch (action) {
     case 'check':
         httpMethod = 'GET';
         func = 'check';
-        if (!user) {
-            exit('Missing \'--user\' argument for the \'check\' action.');
-        }
-        data = { user, };
+        data = { user, send, };
         break;
     case 'list':
         if (!user) {

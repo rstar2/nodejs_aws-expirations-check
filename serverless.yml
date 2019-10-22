@@ -63,7 +63,7 @@ package:
 provider:
   name: aws
   profile: serverless-cli
-  runtime: nodejs8.10
+  runtime: nodejs10.x
 
   stage: ${opt:stage, 'dev'}
   region: ${file(env.yml):env.AWS_REGION} # Note this env.AWS_REGION SHOULD NOT be set as environment variable
@@ -121,6 +121,9 @@ functions:
         # needed to access the necessary DynamoDB table
         AWS_DYNAMODB_ITEMS: ${self:custom.expirationsTable}
         AWS_DYNAMODB_AUTH: ${self:custom.authTable}
+
+        # needed by the schedule-event-trigger to create the web url
+        AWS_STAGE: ${self:provider.stage}
 
       # defined additional role/permissions for this function
       iamRoleStatementsInherit: true
