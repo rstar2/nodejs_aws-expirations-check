@@ -5,6 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
+      // NOT WORKING YET
       "type": "node",
       "request": "launch",
       "name": "Launch via NPM",
@@ -27,6 +28,13 @@
           "request": "launch",
           "name": "Launch Current File",
           "program": "${file}"
+      },
+
+      {
+        "name": "Flutter",
+        "type": "dart",
+        "request": "launch",
+        "program": "flutter/lib/main.dart"
       }
   ]
 }
