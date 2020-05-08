@@ -38,18 +38,17 @@
           :sort-desc="false"
           class="elevation-5"
           hide-default-footer
+		  :class="{ xs: $vuetify.breakpoint.xsOnly }"
         >
           <template slot="no-data">No expirations set</template>
           <template slot="item" slot-scope="{ item }">
-            <tr>
-              <td class="text-xs">
+            <tr >
+              <td class="text-xs" :class="$vuetify.breakpoint.xsOnly ? 'd-flex align-center' : ''">
                 <v-checkbox :input-value="item.enabled | itemEnabled" disabled hide-details class="ma-0 pa-0"></v-checkbox>
               </td>
-              <td class="text-xs">{{ item.name }}</td>
-              <td class="text-xs">{{ item.expiresAt | date }}</td>
-              <td class="text-xs d-flex align-center">
-                <v-spacer></v-spacer>
-
+              <td class="text-xs" :class="$vuetify.breakpoint.xsOnly ? 'd-flex align-center' : ''">{{ item.name }}</td>
+              <td class="text-xs" :class="$vuetify.breakpoint.xsOnly ? 'd-flex align-center' : ''">{{ item.expiresAt | date }}</td>
+              <td class="text-xs d-flex align-center justify-end">
                 <v-layout class="hidden-sm-and-down justify-end">
                   <v-btn small primary @click="dialogAdd.updateItem = item">Update</v-btn>
                   <v-btn small color="error" class="ml-3" @click="tryDelete(item.id)">Delete</v-btn>
@@ -321,5 +320,15 @@ export default {
 
 <style>
 @import "./styles.css";
+
+.xs thead tr {
+	display: table-row;
+}
+
+.xs tbody tr {
+	display: flex;
+	justify-content: space-between;
+}
+
 </style>
 

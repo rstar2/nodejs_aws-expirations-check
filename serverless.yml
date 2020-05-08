@@ -63,7 +63,7 @@ package:
 provider:
   name: aws
   profile: serverless-cli
-  runtime: nodejs10.x
+  runtime: nodejs12.x
 
   stage: ${opt:stage, 'dev'}
   region: ${file(env.yml):env.AWS_REGION} # Note this env.AWS_REGION SHOULD NOT be set as environment variable

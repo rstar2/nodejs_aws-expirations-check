@@ -48,4 +48,5 @@
 ### Client
 
 - ~~The 'Enabled' checkbox in the the table is not centered~~
-- When on mobile the rows are not visually good (offset-ed a little) when the name is on more lines
+- ~~When on mobile the rows are not visually good (offset-ed a little) when the name is on more lines~~
+	> Use the $vuetify.breakpoint.xsOnly breakpoint to set specific style to the table in this case
