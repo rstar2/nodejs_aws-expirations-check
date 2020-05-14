@@ -28,9 +28,9 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 Install now and now-dotenv ```npm i -g now now-dotenv```
 Create a 'now.json' file with builders for the client (the Vue app) and the API serverless functions
-The tricky part to pass the environment variables to the API serverless functions,
+The tricky part is to pass the environment variables to the API serverless functions,
 as I want them to be also defined in a '.env'  file.
-So the '.env.local' file is used for local development - for both the VuApp and a local express-server for the API.
+So the '.env.local' file is used for local development - for both the VueApp and a local express-server for the API.
 The '.env.prop' will be used for production and because Now requires the env variables to be defined in the now.json file
 and even better to be using Now secrets
 
@@ -53,8 +53,8 @@ now.json :
 
 ```json
 "env": {
-  "GOOGLE_ANALYTICS_CLIENT_EMAIL": "@run-aws-expiratations-check-analytics-google-analytics_client_email"
+  "GOOGLE_ANALYTICS_CLIENT_EMAIL": "@run-aws-expirations-check-analytics-google-analytics_client_email"
 }
 ```
 
-and 'run-aws-expiratations-check-analytics-google-analytics_client_email' will be a Now secret
+and 'run-aws-expirations-check-analytics-google-analytics_client_email' will be a Now secret
