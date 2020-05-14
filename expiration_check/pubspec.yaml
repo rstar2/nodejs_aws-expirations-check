@@ -1,4 +1,4 @@
-name: expiration_check_web
+name: expiration_check
 description: A new Flutter project.
 
 # The following defines the version and build number for your application.
@@ -24,9 +24,6 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
 
-  # the WebView that will wrap the real webapp
-  webview_flutter: ^0.3.19+9
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -42,11 +39,6 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
-  fonts:
-    - family: IndieFlower
-      fonts:
-        - asset: assets/fonts/IndieFlower-Regular.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:

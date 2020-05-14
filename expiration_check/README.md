@@ -1,4 +1,4 @@
-# expiration_check_web
+# expiration_check
 
 A new Flutter project.
 
