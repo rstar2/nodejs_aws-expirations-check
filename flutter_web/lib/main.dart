@@ -4,7 +4,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-const mainURL = 'https://8i00jlvjlj.execute-api.eu-west-1.amazonaws.com/dev/';
+// const mainURL = 'https://8i00jlvjlj.execute-api.eu-west-1.amazonaws.com/dev/';
+// when started the webapp with sls:offline
+// const mainURL = 'http://localhost:3000/';
+const mainURL = 'http://10.0.2.2:3000/';
 
 void main() => runApp(MyApp());
 
@@ -16,14 +19,6 @@ class MyApp extends StatelessWidget {
       title: "Exprations Check",
       theme: ThemeData(
         // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.yellow,
       ),
       home: MyHomePage(title: 'Exprations Check Home Page'),

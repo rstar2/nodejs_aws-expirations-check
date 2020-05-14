@@ -1,4 +1,4 @@
-package com.magicmedia.expiration_check
+package com.magicmedia.expiration_check_web
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

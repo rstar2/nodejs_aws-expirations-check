@@ -31,7 +31,13 @@
       },
 
       {
-        "name": "Flutter",
+        "name": "Flutter-Web",
+        "type": "dart",
+        "request": "launch",
+        "program": "flutter_web/lib/main.dart"
+      },
+      {
+        "name": "Flutter-Native",
         "type": "dart",
         "request": "launch",
         "program": "flutter/lib/main.dart"
