@@ -21,7 +21,7 @@
         "space-unary-ops"  :"error",
         "no-console"       : "off",
 		"no-var"           : "error",
-		"comma-dangle"	   : [ "error", "always" ],
+		"comma-dangle"	   : [ "off", "always" ],
 		"linebreak-style"  : "off"
     }
 }

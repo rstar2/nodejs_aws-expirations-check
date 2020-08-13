@@ -20,7 +20,7 @@ exports.handler = (event, context, callback) => {
             request: (request, event, context) => {
                 // this should be already authorized handler, so just attach the authorized user id
                 if (event.requestContext.authorizer) {
-                    request.user = event.requestContext.authorizer.principalId
+                    request.user = event.requestContext.authorizer.principalId;
                 }
             },
         });

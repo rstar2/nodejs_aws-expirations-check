@@ -39,12 +39,14 @@ const notifyUser = async (userId, items, toSend = true, webUrl = null) => {
             Edit on: ${webUrl}` :
                 response;
             await awsSesUtils.sendSMS(user.email || process.env.AWS_SES_RECEIVER, email);
+            console.info('Sent Email with AWS SES Service');
         } catch (e) {
             console.warn('Failed to send Email with AWS SES Service',e);
         }
 
         try {
             await twilioUtils.sendSMS(user.phone || process.env.TWILIO_RECEIVER, response);
+            console.info('Sent SMS with Twilio Service');
         } catch (e) {
             console.warn('Failed to send SMS with Twilio Service');
         }
