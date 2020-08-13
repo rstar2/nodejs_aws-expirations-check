@@ -59,6 +59,8 @@ package:
     - webapp/package-lock.json
     - webapp/package.json
     - webapp/webpack.config.js
+    - flutter/**
+    - flutter_web/**
 
 provider:
   name: aws

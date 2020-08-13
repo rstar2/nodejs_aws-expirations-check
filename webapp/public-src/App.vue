@@ -321,14 +321,23 @@ export default {
 <style>
 @import "./styles.css";
 
+/* Fix the ExtraSmall devices (e.g. phones) look of the Vuetify table */
 .xs thead tr {
 	display: table-row;
 }
-
 .xs tbody tr {
 	display: flex;
 	justify-content: space-between;
 }
+
+/* This will make the text in a table cell not overflowing the row's height,
+   technically this means that no more than 2 lines of text will be in one row
+    */
+tbody tr {
+	overflow: hidden;
+}
+
+
 
 </style>
 
