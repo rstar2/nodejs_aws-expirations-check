@@ -6,7 +6,7 @@ module.exports = (fromSender = process.env.AWS_SES_SENDER) => {
 
     return {
         /**
-		 * Sends SMS to a phone (For trial accounts this 'to' must be verified phone number)
+		 * Sends email to a verified email address
 		 * @param {String} to
 		 * @param {String} message
 		 * @returns {Promise<SES.Types.SendEmailResponse>}

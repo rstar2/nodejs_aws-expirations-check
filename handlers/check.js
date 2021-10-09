@@ -8,6 +8,9 @@ const twilioUtils = require('../utils/twilio')(process.env.TWILIO_ACCOUNT_SID,
 
 const awsSesUtils = require('../utils/aws-ses')(process.env.AWS_SES_SENDER);
 
+
+const webPush = require('../utils/web-push');
+
 const dbAuth = require('../lib/db-auth');
 const { dbList, } = require('../lib/db-items');
 const { createResponse, } = require('../utils/http');
@@ -38,7 +41,7 @@ const notifyUser = async (userId, items, toSend = true, webUrl = null) => {
             --------------
             Edit on: ${webUrl}` :
                 response;
-            await awsSesUtils.sendSMS(user.email || process.env.AWS_SES_RECEIVER, email);
+            await awsSesUtils.sendEmail(user.email || process.env.AWS_SES_RECEIVER, email);
             console.info('Sent Email with AWS SES Service');
         } catch (e) {
             console.warn('Failed to send Email with AWS SES Service',e);
@@ -49,6 +52,12 @@ const notifyUser = async (userId, items, toSend = true, webUrl = null) => {
             console.info('Sent SMS with Twilio Service');
         } catch (e) {
             console.warn('Failed to send SMS with Twilio Service');
+        }
+
+        try {
+            await webPush.sendNotification(user, response);
+        } catch (err) {
+            console.warn('Failed to send PushNotification');
         }
     }
     return response;

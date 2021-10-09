@@ -46,29 +46,35 @@ plugins:
   # - serverless-log-forwarding
 
 package:
-  exclude:
-    - .vscode/**
-    - analytics/**
-    - cli/**
-    - tests/**
-    - '**/__mocks__/**'
-    - webapp/node_modules/**
-    - webapp/public-src/**
-    - webapp/public-src-md/**
-    - webapp/app-local.js
-    - webapp/package-lock.json
-    - webapp/package.json
-    - webapp/webpack.config.js
-    - flutter/**
-    - flutter_web/**
+  patterns:
+    - '!.vscode/**'
+    - '!.*'
+    - '!*.md'
+    - '!package*.json'
+    - '!env.example.yml'
+    - '!analytics/**'
+    - '!cli/**'
+    - '!tests/**'
+    - '!**/__mocks__/**'
+    - '!webapp/node_modules/**'
+    - '!webapp/public-src/**'
+    - '!webapp/public-src-md/**'
+    - '!webapp/app-local.js'
+    - '!webapp/package-lock.json'
+    - '!webapp/package.json'
+    - '!webapp/webpack.config.js'
+    - '!flutter/**'
+    - '!flutter_web/**'
 
 provider:
   name: aws
   profile: serverless-cli
-  runtime: nodejs12.x
+  runtime: nodejs14.x
 
   stage: ${opt:stage, 'dev'}
   region: ${file(env.yml):env.AWS_REGION} # Note this env.AWS_REGION SHOULD NOT be set as environment variable
+
+  lambdaHashingVersion: 20201221
 
   # 'iamRoleStatement' defines the permission policy for the Lambda function.
   # In this case Lambda functions are granted with permissions to access DynamoDB.

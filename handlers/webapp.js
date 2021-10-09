@@ -18,6 +18,10 @@ exports.handler = (event, context, callback) => {
     if (!handler) {
         handler = serverless(app, {
             request: (request, event, context) => {
+                // NOTE: for some reason even if requested http://asdada/dev/ then the path is ''
+                if (event.path === '') {
+                    request.url = request.path = '/';
+                }
                 // this should be already authorized handler, so just attach the authorized user id
                 if (event.requestContext.authorizer) {
                     request.user = event.requestContext.authorizer.principalId;
@@ -25,6 +29,7 @@ exports.handler = (event, context, callback) => {
             },
         });
     }
+    
     
     return handler(event, context, callback);
 };

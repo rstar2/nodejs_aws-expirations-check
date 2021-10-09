@@ -3,9 +3,10 @@ const path = require('path');
 const webpack = require('webpack');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const TerserJSPlugin = require('terser-webpack-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const OptimizeJSPlugin = require('terser-webpack-plugin');
+const OptimizeCSSPlugin = require('css-minimizer-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const CopyPlugin = require('copy-webpack-plugin');
 
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin');
@@ -49,7 +50,6 @@ const options = {
                         // you can specify a publicPath here
                         // by default it uses publicPath in webpackOptions.output
                             // publicPath: '../',
-                            hmr: !isProd,
                         },
                     },
                     'css-loader',
@@ -65,17 +65,15 @@ const options = {
                         loader: 'sass-loader',
                         // Requires sass-loader@^8.0.0
                         options: {
-                            implementation: require('sass'),
+                            // implementation: require('sass'),
                             sassOptions: {
-                                fiber: require('fibers'),
                                 indentedSyntax: true, // optional
+                                quietDeps: true
                             },
                         },
                     },
                 ],
             },
-
-
         ],
     },
     resolve: {
@@ -96,6 +94,15 @@ const options = {
         hints: 'warning',
     },
     plugins: [
+        // new CopyPlugin({
+        //     patterns: [
+        //         './public-src/service-worker.js',
+        //         {
+        //             from: './public-src/manifest.json',
+        //             to: '../',
+        //         }
+        //     ],
+        // }),
         new VueLoaderPlugin(),
 
         new VuetifyLoaderPlugin(),
@@ -129,8 +136,18 @@ const options = {
             analyzerMode: 'static',
             openAnalyzer: false,
         }),
+
+        // http://vue-loader.vuejs.org/en/workflow/production.html
+        // https://vuejs.org/v2/guide/deployment.html
+        // Run Vue.js in production mode - less warnings and etc...
+        new webpack.DefinePlugin({
+            'process.env': {
+                NODE_ENV: isProd ? '"production"' : '"development"',
+                BASE_URL: `"${process.env.BASE_URL ? '/' + process.env.BASE_URL: '' }/"`,
+            },
+        }),
     ],
-    devtool: '#eval-source-map',
+    devtool: 'eval-source-map',
     optimization: {
         concatenateModules: false,
     },
@@ -142,25 +159,14 @@ if (isProd) {
 
     options.optimization = {
         minimizer: [
-            new TerserJSPlugin({}),
-            new OptimizeCSSAssetsPlugin({}),
+            new OptimizeJSPlugin(),
+            new OptimizeCSSPlugin(),
         ],
     };
 
     options.performance = {
         hints: false,
     };
-
-    options.plugins = (options.plugins || []).concat([
-        // http://vue-loader.vuejs.org/en/workflow/production.html
-        // https://vuejs.org/v2/guide/deployment.html
-        // Run Vue.js in production mode - less warnings and etc...
-        new webpack.DefinePlugin({
-            'process.env': {
-                NODE_ENV: '"production"',
-            },
-        }),
-    ]);
 }
 
 module.exports = options;

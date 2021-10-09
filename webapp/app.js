@@ -27,14 +27,21 @@ module.exports = (stage) => {
 
     app.use('/public', express.static(path.join(__dirname, 'public')));
 
+    // it's best the service-worker to be on root level as then it can control the page
+    // if it's served form public/js/service-worker.js that it will control pages with scope 'public/js'
+    // but in this case the app's url is the main "/" url (e.g. where the index.html (index.hbs) is)
+    // https://stackoverflow.com/questions/56338747/navigator-serviceworker-ready-not-fireing-when-sw-placed-in-subfolder
+    // https://stackoverflow.com/questions/29874068/navigator-serviceworker-is-never-ready
+    app.use('/service-worker.js', express.static(path.join(__dirname, 'public/js/service-worker.js')));
+
     // set the stage as global local template variable (e.g. accessible in all routes)
-    if (process.env.IS_OFFLINE === 'true') {
-        // if we test it locally with
-        // $ sls offline start
-        app.locals['context-path'] = '';
-    } else {
+    // if (process.env.IS_OFFLINE === 'true') {
+    //     // if we test it locally with
+    //     // $ sls offline start
+    //     app.locals['context-path'] = '';
+    // } else {
         app.locals['context-path'] = stage ? '/' + stage : '';
-    }
+    // }
 
     app.locals['ga-id'] = process.env.GOOGLE_ANALYTICS_ID;
     
