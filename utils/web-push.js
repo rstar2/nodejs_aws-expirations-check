@@ -1,8 +1,11 @@
 const webPush = require('web-push');
 
+const dbWebPush = require('../lib/db-web-push');
+
+
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
-const VAPID_BASE_URL = process.env.VAPID_BASE_URL || process.env.BASE_URL;
+const VAPID_BASE_URL = process.env.VAPID_BASE_URL;
 
 webPush.setVapidDetails(VAPID_BASE_URL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
@@ -10,14 +13,14 @@ webPush.setVapidDetails(VAPID_BASE_URL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
  * Send Push notifications to the subscribed user
  */
 exports.sendNotification = async function (user, message) {
-    const subscriptions = await getPushSubscriptions(uid);
+    const subscriptions = await dbWebPush.dbList(user);
   
     subscriptions.forEach((subscription) => {
-        sendNotification_(subscription, message);
+        sendNotification_(user, subscription, message);
     });
 };
 
-function sendNotification_(subscription, payload) {
+function sendNotification_(user, subscription, payload) {
     webPush
         .sendNotification(subscription, payload)
         .then(() => {
@@ -25,18 +28,10 @@ function sendNotification_(subscription, payload) {
         })
         .catch((error) => {
             console.log(
-                'ERROR in sending Notification, endpoint removed ' + subscription.endpoint,
+                'ERROR in sending Notification, endpoint will be removed ' + subscription.endpoint,
                 error
             );
             // delete failed subscription
-            deletePushSubscription(subscription.endpoint);
+            dbWebPush.dbDelete(user, subscription);
         });
 }
-
-function getPushSubscriptions() {
-
-}
-
-function deletePushSubscription() {
-
-}  

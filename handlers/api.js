@@ -1,4 +1,4 @@
-const apiFunctionSecret = process.env.AWS_LAMBDA_API_SECRET;
+const apiLambdaSecret = process.env.AWS_LAMBDAS_SECRET;
 
 const db = require('../lib/db-items');
 
@@ -15,18 +15,22 @@ module.exports.handler = async (event, context) => {
     // console.log('Event:');
     // console.dir(event);
 
-    console.time('Invoking function api took');
+    console.time('Invoking API Lambda took');
 
     let action, data;
 
     // check if this function is not invoked from another "authorized" function
     // here the secret has more meaning of an identified for such event, not as authorization-secret/token
     // as anyway AWS will allow only functions that has IAM permissions to invoke this one
-    if (event.secret && event.secret === apiFunctionSecret) {
-        console.log('Invoking function from another authorized function');
+    if (event.secret && event.secret === apiLambdaSecret) {
+        console.log('Invoking Lambda from another authorized Lambda');
         // this is event from another function
         action = event.action;
+        
+        // object
         data = event.data;
+        
+        // string
         data.user = event.user;
         // there should be 'user' in data always
     } else {
@@ -56,16 +60,17 @@ module.exports.handler = async (event, context) => {
 
     // there should be 'user' in data always -  this is the authenticated user
     if (!data.user) {
-        return createResponse(500, { error: `Not authorized api action: ${action}`, });
+        return createResponse(500, { error: `Not authorized API action: ${action}`, });
     }
 
     try {
         const responseBody = await doAction(action, data);
 
-        console.timeEnd('Invoking function api took');
+        console.timeEnd('Invoking API Lambda took');
         return createResponse(200, responseBody);
     } catch (error) {
-        console.timeEnd('Invoking function api took', '- failed');
+        console.error('error', error);
+        console.timeEnd('Invoking API Lambda took');
         return createResponse(500, { error: '' + error, });
     }
 };
@@ -74,7 +79,7 @@ module.exports.handler = async (event, context) => {
  *
  * @param {String} action
  * @param {Object} data
- * @return {Promise<String>}
+ * @return {Promise<Object>}
  */
 const doAction = async (action, data) => {
     switch (action) {

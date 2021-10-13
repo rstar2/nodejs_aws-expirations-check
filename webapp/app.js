@@ -21,6 +21,12 @@ module.exports = (stage) => {
     // use the Handlebars engine
     app.set('view engine', 'hbs');
 
+    // for debug purpose
+    // app.use((req, res, next) => {
+    //     console.log(req);
+    //     next();
+    // });
+
     // from Express 4.16 they are back in the core
     app.use(express.urlencoded({ extended: false, }));
     app.use(express.json());
@@ -40,7 +46,7 @@ module.exports = (stage) => {
     //     // $ sls offline start
     //     app.locals['context-path'] = '';
     // } else {
-        app.locals['context-path'] = stage ? '/' + stage : '';
+    app.locals['context-path'] = stage ? '/' + stage : '';
     // }
 
     app.locals['ga-id'] = process.env.GOOGLE_ANALYTICS_ID;
@@ -50,6 +56,10 @@ module.exports = (stage) => {
     const apiRouter = express.Router();
     require('./routes/api')(apiRouter);
     app.use('/invoke/api', apiRouter);
+
+    const webPushRouter = express.Router();
+    require('./routes/web-push')(webPushRouter);
+    app.use('/invoke/webpush', webPushRouter);
 
     const authRouter = express.Router();
     require('./routes/auth')(authRouter);

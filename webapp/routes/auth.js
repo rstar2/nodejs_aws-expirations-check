@@ -1,12 +1,11 @@
 const jwt = require('../../utils/jwt')(process.env.AUTH_JWT_SECRET);
 
-const dbConnect = require('../../lib/db-auth');
+const dbAuth = require('../../lib/db-auth');
 
 module.exports = (app) => {
 
     app.post('/register', (req, res) => {
-        dbConnect()
-            .then(db => db.register(req.body))
+        dbAuth.register(req.body)
             .then(user => jwt.sign(user.id))
             .then(token => {
                 console.log('Newly registered user');
@@ -19,8 +18,7 @@ module.exports = (app) => {
     });
 
     app.post('/login', (req, res) => {
-        dbConnect()
-            .then(db => db.login(req.body))
+        dbAuth.login(req.body)
             .then(user => jwt.sign(user.id))
             .then(token => {
                 console.log('Newly logged in user');

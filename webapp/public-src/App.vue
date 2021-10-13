@@ -107,6 +107,8 @@ import DialogAuth from "./components/DialogAuth";
 import DialogAdd from "./components/DialogAdd";
 import Notifications from "./components/Notifications";
 
+import {createSubscription, setHandleSubscription} from './configurePushNotifications';
+
 export default {
   components: {
     "app-dialog-auth": DialogAuth,
@@ -176,6 +178,8 @@ export default {
         localStorage.setItem("authJWT", newValue);
 
         this.apiRefresh();
+
+		createSubscription();
       } else {
         localStorage.removeItem("authJWT");
       }
@@ -283,6 +287,24 @@ export default {
 		if (await this.$confirm('Delete?', {title: 'Confirmation Warning'})) {
 			this.apiDelete(id);
 		}
+	},
+
+	/**
+	 * @param {PushSubscription?} subsription
+	 * @param {PushSubscription?} oldSubscription
+	 */
+	async updateSubsctiption(subsription, oldSubscription) {
+		// register the new
+		if (subsription) {
+      		this.apiRequest(`${APP_CONTEXT_PATH}/invoke/webpush/register`, subsription)
+        		.then(({success}) => (success && (this.info = "Subscribed to push notifications")))
+        		.catch(() => (this.info = "Failed to subscrib to push notifications"));
+		}
+
+		// unregister old - no matter the result
+		if (oldSubscription) {
+      		this.apiRequest(`${APP_CONTEXT_PATH}/invoke/webpush/unregister`, oldSubscription);
+		}
 	}
   },
   mounted() {
@@ -314,6 +336,8 @@ export default {
         this.authJWT = authJWT;
       }
     }
+
+	setHandleSubscription(this.updateSubsctiption)
   }
 };
 </script>

@@ -5,15 +5,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      // NOT WORKING YET
       "type": "node",
       "request": "launch",
-      "name": "Launch via NPM",
-      "cwd": "${workspaceFolder}/webapp",
+      "name": "Launch NPM SLS:DEV",
+      "cwd": "${workspaceFolder}",
       "runtimeExecutable": "npm",
       "runtimeArgs": [
-        "run-script",
-        "build"
+        "run",
+        "sls:dev"
       ],
       "port": 9229
     },

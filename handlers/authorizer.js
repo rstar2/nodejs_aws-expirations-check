@@ -76,7 +76,7 @@ const authorizeDummy = (token, resource) => {
 
 
 const jwt = require('../utils/jwt')(process.env.AUTH_JWT_SECRET);
-const dbConnect = require('../lib/db-auth');
+const dbAuth = require('../lib/db-auth');
 
 /**
  * @param {String} token
@@ -89,8 +89,7 @@ const authorizeJWT = (jsonWebToken, resource) => {
             if (!id) throw 'No id decoded from the JWT';
             return id;
         })
-        .then(id => Promise.all([id, dbConnect(),]))
-        .then(([id, db,]) => db.authorize(id)
+        .then(id => dbAuth.authorize(id)
             .then(authorized => generatePolicy(id, authorized ? EFFECT_ALLOW : EFFECT_DENY, resource)));
 };
 

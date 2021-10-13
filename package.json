@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "client:dev": "cd webapp && BASE_URL=dev npm run dev",
-    "client:build": "cd webapp && BASE_URL=dev npm run build",
+    "client:dev": "cd webapp && npm run dev",
+    "client:build": "cd webapp && npm run build",
     "sls:dev": "sls offline start",
     "sls:deploy": "sls deploy",
     "dev": "(npm run client:dev &) && npm run sls:dev",

@@ -5,19 +5,28 @@
 // https://www.blog.plint-sites.nl/how-to-add-push-notifications-to-a-progressive-web-app/
 
 /**
- * @type {ServiceWorkerRegistration}
+ * @type {(swRegistration: ServiceWorkerRegistration) => void}
  */
-let swRegistration = null;
+let swResolve;
+/**
+ * @type {Promise<ServiceWorkerRegistration>}
+ */
+const swRegistrationPromise = new Promise((aSwResolve) => {
+    swResolve = aSwResolve;
+});
 
 /**
  * @type {PushSubscription}
  */
-let pushSubscription = null;
+let pushSubscription;
 
-export const notificationsSupported = 'Notification' in window && navigator.serviceWorker;
+/**
+ * @type {(subscription: PushSubscription|undefined, oldSubscription: PushSubscription|undefined) => void}
+ */
+let handleSubscription;
 
-// configure VAPID key for instance with https://web-push-codelab.glitch.me/
-const applicationServerPublicKey = process.env.VUE_APP_PUSH_API_KEY;
+// configure VAPID keys for instance with https://web-push-codelab.glitch.me/
+const applicationServerPublicKey = process.env.VAPID_PUBLIC_KEY;
 
 function urlB64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -60,14 +69,20 @@ function requestNotificationPermission() {
     });
 }
 
-function updateSubscriptionOnServer(subscription) {
-    // TODO: Send subscription to application server, so that it can send Push Notifications
-    // NOTE: Note that a user can have multiple subscriptions for different devices/browsers
-    // so removing them will be trickier
-    const subscriptionJson = subscription ? JSON.stringify(subscription) : null;
-    const uid = 'UID_TESTER';
-    console.log(`Update push subscription on server for ${uid}`, subscriptionJson);
+/**
+ * 
+ * @param {PushSubscription} subscription 
+ * @param {PushSubscription} oldSubscription 
+ */
+function updateSubscriptionOnServer(subscription, oldSubscription) {
+    if (handleSubscription) {
+        console.log('Update push subscription on server for', subscription, oldSubscription);
+        handleSubscription(subscription, oldSubscription);
+    }
 }
+
+
+export const notificationsSupported = 'Notification' in window && navigator.serviceWorker;
 
 /**
  * This must be called (and thus configured) before
@@ -75,13 +90,18 @@ function updateSubscriptionOnServer(subscription) {
  * @param {ServiceWorkerRegistration} swReg
  */
 export default swReg => {
-    swRegistration = swReg;
+    swResolve(swReg);
 
-    // try go get current state
-    hasSubscription();
-
-    // for testing immediate subscription
-    createSubscription();
+    swRegistrationPromise.then(() => {
+        // try go get any current subscription
+        hasSubscription().then(() => {
+            if (!pushSubscription) {
+                // for testing immediately create subscription now if there's none,
+                // otherwise it's called after authorization is complete 
+                // createSubscription();
+            }
+        });
+    });
 };
 
 /**
@@ -89,21 +109,19 @@ export default swReg => {
  */
 export function hasSubscription() {
     if (!notificationsSupported) return Promise.reject(new Error('Client Notifications not supported'));
-    if (!swRegistration)
-        return Promise.reject(new Error('The default exported module\'s function has to be called first'));
 
-    return swRegistration.pushManager
-        .getSubscription()
+    return swRegistrationPromise
+        .then(swRegistration => swRegistration.pushManager.getSubscription())
         .then(subscription => {
-            if (pushSubscription !== subscription) {
-                updateSubscriptionOnServer(subscription);
+            if (!pushSubscription || pushSubscription.endpoint !== subscription.endpoint) {
+                updateSubscriptionOnServer(subscription, pushSubscription);
             }
             pushSubscription = subscription;
             return !!subscription;
         })
         .catch(error => {
-            updateSubscriptionOnServer(null);
-            pushSubscription = null;
+            updateSubscriptionOnServer(undefined, pushSubscription);
+            pushSubscription = undefined;
             throw error; // rethrow the same rejected error
         });
 }
@@ -114,18 +132,17 @@ export function hasSubscription() {
  */
 export function createSubscription() {
     if (!notificationsSupported) return Promise.reject(new Error('Client Notifications not supported'));
-    if (!swRegistration)
-        return Promise.reject(new Error('The default exported module\'s function has to be called first'));
 
     const applicationServerKey = urlB64ToUint8Array(applicationServerPublicKey);
 
     return requestNotificationPermission()
-        .then(() =>
-        // this will also return current returned Push subscription if any
-        // Permissions and subscribe()
-        //There is one side effect of calling subscribe(). If your web app doesn't have permissions for showing notifications
-        // at the time of calling subscribe(), the browser will request the permissions for you.
-        // This is useful if your UI works with this flow, but if you want more control  stick to the Notification.requestPermission() API.
+        .then(() => swRegistrationPromise)
+        .then(swRegistration =>
+            // this will also return current returned Push subscription if any
+            // Permissions and subscribe()
+            //There is one side effect of calling subscribe(). If your web app doesn't have permissions for showing notifications
+            // at the time of calling subscribe(), the browser will request the permissions for you.
+            // This is useful if your UI works with this flow, but if you want more control  stick to the Notification.requestPermission() API.
             swRegistration.pushManager.subscribe({
                 // The userVisibleOnly parameter is basically an admission that you will show a notification every time a push is sent.
                 // At the time of writing this value is required and must be true.
@@ -140,15 +157,15 @@ export function createSubscription() {
                 console.log('User is NOT subscribed.');
             }
 
-            if (pushSubscription !== subscription) {
-                updateSubscriptionOnServer(subscription);
+            if (!pushSubscription || pushSubscription.endpoint !== subscription.endpoint) {
+                updateSubscriptionOnServer(subscription, pushSubscription);
             }
             pushSubscription = subscription;
         })
         .catch(error => {
             console.error('User is NOT subscribed because of', error);
-            pushSubscription = null;
-            updateSubscriptionOnServer(null);
+            pushSubscription = undefined;
+            updateSubscriptionOnServer(undefined, pushSubscription);
             throw error; // rethrow the same rejected error
         });
 }
@@ -161,7 +178,16 @@ export function removeSubscription() {
     if (!pushSubscription) return Promise.resolve(true);
 
     return pushSubscription.unsubscribe().then(result => {
-        updateSubscriptionOnServer(null);
+        updateSubscriptionOnServer(undefined, pushSubscription);
+        pushSubscription = undefined;
         return result;
     });
+}
+
+/**
+ * Attach/set-clear the global single handle subscription handler
+ * @param {(subscription: PushSubscription|undefined, oldSubscription: PushSubscription|undefined) => void} handle
+ */
+export function setHandleSubscription(handle) {
+    handleSubscription = handle;
 }

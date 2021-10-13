@@ -6,10 +6,13 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeJSPlugin = require('terser-webpack-plugin');
 const OptimizeCSSPlugin = require('css-minimizer-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const CopyPlugin = require('copy-webpack-plugin');
+// const CopyPlugin = require('copy-webpack-plugin');
 
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin');
+
+// load the common .env.yml
+require('../utils/env').config(path.resolve(__dirname, '../env.yml'));
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -143,7 +146,10 @@ const options = {
         new webpack.DefinePlugin({
             'process.env': {
                 NODE_ENV: isProd ? '"production"' : '"development"',
-                BASE_URL: `"${process.env.BASE_URL ? '/' + process.env.BASE_URL: '' }/"`,
+                // TODO: add also a direct BASE_URL that could be used in case of local serving 
+                // like with ```npm run serve```
+                BASE_URL: `"${process.env.AWS_STAGE ? '/' + process.env.AWS_STAGE: '' }/"`,
+                VAPID_PUBLIC_KEY: `"${process.env.VAPID_PUBLIC_KEY}"`,
             },
         }),
     ],

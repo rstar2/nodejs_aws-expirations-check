@@ -8,8 +8,9 @@ custom:
   # define the name of the DynamoDB Table here as it's ARN will be used in the IAM roles also
   expirationsTable: ${self:service}-${self:provider.stage}-expirations
   authTable: ${self:service}-${self:provider.stage}-auth
-  apiLambdaFunction: ${self:service}-${self:provider.stage}-api
-  apiLambdaFunctionSecret: ${file(env.yml):env.AWS_LAMBDA_API_SECRET}
+  apiLambda: ${self:service}-${self:provider.stage}-api
+  webpushLambda: ${self:service}-${self:provider.stage}-webpush
+  lambdasSecret: ${file(env.yml):env.AWS_LAMBDAS_SECRET}
 
   # implementing custom authorization
   authorizer:
@@ -71,12 +72,12 @@ provider:
   profile: serverless-cli
   runtime: nodejs14.x
 
-  stage: ${opt:stage, 'dev'}
+  stage: ${opt:stage, file(env.yml):env.AWS_STAGE, 'dev'}
   region: ${file(env.yml):env.AWS_REGION} # Note this env.AWS_REGION SHOULD NOT be set as environment variable
 
   lambdaHashingVersion: 20201221
 
-  # 'iamRoleStatement' defines the permission policy for the Lambda function.
+  # 'iamRoleStatement' defines the permission policy for ALL Lambda functions.
   # In this case Lambda functions are granted with permissions to access DynamoDB.
   iamRoleStatements:
     - Effect: Allow
@@ -99,6 +100,8 @@ provider:
 
   # Load environment variables externally from 'env.yml' depending on the stage,
   # Fallback to default if it is not in specified stage.
+  # These will be available to all Lambda functions,
+  # specific ones can be added later ot each one individually
   environment: ${file(env.yml):${self:provider.stage}, file(env.yml):default}
 
 functions:
@@ -129,6 +132,9 @@ functions:
         # needed to access the necessary DynamoDB table
         AWS_DYNAMODB_ITEMS: ${self:custom.expirationsTable}
         AWS_DYNAMODB_AUTH: ${self:custom.authTable}
+        VAPID_PUBLIC_KEY: ${file(env.yml):env.VAPID_PUBLIC_KEY}
+        VAPID_PRIVATE_KEY: ${file(env.yml):env.VAPID_PRIVATE_KEY}
+        VAPID_BASE_URL: ${file(env.yml):env.VAPID_BASE_URL}
 
         # needed by the schedule-event-trigger to create the web url
         AWS_STAGE: ${self:provider.stage}
@@ -143,36 +149,47 @@ functions:
 
   - api:
       handler: handlers/api.handler
-      events:
-        - http:
-            path: api/list
-            method: GET
-            cors: true
-            authorizer: aws_iam
-            # authorizer: ${self:custom.authorizer.jwt}
-        - http:
-            path: api/add
-            method: POST
-            cors: true
-            authorizer: aws_iam
-            # authorizer: ${self:custom.authorizer.jwt}
-        - http:
-            path: api/delete
-            method: POST
-            cors: true
-            authorizer: aws_iam
-            # authorizer: ${self:custom.authorizer.jwt}
-        - http:
-            path: api/update
-            method: POST
-            cors: true
-            authorizer: aws_iam
-            # authorizer: ${self:custom.authorizer.jwt}
+      # events:
+      #   - http:
+      #       path: api/list
+      #       method: GET
+      #       cors: true
+      #       authorizer: aws_iam
+      #   - http:
+      #       path: api/add
+      #       method: POST
+      #       cors: true
+      #       authorizer: aws_iam
+      #   - http:
+      #       path: api/delete
+      #       method: POST
+      #       cors: true
+      #       authorizer: aws_iam
+      #   - http:
+      #       path: api/update
+      #       method: POST
+      #       cors: true
+      #       authorizer: aws_iam
       environment:
         # needed to communicate with the API Lambda
-        AWS_LAMBDA_API_SECRET: ${self:custom.apiLambdaFunctionSecret}
+        AWS_LAMBDAS_SECRET: ${self:custom.lambdasSecret}
         # needed to access the necessary DynamoDB table
         AWS_DYNAMODB_ITEMS: ${self:custom.expirationsTable}
+  
+  - webpush:  
+      handler: handlers/webpush.handler
+      timeout: 30
+      # events:    
+      #   - http:
+      #       path: webpush/register
+      #       method: POST
+      #       cors: true
+      #       authorizer: aws_iam
+      environment:
+        # needed to communicate with the API Lambda
+        AWS_LAMBDAS_SECRET: ${self:custom.lambdasSecret}
+        # needed to access the necessary DynamoDB table
+        AWS_DYNAMODB_AUTH: ${self:custom.authTable}
 
   - webapp:
       handler: handlers/webapp.handler
@@ -183,8 +200,12 @@ functions:
             method: ANY
             path: /invoke/api/{action+}
             cors: true
-            # authorizer: aws_iam
-            authorizer: ${self:custom.authorizer.jwt}  
+            authorizer: ${self:custom.authorizer.jwt}
+        - http:
+            method: ANY
+            path: /invoke/webpush/{action+}
+            cors: true
+            authorizer: ${self:custom.authorizer.jwt}      
         - http: 
             path: / # this matches the base path
             method: ANY
@@ -193,15 +214,15 @@ functions:
             path: /{any+}  # this matches any path, the token 'any' doesn't mean anything special. Note it's greedy path parameter (The + sign indicates whichever child resources are appended to it)
             method: ANY
             cors: true
-      
       environment:
         # needed by the Express HTTP server (to send it to the client for a context path)
         # this could be get though from the API Gateway event (e.g. 'event.requestContext.stage')
         AWS_STAGE: ${self:provider.stage}
         
         # needed to communicate with the API Lambda
-        AWS_LAMBDA_API: ${self:custom.apiLambdaFunction}
-        AWS_LAMBDA_API_SECRET: ${self:custom.apiLambdaFunctionSecret}
+        AWS_LAMBDA_API: ${self:custom.apiLambda}
+        AWS_LAMBDA_WEBPUSH: ${self:custom.webpushLambda}
+        AWS_LAMBDAS_SECRET: ${self:custom.lambdasSecret}
         
         # needed for auth (register/login)
         AUTH_JWT_SECRET: ${file(env.yml):env.AUTH_JWT_SECRET}
@@ -223,7 +244,9 @@ functions:
           # Resource: "*"
 
           # allow invoking just the handler.api function
-          Resource: "arn:aws:lambda:${self:provider.region}:*:function:${self:custom.apiLambdaFunction}"
+          Resource:
+            - "arn:aws:lambda:${self:provider.region}:*:function:${self:custom.apiLambda}"
+            - "arn:aws:lambda:${self:provider.region}:*:function:${self:custom.webpushLambda}"
                   # "arn:aws:lambda:${self:provider.region}:${self:provider.environment.AWS_ACCOUNT}:function:${self:service}-${self:provider.stage}-lambdaTwo"  
       
 # you can add CloudFormation resource templates here
