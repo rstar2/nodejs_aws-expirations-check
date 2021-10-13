@@ -17,6 +17,8 @@ exports.handler = (event, context, callback) => {
 
     if (!handler) {
         handler = serverless(app, {
+            // this will allow sending binary data for some content-type files
+            binary: ['image/*'],
             request: (request, event, context) => {
                 // NOTE: for some reason even if requested http://asdada/dev/ then the path is ''
                 if (event.path === '') {
