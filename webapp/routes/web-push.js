@@ -22,7 +22,7 @@ const webPush = (req, res) => {
 
     const event = createEventPayload({ user, action, data, });
 
-    console.log('Invoking the WebPushAPI Lambda', event);
+    console.log('Invoking the WebPushAPI Lambda'/* , event */);
     // invoke the api Lambda function
     lambda.invoke({
         FunctionName: webpushFunction,
@@ -36,7 +36,7 @@ const webPush = (req, res) => {
         .then(data => data.Payload)
         .then(data => JSON.parse(data))
         .then(data => {
-            const { statusCode, body, } = data;
+            const { statusCode, body } = data;
 
             console.log('Received response from WebPushAPI Lambda - response', body);
             // console.dir(data);

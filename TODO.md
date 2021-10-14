@@ -30,7 +30,7 @@
 
 - ~~Better Vuetify-DatePicker handling~~
 
-- Make it a PWA with PushNotifications support
+- ~~Make it a PWA with PushNotifications support~~
 
 - Use @vue/cli (with PWA, Vuetify plugins), maybe also Vite for faster development
 
@@ -47,9 +47,11 @@
 ## Backend
 
 - ~~New items are not added with the 'user' field~~
+- The image icons (like those from the manifest.json) are not served as binary. With ```sls offline``` it's working properly but in the AWS cloud not - something is still missing, maybe something in "API Gateway" config
+	> In the webapp.js Lambda the serverless-http is already configured with ```binary: ['image/*']```, which works in ```sls offline``` but not when deployed to AWS.
 
 ## Client
 
 - ~~The 'Enabled' checkbox in the the table is not centered~~
 - ~~When on mobile the rows are not visually good (offset-ed a little) when the name is on more lines~~
-  > Use the $vuetify.breakpoint.xsOnly breakpoint to set specific style to the table in this case
+	> Use the $vuetify.breakpoint.xsOnly breakpoint to set specific style to the table in this case

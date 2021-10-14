@@ -11,27 +11,35 @@ webPush.setVapidDetails(VAPID_BASE_URL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
 /**
  * Send Push notifications to the subscribed user
+ * @param {string} userID
  */
-exports.sendNotification = async function (user, message) {
-    const subscriptions = await dbWebPush.dbList(user);
+exports.send = async function (userID, message) {
+    const subscriptions = await dbWebPush.dbList(userID);
   
     subscriptions.forEach((subscription) => {
-        sendNotification_(user, subscription, message);
+        sendNotification(userID, subscription, message);
     });
 };
 
-function sendNotification_(user, subscription, payload) {
+/**
+ * 
+ * @param {string} userID 
+ * @param {PushSubscription} subscription 
+ * @param {string} message 
+ */
+function sendNotification(userID, subscription, message) {
+    console.log('Push Application Server - Notification send to', userID, subscription.endpoint);
     webPush
-        .sendNotification(subscription, payload)
+        .sendNotification(subscription, message)
         .then(() => {
-            console.log('Push Application Server - Notification sent to ' + subscription.endpoint);
+            console.log('Push Application Server - Notification sent to', subscription.endpoint);
         })
         .catch((error) => {
             console.log(
-                'ERROR in sending Notification, endpoint will be removed ' + subscription.endpoint,
+                'ERROR in sending Notification, endpoint will be removed', subscription.endpoint,
                 error
             );
             // delete failed subscription
-            dbWebPush.dbDelete(user, subscription);
+            dbWebPush.dbDelete(userID, subscription);
         });
 }

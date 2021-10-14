@@ -11,7 +11,7 @@ module.exports = (fromSender = process.env.AWS_SES_SENDER) => {
 		 * @param {String} message
 		 * @returns {Promise<SES.Types.SendEmailResponse>}
 		 */
-        sendSMS(to, message) {
+        send(to, message) {
             const emailParams = {
                 Source: fromSender, // SES SENDING EMAIL
                 Destination: {

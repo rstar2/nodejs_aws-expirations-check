@@ -12,7 +12,7 @@ module.exports = (accountSid, authToken, fromSender) => {
 		 * @param {String} message
 		 * @returns {Promise<MessageResource>}
 		 */
-        sendSMS(to, message) {
+        send(to, message) {
             return client.messages.create({
                 body: message,
                 from: fromSender, // From a valid Twilio number,

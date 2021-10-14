@@ -24,8 +24,7 @@ const dateUtils = require('../utils/date');
  */
 const notifyUser = async (userId, items, toSend = true, webUrl = null) => {
     // get user details
-    const db = await dbAuth();
-    const user = await db.get(userId);
+    const user = await dbAuth.get(userId);
     console.log(`Notifying user: ${JSON.stringify(user, ['id', 'email', 'name',])}`);
 
     const response = items.reduce((acc, item) => {
@@ -34,30 +33,32 @@ const notifyUser = async (userId, items, toSend = true, webUrl = null) => {
     console.log('Message ', response);
 
     if (response && toSend) {
-        console.log('Send SMS and email');
         try {
-            const email = webUrl ? 
+            console.log('Send email to', user.email);
+            const message = webUrl ? 
                 `${response}
             --------------
             Edit on: ${webUrl}` :
                 response;
-            await awsSesUtils.sendEmail(user.email || process.env.AWS_SES_RECEIVER, email);
+            await awsSesUtils.send(user.email || process.env.AWS_SES_RECEIVER, message);
             console.info('Sent Email with AWS SES Service');
-        } catch (e) {
-            console.warn('Failed to send Email with AWS SES Service',e);
+        } catch (error) {
+            console.warn('Failed to send Email with AWS SES Service', error);
         }
 
         try {
-            await twilioUtils.sendSMS(user.phone || process.env.TWILIO_RECEIVER, response);
+            console.log('Send SMS to', user.phone);
+            await twilioUtils.send(user.phone || process.env.TWILIO_RECEIVER, response);
             console.info('Sent SMS with Twilio Service');
-        } catch (e) {
-            console.warn('Failed to send SMS with Twilio Service');
+        } catch (error) {
+            console.warn('Failed to send SMS with Twilio Service', error);
         }
 
         try {
-            await webPush.sendNotification(user, response);
-        } catch (err) {
-            console.warn('Failed to send PushNotification');
+            console.log('Send PushNotification to', user.id);
+            await webPush.send(user.id, response);
+        } catch (error) {
+            console.warn('Failed to send PushNotification', error);
         }
     }
     return response;

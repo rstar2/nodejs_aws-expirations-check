@@ -58,8 +58,6 @@ and
 npm run client:dev
 ```
 
-NOTE: For the client webapp building a proper process.env.BASE_URL is needed (which is the AWS stage) -so for now just pass 'dev' as it's the only one used
-
 ## Deploy to AWS
 
 ```bash

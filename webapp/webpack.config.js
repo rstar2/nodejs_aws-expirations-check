@@ -110,23 +110,6 @@ const options = {
 
         new VuetifyLoaderPlugin(),
 
-        // TODO: 
-        // extract the 'boot' entry, the one containing Vue and VueMaterial (or Vuetify) as
-        // it will be included in every page
-        // new webpack.optimize.CommonsChunkPlugin({
-        //     name: 'vue',
-        //     // minChunks: function (module, count) {
-        //     //   // any required modules inside node_modules are extracted to vendor
-        //     //   return (
-        //     // 	module.resource &&
-        //     // 	/\.js$/.test(module.resource) &&
-        //     // 	module.resource.indexOf(
-        //     // 	  path.join(__dirname, '../node_modules')
-        //     // 	) === 0
-        //     //   )
-        //     // }
-        // }),
-
         new MiniCssExtractPlugin({
             // Options similar to the same options in webpackOptions.output
             // all options are optional
@@ -146,8 +129,6 @@ const options = {
         new webpack.DefinePlugin({
             'process.env': {
                 NODE_ENV: isProd ? '"production"' : '"development"',
-                // TODO: add also a direct BASE_URL that could be used in case of local serving 
-                // like with ```npm run serve```
                 BASE_URL: `"${process.env.AWS_STAGE ? '/' + process.env.AWS_STAGE: '' }/"`,
                 VAPID_PUBLIC_KEY: `"${process.env.VAPID_PUBLIC_KEY}"`,
             },
