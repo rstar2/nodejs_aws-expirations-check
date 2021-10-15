@@ -33,6 +33,7 @@
     "aws-sdk": "^2.665.0",
     "clone-deep": "^4.0.1",
     "jest": "^27.2.4",
+    "serverless-apigw-binary": "^0.4.4",
     "serverless-iam-roles-per-function": "^3.2.0",
     "serverless-log-forwarding": "^1.4.0",
     "serverless-offline": "^8.2.0"

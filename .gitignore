@@ -30,4 +30,11 @@ env.yml
 # IDEs
 .idea
 
-webapp/public
+webapp/public/*
+!webapp/public/img
+!webapp/public/manifest.json
+!webapp/public/robots.txt
+
+!webapp/public/js
+webapp/public/js/*
+!webapp/public/js/service-worker.js

@@ -55,3 +55,8 @@
 - ~~The 'Enabled' checkbox in the the table is not centered~~
 - ~~When on mobile the rows are not visually good (offset-ed a little) when the name is on more lines~~
 	> Use the $vuetify.breakpoint.xsOnly breakpoint to set specific style to the table in this case
+
+- The PushNotification request must be called after login is done (especially after refresh of the page)
+
+- Deploy client to S3 - much better support of binary files (like images)
+	> For now I had to deploy the manifest icons to https://my-ru-public.s3.eu-west-1.amazonaws.com/my-expirations-check/img/icons/ . This is because if they are served from the API Gateway then Chrome is not liking them for some reason (Firefox has no problems)

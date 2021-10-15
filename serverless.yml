@@ -38,6 +38,11 @@ custom:
     normalizedFilterID: true # whether to use normalized function name as filter ID 
     stages: ${self:provider.stage}
 
+  # Configuring the serverless-apigw-binary plugin https://www.serverless.com/plugins/serverless-apigw-binary
+  apigwBinary:
+    types:           #list of mime-types
+      - 'image/*'
+
 plugins:
   # plugin for assigning additioanl roles per function
   - serverless-iam-roles-per-function
@@ -45,6 +50,9 @@ plugins:
   - serverless-offline
   # plugin for forwarding CloudWatch logs to another Lambda function
   # - serverless-log-forwarding
+  # for configuring the binary files support in API Gateway.
+  # The serverless-http wrapper is also configured to allow the same binary files
+  - serverless-apigw-binary
 
 package:
   patterns:

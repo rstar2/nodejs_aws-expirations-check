@@ -7,9 +7,11 @@ if (!id) {
 }
 
 // parse and configure the env variables
-require('../utils/env').config('../env.yml');
+require('../utils/env').config(path.resolve(__dirname, '../env.yml'));
 
-const jwt = require(path.resolve(__dirname, '../env.yml'))(process.env.AUTH_JWT_SECRET);
+console.log(Date.now());
+
+const jwt = require('../utils/jwt')(process.env.AUTH_JWT_SECRET);
 const main = async () => {
     let token;
     await jwt.sign(id)

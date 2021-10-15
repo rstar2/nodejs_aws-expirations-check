@@ -59,6 +59,7 @@ module.exports.handler = async (event, context) => {
         const responseBody = await doAction(action, user, data);
 
         console.timeEnd('Invoking WebPushAPI Lambda took');
+        console.timeEnd('Result is:', responseBody);
         return createResponse(200, responseBody);
     } catch (error) {
         console.error('error', error);

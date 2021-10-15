@@ -28,7 +28,7 @@ module.exports = (jwtSecret, jwtOptions = jwtOptionsDef) => {
  * @returns {Promise<String>}
  */
 const sign = (jwtSecret, jwtOptions, id) => {
-    const payload = { id, };
+    const payload = { id, iat: Date.now()};
     const token = jwt.sign(payload, jwtSecret, jwtOptions);
     return Promise.resolve(token);
 };
