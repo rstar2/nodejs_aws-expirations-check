@@ -31,8 +31,8 @@ env.yml
 .idea
 
 webapp/public/*
-!webapp/public/img
-!webapp/public/manifest.json
+# !webapp/public/img
+# !webapp/public/manifest.json
 !webapp/public/robots.txt
 
 !webapp/public/js
