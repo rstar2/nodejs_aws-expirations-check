@@ -19,7 +19,12 @@ custom:
       type: TOKEN
       identitySource: method.request.header.Authorization
       identityValidationExpression: Bearer (.*)
-      resultTtlInSeconds: 1
+      # NOTE: Set to 0 so no caching of the returned policy to be,
+      # otherwise if there are more than one Lambda that uses the same authorizer then
+      # it has to return the "combined" (using *) ARN of the authorized functions
+      # See https://aws.amazon.com/blogs/compute/introducing-custom-authorizers-in-amazon-api-gateway/
+      #   > Because policies are cached for a configured TTL, API Gateway only invokes your Lambda function the first time it sees a token; all of the calls that follow during the TTL period are authorized by API Gateway using the cached policy.
+      resultTtlInSeconds: 0
 
   # Configuration for the serverless-offline plugin https://github.com/dherault/serverless-offline
   serverless-offline:
