@@ -4,10 +4,10 @@
         "browser": true
     },
     "parserOptions": {
-        "ecmaVersion": 2016,
+        "ecmaVersion": 2020,
         "sourceType": "module"
     },
-    "extends": "eslint:recommended",
+	"extends": ["plugin:vue/base"],
     "rules": {
         "consistent-return":"error",
         "indent"           : ["warn", 4,  { "SwitchCase": 1 }],
@@ -25,4 +25,3 @@
         "Vue": false
     }
 }
-  

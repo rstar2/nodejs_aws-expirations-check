@@ -88,21 +88,27 @@ export const notificationsSupported = 'Notification' in window && navigator.serv
  * This must be called (and thus configured) before
  * any "other" module importing the other exported functions
  * @param {ServiceWorkerRegistration} swReg
+ * @param {boolean} toCheck
+ * @param {boolean} toCreate
  */
-export default swReg => {
+export function init(swReg, toCheck, toCreate) {
     swResolve(swReg);
 
-    swRegistrationPromise.then(() => {
-        // try go get any current subscription
-        hasSubscription().then(() => {
-            if (!pushSubscription) {
-                // for testing immediately create subscription now if there's none,
-                // otherwise it's called after authorization is complete 
-                // createSubscription();
-            }
+    if (toCheck) {
+        swRegistrationPromise.then(() => {
+            // try go get any current subscription
+            hasSubscription().then(() => {
+                if (!pushSubscription) {
+                    if (toCreate) {
+                        // for testing immediately create subscription now if there's none,
+                        // otherwise it's called after authorization is complete 
+                        createSubscription();
+                    }
+                }
+            });
         });
-    });
-};
+    }
+}
 
 /**
  * @return {Promise<Boolean>}

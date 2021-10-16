@@ -26,7 +26,7 @@ module.exports = (app) => {
             })
             .catch(error => {
                 console.error(error);
-                res.status(500).send({ auth: false, error, });
+                res.status(500).send({ auth: false, error: error ? error.message : 'Failed', });
             });
     });
 };

@@ -6,15 +6,21 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeJSPlugin = require('terser-webpack-plugin');
 const OptimizeCSSPlugin = require('css-minimizer-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-// const CopyPlugin = require('copy-webpack-plugin');
 
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin');
+
+// const CopyPlugin = require('copy-webpack-plugin');
+// const WebpackPwaManifest = require('webpack-pwa-manifest');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 // load the common .env.yml
 require('../utils/env').config(path.resolve(__dirname, '../env.yml'));
 
 const isProd = process.env.NODE_ENV === 'production';
+
+let baseUrl = `${process.env.BASE_URL || (process.env.AWS_STAGE ? '/' + process.env.AWS_STAGE: '')}`;
+if (!baseUrl.endsWith('/')) baseUrl+= '/';
 
 const options = {
     mode: isProd ? 'production' : 'development',
@@ -97,15 +103,6 @@ const options = {
         hints: 'warning',
     },
     plugins: [
-        // new CopyPlugin({
-        //     patterns: [
-        //         './public-src/service-worker.js',
-        //         {
-        //             from: './public-src/manifest.json',
-        //             to: '../',
-        //         }
-        //     ],
-        // }),
         new VueLoaderPlugin(),
 
         new VuetifyLoaderPlugin(),
@@ -129,10 +126,63 @@ const options = {
         new webpack.DefinePlugin({
             'process.env': {
                 NODE_ENV: isProd ? '"production"' : '"development"',
-                BASE_URL: `"${process.env.AWS_STAGE ? '/' + process.env.AWS_STAGE: '' }/"`,
+                BASE_URL: `"${baseUrl}"`,
                 VAPID_PUBLIC_KEY: `"${process.env.VAPID_PUBLIC_KEY}"`,
             },
         }),
+
+        // new CopyPlugin({
+        //     patterns: [
+        //         './public-src/service-worker.js',
+        //         {
+        //             from: './public-src/manifest.json',
+        //             to: '../',
+        //         }
+        //     ],
+        // }),
+        // new WebpackPwaManifest({
+        //     fingerprints: false,
+        //     inject: false,
+        //     filename: '../manifest.json',
+
+        //     // the actual manifest options inside
+        //     name: 'Expirations Report',
+        //     short_name: 'Expirations',
+        //     scope: '/dev/',
+        //     start_ulr: '../',
+        //     display: 'standalone',
+        //     theme: '#4DBA87',
+        //     background_color: '#000000',
+        //     orientation: 'omit',
+        // }),
+        // use the HtmlWebpackPlugin to create a template for manifest.json file as it needs to be dynamic
+        new HtmlWebpackPlugin({
+            inject: false,
+            filename: '../manifest.json',
+            templateContent: () => `
+            {
+                "name": "Expirations Report",
+                "short_name": "Expirations",
+                "display": "standalone",
+                "scope": "${baseUrl}",
+                "start_url": "${baseUrl === '/' ? '.' : '../'}",
+                "theme": "#4DBA87",
+                "background_color": "#000000",
+                "icons": [
+                    {
+                        "src": "https://my-ru-public.s3.eu-west-1.amazonaws.com/my-expirations-check/img/icons/android-chrome-192x192.png",
+                        "sizes": "192x192",
+                        "type": "image/png"
+                    },
+                    {
+                        "src": "https://my-ru-public.s3.eu-west-1.amazonaws.com/my-expirations-check/img/icons/android-chrome-512x512.png",
+                        "sizes": "512x512",
+                        "type": "image/png"
+                    }
+                ]
+              }
+            `
+        })
     ],
     devtool: 'eval-source-map',
     optimization: {

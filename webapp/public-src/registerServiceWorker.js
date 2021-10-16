@@ -2,7 +2,7 @@
 
 import { register } from 'register-service-worker';
 
-import configurePushNotifications from './configurePushNotifications';
+import {init} from './configurePushNotifications';
 
 if (/* process.env.NODE_ENV === 'production' */ true) {
     register(`${process.env.BASE_URL}service-worker.js`, {
@@ -15,7 +15,7 @@ if (/* process.env.NODE_ENV === 'production' */ true) {
         ready(swRegistration) {
             console.log('Service worker is ready.');
 
-            configurePushNotifications(swRegistration);
+            init(swRegistration);
         },
         /**
          * @param {ServiceWorkerRegistration} swRegistration 

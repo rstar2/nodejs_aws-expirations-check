@@ -7,29 +7,29 @@
 
 <script>
 export default {
-  props: {
-    info: {
-      type: String,
-      default: null
-    }
-  },
-  model: {
-    prop: "info",
-    event: "change"
-  },
-  computed: {
-    active: {
-      // getter
-      get: function() {
-        return !!this.info;
-      },
-      // setter
-      set: function(newValue) {
-        if (!newValue) {
-          this.$emit("change", null);
+    props: {
+        info: {
+            type: String,
+            default: null
         }
-      }
+    },
+    model: {
+        prop: 'info',
+        event: 'change'
+    },
+    computed: {
+        active: {
+            // getter
+            get: function() {
+                return !!this.info;
+            },
+            // setter
+            set: function(newValue) {
+                if (!newValue) {
+                    this.$emit('change', null);
+                }
+            }
+        }
     }
-  }
 };
 </script>
