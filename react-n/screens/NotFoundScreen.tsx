@@ -5,9 +5,9 @@ import { RootStackScreenProps } from '../types';
 
 export default function NotFoundScreen({ navigation }: RootStackScreenProps<'NotFound'>) {
   return (
-    <View style={styles.container}>
+    <View style={styles.screen}>
       <Text style={styles.title}>This screen doesn't exist.</Text>
-      <TouchableOpacity onPress={() => navigation.replace('Root')} style={styles.link}>
+      <TouchableOpacity onPress={() => navigation.replace('Tabs')} style={styles.link}>
         <Text style={styles.linkText}>Go to home screen!</Text>
       </TouchableOpacity>
     </View>
@@ -15,7 +15,7 @@ export default function NotFoundScreen({ navigation }: RootStackScreenProps<'Not
 }
 
 const styles = StyleSheet.create({
-  container: {
+	screen: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',

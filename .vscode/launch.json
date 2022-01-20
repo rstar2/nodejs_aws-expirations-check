@@ -5,41 +5,45 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "ReactNative-Attach to packager",
+      "request": "attach",
+      "type": "reactnative",
+      "cwd": "${workspaceFolder}/react-n",
+      "port": 19000
+    },
+    {
       "type": "node",
       "request": "launch",
       "name": "Launch NPM SLS:DEV",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "sls:dev"
-      ],
+      "runtimeArgs": ["run", "sls:dev"],
       "port": 9229
     },
-      {
-          "type": "node",
-          "request": "launch",
-          "name": "Launch AppLocal",
-          "program": "${workspaceFolder}/webapp/app-local.js"
-      },
-      {
-          "type": "node",
-          "request": "launch",
-          "name": "Launch Current File",
-          "program": "${file}"
-      },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch AppLocal",
+      "program": "${workspaceFolder}/webapp/app-local.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Current File",
+      "program": "${file}"
+    },
 
-      {
-        "name": "Flutter-Web",
-        "type": "dart",
-        "request": "launch",
-        "program": "${workspaceFolder}/flutter_web/lib/main.dart"
-      },
-      {
-        "name": "Flutter-Native",
-        "type": "dart",
-        "request": "launch",
-        "program": "${workspaceFolder}/flutter/lib/main.dart"
-      }
+    {
+      "name": "Flutter-Web",
+      "type": "dart",
+      "request": "launch",
+      "program": "${workspaceFolder}/flutter_web/lib/main.dart"
+    },
+    {
+      "name": "Flutter-Native",
+      "type": "dart",
+      "request": "launch",
+      "program": "${workspaceFolder}/flutter/lib/main.dart"
+    }
   ]
 }

@@ -1,21 +1,23 @@
-import { StyleSheet } from 'react-native';
+import { Alert, Button, StyleSheet } from 'react-native';
 
 import EditScreenInfo from '../components/EditScreenInfo';
 import { Text, View } from '../components/Themed';
-import { RootTabScreenProps } from '../types';
+import { Separator } from '../components/Separator';
+import { TabsScreenProps } from '../types';
 
-export default function TabOneScreen({ navigation }: RootTabScreenProps<'TabOne'>) {
+export default function TabOneScreen({ navigation }: TabsScreenProps<'TabOne'>) {
   return (
-    <View style={styles.container}>
+    <View style={styles.screen}>
       <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
+      <Separator />
       <EditScreenInfo path="/screens/TabOneScreen.tsx" />
+	  <Button title="Hi" onPress={() => Alert.prompt("asdSSS", "asd")}/>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+	screen: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -23,10 +25,5 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
+  }
 });

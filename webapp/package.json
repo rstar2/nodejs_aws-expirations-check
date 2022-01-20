@@ -1,7 +1,7 @@
 {
-  "name": "src",
+  "name": "webapp-vue",
   "version": "1.0.0",
-  "description": "",
+  "description": "Expirations check webapp, created with Vue",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

@@ -1,9 +1,10 @@
 {
     "cSpell.words": [
-        "Vuetify",
         "dynamodb",
+        "Pressable",
         "serverless",
         "twilio",
+        "Vuetify",
         "webapp"
     ],
     "workbench.colorCustomizations": {

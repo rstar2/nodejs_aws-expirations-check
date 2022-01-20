@@ -50,7 +50,7 @@
 - The image icons (like those from the manifest.json) are not served as binary. With ```sls offline``` it's working properly but in the AWS cloud not - something is still missing, maybe something in "API Gateway" config
 	> In the webapp.js Lambda the serverless-http is already configured with ```binary: ['image/*']```, which works in ```sls offline``` but not when deployed to AWS.
 
-## Client
+## Client - webapp (the Vue app)
 
 - ~~The 'Enabled' checkbox in the the table is not centered~~
 - ~~When on mobile the rows are not visually good (offset-ed a little) when the name is on more lines~~
