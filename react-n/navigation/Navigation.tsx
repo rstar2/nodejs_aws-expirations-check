@@ -16,7 +16,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 // import { createDrawerNavigator } from '@react-navigation/drawer';
 
-import Colors from "../constants/Colors";
+import Colors from "../../react-n/constants/Colors";
 import useColorScheme from "../hooks/useColorScheme";
 import LoginScreen from "../screens/LoginScreen";
 import MainScreen from "../screens/MainScreen";

@@ -1,6 +1,6 @@
 import { useReducer } from "react";
 
-import { ListItem, ListState } from "./../../types";
+import { ListItem, ListState } from "../../types";
 
 const initState: ListState = {
 	list: [],

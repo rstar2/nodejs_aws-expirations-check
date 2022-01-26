@@ -1,13 +1,14 @@
-import { useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { Button, StyleSheet, FlatList } from "react-native";
-import { SafeAreaView } from 'react-native-safe-area-context';
-// import CheckBox from '@react-native-community/checkbox';
+import { SafeAreaView } from "react-native-safe-area-context";
+import CheckBox from "react-native-check-box";
 
 import { useListContext } from "../state/list/context";
 import { View, Text } from "../components/Themed";
 import { HandwrittenText } from "../components/StyledText";
 import { Separator } from "../components/Separator";
 import { ListItem, RootStackScreenProps } from "../types";
+import { formatDate, noop } from "../utils";
 
 export default function MainScreen({
 	navigation,
@@ -27,12 +28,17 @@ export default function MainScreen({
 
 	const listContext = useListContext();
 
+	useEffect(()=> {
+		listContext.refresh();
+	}, [listContext]);
+
 	return (
 		<SafeAreaView style={styles.screen}>
 			<Text style={styles.title}>Expirations list</Text>
 			<Button title="Add" onPress={() => navigation.navigate("ModalAddItem")} />
 			<Separator />
 			{!!listContext.state.list.length ? <ViewListHeader /> : <ViewListEmpty />}
+
 			<FlatList
 				data={listContext.state.list}
 				renderItem={({ item }) => <ViewListItem item={item} />}
@@ -41,8 +47,8 @@ export default function MainScreen({
 	);
 }
 MainScreen.navigationOptions = {
-	headerTitle: "asd"
-}
+	headerTitle: "asd",
+};
 
 function ViewListEmpty() {
 	return (
@@ -54,17 +60,32 @@ function ViewListEmpty() {
 function ViewListHeader() {
 	return (
 		<View style={styles.header}>
-			<View style={styles.headerItem}><HandwrittenText>Enabled</HandwrittenText></View>
-			<View style={styles.headerItem}><HandwrittenText>Name</HandwrittenText></View>
-			<View style={styles.headerItem}><HandwrittenText>Expires</HandwrittenText></View>
-			<View style={styles.headerItem}><HandwrittenText>Action</HandwrittenText></View>
+			<View style={styles.headerItem}>
+				<HandwrittenText>Enabled</HandwrittenText>
+			</View>
+			<View style={styles.headerItem}>
+				<HandwrittenText>Name</HandwrittenText>
+			</View>
+			<View style={styles.headerItem}>
+				<HandwrittenText>Expires</HandwrittenText>
+			</View>
+			<View style={styles.headerItem}>
+				<HandwrittenText>Action</HandwrittenText>
+			</View>
 		</View>
 	);
 }
 function ViewListItem({ item }: { item: ListItem }) {
+	const {id, name, expiresAt, enabled} = item;
 	return (
-		<View key={item.id}>
-			<Text>{item.name}</Text>
+		<View key={id}>
+			<CheckBox
+				style={{ flex: 1, padding: 10 }}
+				isChecked={enabled}
+				onClick={noop}
+			/>
+			<Text>{name}</Text>
+			<Text>{formatDate(expiresAt)}</Text>
 		</View>
 	);
 }
