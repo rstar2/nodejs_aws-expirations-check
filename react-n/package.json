@@ -42,13 +42,15 @@
     "react-native-modalize": "^2.0.13",
     "react-native-safe-area-context": "3.3.2",
     "react-native-screens": "~3.10.1",
-    "react-native-web": "0.17.1"
+    "react-native-web": "0.17.1",
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
     "@types/react": "~17.0.21",
     "@types/react-native": "~0.64.12",
     "@types/react-native-check-box": "^2.1.2",
+    "@types/validator": "^13.7.1",
     "jest": "^26.6.3",
     "jest-expo": "~44.0.1",
     "react-test-renderer": "17.0.1",

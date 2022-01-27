@@ -35,14 +35,14 @@ import { Icon } from "../components/Icon";
 
 
 export default function Navigation({
-	colorScheme,
+	theme,
 }: {
-	colorScheme: ColorSchemeName;
+	theme: ColorSchemeName;
 }) {
 	return (
 		<NavigationContainer
 			linking={LinkingConfiguration}
-			theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+			theme={theme === "dark" ? DarkTheme : DefaultTheme}
 		>
 			<RootNavigator />
 		</NavigationContainer>
@@ -62,8 +62,8 @@ function RootNavigator() {
 	// NOTE: React Navigation handles safe area in the default header.
 	// However, if you're using a custom header, it's important to ensure your UI is
 	// within the safe area. (e.g like when 'headerShown' is false).
-	// SO the screen component has to be wrapped in <SafeAreaView> component (from 'react-native-safe-area-context')
-	// it works together with the <SafeAreaProvider>
+	// So the screen component has to be wrapped in <SafeAreaView> component (from 'react-native-safe-area-context')
+	// it works together with the <SafeAreaProvider> (like in LoginScreen and MainScreen)
 	{
 		/* TODO:  shown or don't show anything and keep the splash screen until state.isLoading */
 	}
@@ -75,7 +75,7 @@ function RootNavigator() {
 					<Stack.Screen
 						name="Login"
 						component={LoginScreen}
-						options={{ headerShown: true, title: "Login title!" }}
+						options={{ headerShown: false, title: "Login title!" }}
 					/>
 				) : (
 					<>

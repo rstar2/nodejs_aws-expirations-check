@@ -31,7 +31,7 @@ export default function App() {
 }
 
 function AppMain() {
-	const colorScheme = useColorScheme();
+	const theme = useColorScheme();
 	const authContext = useAuthContext();
 
 	useEffect(() => {
@@ -61,7 +61,7 @@ function AppMain() {
 
 	return (
 		<>
-			<Navigation colorScheme={colorScheme} />
+			<Navigation theme={theme} />
 			<StatusBar />
 		</>
 	);

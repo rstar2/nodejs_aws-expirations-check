@@ -15,26 +15,26 @@ function createListContextValue(
   authToken?: string
 ): ListContextValue {
   return {
+	// current context state (e.g. the list)  
     state,
+
+	// send to server (async) and on response update (sync)
+
     add: async (item: Omit<ListItem, "id">) => {
-      // TODO:
-      // send to server and on response update
-      dispatch({ type: "ADD", item: { ...item, id: "" + ID++ } });
+		const addedItem = await api.addListItem(item);
+		dispatch({ type: "ADD", item: addedItem });
     },
     update: async (item: Partial<ListItem>) => {
-      // TODO:
-      // send to server and on response update
-      // dispatch({ type: "UPDATE", item });
+		const updatedItem = await api.updateListItem(item);
+      dispatch({ type: "UPDATE", item: updatedItem });
     },
     remove: async (id: string) => {
-      // TODO:
-      // send to server and on response update
+	  await api.removeListItem(id);
       dispatch({ type: "DELETE", id });
     },
     refresh: async () => {
       const list = await api.getList();
-
-      // send to server and on response update
+      
       dispatch({ type: "REFRESH", list });
     },
   };

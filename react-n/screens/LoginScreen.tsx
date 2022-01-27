@@ -1,49 +1,128 @@
-import { useState } from "react";
-import { Button, StyleSheet, TextInput } from "react-native";
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useReducer, useCallback } from "react";
+import {
+  Button,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Text, View } from "../components/Themed";
+import isEmail from "validator/es/lib/isEmail";
+import isLength from "validator/es/lib/isLength";
+
+import { Text, TextInput, View } from "../components/Themed";
 import { Separator } from "../components/Separator";
 import { RootStackScreenProps } from "../types";
 import { useAuthContext } from "../state/auth/context";
 
+type Validator = (value: string) => boolean;
+
+const isPassword: Validator = (value) => isLength(value, { min: 5 });
+
+const ACTION_SET_INPUT = "SET_INPUT";
+const reducer = (state: State, action: any): State => {
+  if (action.type === ACTION_SET_INPUT) {
+    const inputs = {
+      ...state.inputs,
+      [action.input]: action.value,
+    };
+    const validations = {
+      ...state.validations,
+      [action.input]: action.isValid,
+    };
+    const isValid = Object.values(validations).every((valid) => !!valid);
+    return {
+      isValid,
+      validations,
+      inputs,
+    };
+  }
+  return state;
+};
+const initialState = {
+  inputs: {
+    email: "",
+    password: "",
+  },
+  validations: {
+    email: true,
+    password: true,
+  },
+  isValid: false,
+};
+type State = typeof initialState;
+
 export default function LoginScreen({
-	navigation,
+  navigation,
 }: RootStackScreenProps<"Login">) {
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-	const authContext = useAuthContext();
+  const authContext = useAuthContext();
 
-	return (
-		<SafeAreaView style={styles.screen}>
-			<Text style={styles.title}>Login / Register</Text>
-			<Separator />
-			<TextInput placeholder="Email" value={email} onChangeText={setEmail} />
-			<TextInput
-				placeholder="Password"
-				value={password}
-				onChangeText={setPassword}
-				secureTextEntry
-			/>
-			<Separator />
-			<Button
-				title="Login"
-				disabled={!email || !password}
-				onPress={() => authContext.signIn({ email, password })}
-			/>
-		</SafeAreaView>
-	);
+  const inputChangeHandler = (
+    input: string,
+    validator: Validator | undefined,
+    value: string
+  ) => {
+    dispatch({
+      type: ACTION_SET_INPUT,
+      input,
+      value,
+      isValid: validator ? validator(value) : true,
+    });
+  };
+  const loginHandler = () => {
+    authContext.signIn({
+      email: state.inputs.email,
+      password: state.inputs.password,
+    });
+  };
+
+  return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={{flex: 1}}>
+        <View style={styles.screen}>
+          {/* <Text style={styles.title}>Login</Text> */}
+          <Separator />
+          <TextInput
+            placeholder="Email"
+            keyboardType="email-address"
+            autoCapitalize={"none"}
+            autoCorrect={false}
+            autoCompleteType="email"
+            value={state.inputs.email}
+            onChangeText={inputChangeHandler.bind(null, "email", isEmail)}
+          />
+          <TextInput
+            placeholder="Password"
+            keyboardType="default"
+            autoCapitalize={"none"}
+            autoCorrect={false}
+            autoCompleteType="password"
+            value={state.inputs.password}
+            onChangeText={inputChangeHandler.bind(null, "password", isPassword)}
+            secureTextEntry
+          />
+          <Separator />
+          <Button
+            title="Login"
+            disabled={!state.isValid}
+            onPress={loginHandler}
+          />
+        </View>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
+  );
 }
 
 const styles = StyleSheet.create({
-	screen: {
-		flex: 1,
-		alignItems: "center",
-		justifyContent: "center",
-	},
-	title: {
-		fontSize: 20,
-		fontWeight: "bold",
-	}
+  screen: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
 });

@@ -34,25 +34,22 @@ function createAuthContextValue(
       dispatch({ type: "SIGN_IN", token });
     },
     signUp: async (data: SignUpData) => {
-      // TODO:
-      const token = "dummy-auth-token";
-
-      // After getting token, we need to persist the token using `SecureStore` or any other encrypted storage
-      if (Platform.OS !== "web")
-        await SecureStore.setItemAsync(AuthTokenName, token);
-
-      dispatch({ type: "SIGN_IN", token });
+      //   // TODO: implement if needed
+      //   const token = await auth.register(data.email, data.password, data.name);
+      //   // After getting token, we need to persist the token using `SecureStore` or any other encrypted storage
+      //   if (Platform.OS !== "web")
+      //     await SecureStore.setItemAsync(AuthTokenName, token);
+      //   dispatch({ type: "SIGN_IN", token });
     },
     signOut() {
       // keep it async no need to wait for it, technically it could fail
       // but it doesn't matter
-      if (Platform.OS !== "web")
-	    SecureStore.deleteItemAsync(AuthTokenName);
+      if (Platform.OS !== "web") SecureStore.deleteItemAsync(AuthTokenName);
 
       dispatch({ type: "SIGN_OUT" });
     },
     restore(token: string) {
-      dispatch({ type: "RESTORE_TOKEN", token });
+      //dispatch({ type: "RESTORE_TOKEN", token });
     },
   };
 }
