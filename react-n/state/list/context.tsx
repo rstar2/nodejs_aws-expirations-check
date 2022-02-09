@@ -15,26 +15,26 @@ function createListContextValue(
   authToken?: string
 ): ListContextValue {
   return {
-	// current context state (e.g. the list)  
+    // current context state (e.g. the list)
     state,
 
-	// send to server (async) and on response update (sync)
+    // send to server (async) and on response update (sync)
 
     add: async (item: Omit<ListItem, "id">) => {
-		const addedItem = await api.addListItem(item);
-		dispatch({ type: "ADD", item: addedItem });
+      const addedItem = await api.addListItem(item);
+      dispatch({ type: "ADD", item: addedItem });
     },
     update: async (item: Partial<ListItem>) => {
-		const updatedItem = await api.updateListItem(item);
+      const updatedItem = await api.updateListItem(item);
       dispatch({ type: "UPDATE", item: updatedItem });
     },
     remove: async (id: string) => {
-	  await api.removeListItem(id);
+      await api.removeListItem(id);
       dispatch({ type: "DELETE", id });
     },
     refresh: async () => {
       const list = await api.getList();
-      
+
       dispatch({ type: "REFRESH", list });
     },
   };
@@ -55,7 +55,7 @@ export function ListContextProvider({
   const authContext = useAuthContext();
   const authToken = authContext.state.authToken;
   useLayoutEffect(() => {
-	  console.log('ListContext - auth token ', authToken)
+    console.log("ListContext - auth token ", authToken);
     if (authToken) api.setAuthToken(authToken);
     else api.clearAuthToken();
   }, [authToken]);

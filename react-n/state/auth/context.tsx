@@ -28,9 +28,10 @@ function createAuthContextValue(
       const token = await auth.login(data.email, data.password);
 
       // After getting token, we need to persist the token using `SecureStore` or any other encrypted storage
-      if (Platform.OS !== "web")
+      if (Platform.OS !== "web") {
         await SecureStore.setItemAsync(AuthTokenName, token);
-
+		console.log("Stored token", token);
+	  }
       dispatch({ type: "SIGN_IN", token });
     },
     signUp: async (data: SignUpData) => {
@@ -49,7 +50,7 @@ function createAuthContextValue(
       dispatch({ type: "SIGN_OUT" });
     },
     restore(token: string) {
-      //dispatch({ type: "RESTORE_TOKEN", token });
+      dispatch({ type: "RESTORE_TOKEN", token });
     },
   };
 }

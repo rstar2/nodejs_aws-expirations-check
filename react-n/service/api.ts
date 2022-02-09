@@ -15,14 +15,20 @@ export function clearAuthToken() {
   authToken = undefined;
 }
 
-function parseItem(Item: any): ListItem {
-	return {
-		id: Item.id,
-		name: Item.name,
-		expiresAt: new Date(Item.expiresAt),
-		daysBefore: Item.daysBefore,
-		enabled: Item.enabled,
-	  };
+export function parseItem(Item: any): ListItem {
+  return {
+    id: Item.id,
+    name: Item.name,
+    expiresAt: new Date(Item.expiresAt),
+    daysBefore: Item.daysBefore,
+    enabled: Item.enabled,
+  };
+}
+
+function forExportItem(item: Partial<ListItem>): any {
+  const res = { ...item } as any;
+  if (item.expiresAt) res.expiresAt = item.expiresAt.getTime();
+  return res;
 }
 
 export async function getList(): Promise<ListItem[]> {
@@ -35,24 +41,28 @@ export const addListItem: AsyncFunction<
   Omit<ListItem, "id">,
   ListItem
 > = async (item) => {
-	return http(`${API_URL_BASE}/invoke/api/add`, item, authToken)
-	.then(data => data.Item)
-	.then(parseItem);
+  return http(`${API_URL_BASE}/invoke/api/add`, forExportItem(item), authToken)
+    .then((data) => data.Item)
+    .then(parseItem);
 };
 
 export const updateListItem: AsyncFunction<
   Partial<ListItem>,
   ListItem
 > = async (item) => {
-	return http(`${API_URL_BASE}/invoke/api/update`, item, authToken)
-	.then(data => data.Item)
-	.then(parseItem);
+  return http(
+    `${API_URL_BASE}/invoke/api/update`,
+    forExportItem(item),
+    authToken
+  )
+    .then((data) => data.Item)
+    .then(parseItem);
 };
 
 export const removeListItem: AsyncFunction<string, void> = async (id) => {
-	return http(`${API_URL_BASE}/invoke/api/delete`, {id}, authToken)
-	.then(data => data.Item)
-	.then(parseItem)
-	// not interested in the result
-	.then();
+  return (
+    http(`${API_URL_BASE}/invoke/api/delete`, { id }, authToken)
+      // not interested in the result
+      .then()
+  );
 };

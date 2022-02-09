@@ -10,7 +10,7 @@
  } from "@react-navigation/native";
  import { NativeStackScreenProps } from "@react-navigation/native-stack";
  
- export type AsyncFunction<A, O> = (...args: A[]) => Promise<O>;
+ export type AsyncFunction<A, O> = (arg: A) => Promise<O>;
  declare global {
 	 namespace ReactNavigation {
 		 interface RootParamList extends RootStackParamList {}
@@ -23,7 +23,10 @@
 	 Login: undefined;
 	 Modal: undefined;
 	 ModalAddItem: undefined;
-	 ModalUpdateItem: undefined;
+	 ModalUpdateItem: {
+		 // id of the ListItem to update
+		 id: string
+	 };
 	 NotFound: undefined;
  };
  

@@ -42,6 +42,7 @@ function AppMain() {
 			try {
 				// get from store
 				authToken = await SecureStore.getItemAsync(AuthTokenName);
+				console.log("Restored token", authToken);
 			} catch (e) {
 				// Restoring token failed
 				console.error("Restoring token failed", e);

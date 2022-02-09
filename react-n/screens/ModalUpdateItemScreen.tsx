@@ -1,30 +1,30 @@
-import { Platform, StyleSheet } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
+import { StyleSheet } from "react-native";
 
-import { Text, View } from '../components/Themed';
+import { ListItem, RootStackScreenProps } from "../types";
+import { useListContext } from "../state/list/context";
+import EditListItem from "../components/AddEditListItem";
 
-export default function ModalUpdateItemScreen() {
-  return (
-    <View style={styles.screen}>
-      <Text style={styles.title}>Modal</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-    </View>
-  );
+export default function ModalUpdateItemScreen({
+  route,
+  navigation,
+}: RootStackScreenProps<"ModalUpdateItem">) {
+  const listContext = useListContext();
+
+  // get the ListItem form the passed ID in the params
+  const { id } = route.params;
+
+  const item = listContext.state.list.find((item) => item.id === id);
+
+  const updateHandler = async (item: ListItem) => {
+    await listContext.update(item);
+    navigation.goBack();
+  };
+
+  return <EditListItem item={item} onAction={updateHandler} />;
 }
 
 const styles = StyleSheet.create({
-	screen: {
+  screen: {
     flex: 1,
-    // alignItems: 'center',
-    // justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
   },
 });

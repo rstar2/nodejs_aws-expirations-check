@@ -11,7 +11,7 @@ export function HandwrittenText(props: TextProps) {
 	return (
 		<Text
 			{...props}
-			style={[{ fontSize: 40 }, props.style, { fontFamily: Fonts.Handwritten }]}
+			style={[{ fontSize: 30 }, props.style, { fontFamily: Fonts.Handwritten }]}
 		/>
 	);
 }

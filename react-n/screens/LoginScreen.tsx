@@ -30,9 +30,7 @@ const reducer = (state: State, action: any): State => {
       ...state.validations,
       [action.input]: action.isValid,
     };
-    const isValid = Object.values(validations).every((valid) => !!valid);
     return {
-      isValid,
       validations,
       inputs,
     };
@@ -45,19 +43,20 @@ const initialState = {
     password: "",
   },
   validations: {
-    email: true,
-    password: true,
+    email: false,
+    password: false,
   },
-  isValid: false,
 };
 type State = typeof initialState;
 
 export default function LoginScreen({
   navigation,
 }: RootStackScreenProps<"Login">) {
+  const authContext = useAuthContext();
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const authContext = useAuthContext();
+  const isValid = Object.values(state.validations)
+  .every((valid) => valid);
 
   const inputChangeHandler = (
     input: string,
@@ -80,7 +79,7 @@ export default function LoginScreen({
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={{flex: 1}}>
+      <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.screen}>
           {/* <Text style={styles.title}>Login</Text> */}
           <Separator />
@@ -106,7 +105,7 @@ export default function LoginScreen({
           <Separator />
           <Button
             title="Login"
-            disabled={!state.isValid}
+            disabled={!isValid}
             onPress={loginHandler}
           />
         </View>
