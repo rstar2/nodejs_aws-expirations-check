@@ -17,6 +17,8 @@ export default function useCachedResources() {
           ...FontAwesome.font,
           'space-mono': require('../assets/fonts/SpaceMono-Regular.ttf'),
           'something-wild': require('../assets/fonts/somethingwild-Regular.ttf'),
+          'arina': require('../assets/fonts/Arina-Regular.ttf'),
+          'cartoon1471': require('../assets/fonts/Cartoon1471-Regular.ttf'),
         });
       } catch (e) {
         // We might want to provide this error information to an error reporting service

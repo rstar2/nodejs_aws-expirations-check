@@ -11,6 +11,8 @@ import {
   AuthState,
 } from "../../types";
 
+import { useToastContext } from "../error/context";
+
 const AuthContext = React.createContext<AuthContextValue | undefined>(
   undefined
 );
@@ -19,19 +21,33 @@ export const AuthTokenName = "authToken";
 
 function createAuthContextValue(
   state: AuthState,
-  dispatch: React.Dispatch<AuthAction>
+  dispatch: React.Dispatch<AuthAction>,
+  showError: (error: string, isLong?: boolean) => void
 ): AuthContextValue {
   return {
     state,
     signIn: async (data: SignInData) => {
-      // We will also need to handle errors if sign in failed
-      const token = await auth.login(data.email, data.password);
+      let token!: string;
+      try {
+        // We will also need to handle errors if sign in failed
+        token = await auth.login(data.email, data.password);
+      } catch (err) {
+        console.error("Failed to sign-in", err);
+		// TODO: If needed can check the concrete error-reason and show more specific error message
+		showError("Failed to sign-in", true);
+        
+		// leave the whole method
+		return;
+      }
 
       // After getting token, we need to persist the token using `SecureStore` or any other encrypted storage
       if (Platform.OS !== "web") {
-        await SecureStore.setItemAsync(AuthTokenName, token);
-		console.log("Stored token", token);
-	  }
+        try {
+          await SecureStore.setItemAsync(AuthTokenName, token);
+        } catch (err) {
+          console.error("Failed to store auth token", err);
+        }
+      }
       dispatch({ type: "SIGN_IN", token });
     },
     signUp: async (data: SignUpData) => {
@@ -62,11 +78,13 @@ export function AuthContextProvider({
 }) {
   const [state, dispatch] = useAuthReducer();
 
+  const toastContext = useToastContext();
+
   // NOTE: you *might* need to memoize this value
   // Learn more in http://kcd.im/optimize-context
   const context = useMemo<AuthContextValue>(
-    () => createAuthContextValue(state, dispatch),
-    [state, dispatch]
+    () => createAuthContextValue(state, dispatch, toastContext.show),
+    [state, dispatch, toastContext.show]
   );
 
   return (

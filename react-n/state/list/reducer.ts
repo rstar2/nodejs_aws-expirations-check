@@ -55,8 +55,8 @@ type ListActionRefresh = {
 };
 
 export const useListReducer = () => {
-  // NOTE: the reducer function has to be defined not as inline function here are it will mean it will
-  // be each time a new function, so a dispatch(...) could cause calling the reducer twice
+  // NOTE: the reducer function MUST NOT be defined as inline function here,
+  // otherwise it will be each time a new function, so a dispatch(...) could cause calling the reducer twice
   // More info at:
   // https://stackoverflow.com/questions/54892403/usereducer-action-dispatched-twice
   // https://stackoverflow.com/questions/55055793/react-usereducer-hook-fires-twice-how-to-pass-props-to-reducer/55056623#55056623

@@ -6,6 +6,7 @@
 import {
   Text as DefaultText,
   View as DefaultView,
+  Button as DefaultButton,
   TextInput as DefaultTextInput,
 } from "react-native";
 
@@ -27,7 +28,7 @@ export function useThemeColor(
   props: { light?: string; dark?: string },
   colorName: keyof typeof Colors.light & keyof typeof Colors.dark
 ) {
-  const theme = useColorScheme();
+  const theme = "light"; useColorScheme();
   const colorFromProps = props[theme];
 
   if (colorFromProps) {
@@ -46,6 +47,7 @@ type ThemeProps = {
 
 export type TextProps = ThemeProps & DefaultText["props"];
 export type ViewProps = ThemeProps & DefaultView["props"];
+export type ButtonProps = ThemeProps & DefaultButton["props"];
 export type TextInputProps = ThemeProps & {
   lightBackgroundColor?: string;
   darkBackgroundColor?: string;
@@ -89,5 +91,22 @@ export function TextInput(props: TextInputProps) {
     "textInputBackground"
   );
 
-  return <DefaultTextInput style={{ color, backgroundColor }} {...props} />;
+  return <DefaultTextInput style={[{ color, backgroundColor }, style]} {...otherProps} />;
 }
+
+
+export function Button(props: ButtonProps) {
+	// Use theme and default colors if not explicitly set
+	const {
+	  lightColor,
+	  darkColor,
+	  ...otherProps
+	} = props;
+	const color = useThemeColor(
+	  { light: lightColor, dark: darkColor },
+	  "button"
+	);
+  
+	return <DefaultButton color={color } {...otherProps} />;
+  }
+  

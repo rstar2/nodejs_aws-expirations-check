@@ -11,6 +11,9 @@ export default {
     tabIconDefault: "#ccc",
     tabIconSelected: tintColorLight,
     icon: "#000",
+	button: "#000",
+	header: "blue",
+	headerBackground: "cyan"
   },
   dark: {
     text: "#fff",
@@ -21,5 +24,8 @@ export default {
     tabIconDefault: "#ccc",
     tabIconSelected: tintColorDark,
     icon: "#fff",
+	button: "#fff",
+	header: "red",
+	headerBackground: "pink"
   },
 };

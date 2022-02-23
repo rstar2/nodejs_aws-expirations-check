@@ -55,8 +55,7 @@ export default function LoginScreen({
   const authContext = useAuthContext();
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const isValid = Object.values(state.validations)
-  .every((valid) => valid);
+  const isValid = Object.values(state.validations).every((valid) => valid);
 
   const inputChangeHandler = (
     input: string,
@@ -103,11 +102,7 @@ export default function LoginScreen({
             secureTextEntry
           />
           <Separator />
-          <Button
-            title="Login"
-            disabled={!isValid}
-            onPress={loginHandler}
-          />
+          <Button title="Login" disabled={!isValid} onPress={loginHandler} />
         </View>
       </SafeAreaView>
     </TouchableWithoutFeedback>

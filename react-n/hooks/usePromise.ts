@@ -73,7 +73,7 @@ export type PromiseStateWithReset<T> = PromiseState<T> & {
  * )
  * ```
  */
-export const usePromise = <T extends (...args: any[]) => any>(
+const usePromise = <T extends (...args: any[]) => any>(
 	asyncFunction: T,
 	initialState?: PromiseState<ReturnType<T>>
 ): [
@@ -178,3 +178,4 @@ export const usePromise = <T extends (...args: any[]) => any>(
 
 	return [stateWithReset, callAsyncFunction];
 };
+export default usePromise;

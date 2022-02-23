@@ -1,4 +1,4 @@
-import { StyleProp, TextStyle } from "react-native";
+import { OpaqueColorValue, StyleProp, TextStyle } from "react-native";
 
 /**
  * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
@@ -10,7 +10,7 @@ import {
 
 export function Icon(props: {
 	name: React.ComponentProps<typeof FontAwesome>["name"];
-	color: string;
+	color: string | OpaqueColorValue;
 	size?: number;
 	style?: StyleProp<TextStyle>;
 }) {

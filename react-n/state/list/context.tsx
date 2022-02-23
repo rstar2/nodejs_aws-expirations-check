@@ -4,6 +4,8 @@ import { ListAction, useListReducer } from "./reducer";
 import { ListContextValue, ListItem, ListState } from "../../types";
 import * as api from "../../service/api";
 import { useAuthContext } from "../auth/context";
+import { useLoadingContext } from "../loading/context";
+import { useToastContext } from "../error/context";
 
 const ListContext = React.createContext<ListContextValue | undefined>(
   undefined
@@ -12,7 +14,8 @@ const ListContext = React.createContext<ListContextValue | undefined>(
 function createListContextValue(
   state: ListState,
   dispatch: React.Dispatch<ListAction>,
-  authToken?: string
+  setLoading: (isLoading: boolean, text?: string) => void,
+  showError: (error: string) => void
 ): ListContextValue {
   return {
     // current context state (e.g. the list)
@@ -21,21 +24,53 @@ function createListContextValue(
     // send to server (async) and on response update (sync)
 
     add: async (item: Omit<ListItem, "id">) => {
-      const addedItem = await api.addListItem(item);
-      dispatch({ type: "ADD", item: addedItem });
+      setLoading(true, "Adding...");
+      try {
+        const addedItem = await api.addListItem(item);
+        dispatch({ type: "ADD", item: addedItem });
+      } catch (err) {
+        console.error("Failed to add new expiration-check", err);
+        showError("Failed to add");
+      } finally {
+        setLoading(false);
+      }
     },
     update: async (item: Partial<ListItem>) => {
-      const updatedItem = await api.updateListItem(item);
-      dispatch({ type: "UPDATE", item: updatedItem });
+      setLoading(true, "Updating...");
+      try {
+        const updatedItem = await api.updateListItem(item);
+        dispatch({ type: "UPDATE", item: updatedItem });
+		throw new Error("test");
+      } catch (err) {
+        console.error("Failed to update expiration-check", err);
+        showError("Failed to update");
+      } finally {
+        setLoading(false);
+      }
     },
     remove: async (id: string) => {
-      await api.removeListItem(id);
-      dispatch({ type: "DELETE", id });
+      setLoading(true, "Deleting...");
+      try {
+        await api.removeListItem(id);
+        dispatch({ type: "DELETE", id });
+      } catch (err) {
+        console.error("Failed to delete expiration-check", err);
+        showError("Failed to delete");
+      } finally {
+        setLoading(false);
+      }
     },
     refresh: async () => {
-      const list = await api.getList();
-
-      dispatch({ type: "REFRESH", list });
+      setLoading(true, "Refreshing...");
+      try {
+        const list = await api.getList();
+        dispatch({ type: "REFRESH", list });
+      } catch (err) {
+        console.error("Failed to load/refresh expiration-checks", err);
+        showError("Failed to refresh");
+      } finally {
+        setLoading(false);
+      }
     },
   };
 }
@@ -49,13 +84,17 @@ export function ListContextProvider({
 }) {
   const [state, dispatch] = useListReducer();
 
+  const toastContext = useToastContext();
+  const loadingContext = useLoadingContext();
+  const authContext = useAuthContext();
+  const authToken = authContext.state.authToken;
+
   // when there's a token available then set it
   // NOTE: it must be useLayoutEffect() as this is executed sync before the first render
   // (as the MainScreen will try to load the list on this first render)
-  const authContext = useAuthContext();
-  const authToken = authContext.state.authToken;
+  
   useLayoutEffect(() => {
-    console.log("ListContext - auth token ", authToken);
+    //console.log("ListContext - auth token ", authToken);
     if (authToken) api.setAuthToken(authToken);
     else api.clearAuthToken();
   }, [authToken]);
@@ -63,8 +102,10 @@ export function ListContextProvider({
   // NOTE: you *might* need to memoize this value
   // Learn more in http://kcd.im/optimize-context
   const context = useMemo<ListContextValue>(
-    () => createListContextValue(state, dispatch),
-    [state, dispatch]
+    () => createListContextValue(state, dispatch,
+		loadingContext.setLoading,
+		toastContext.show),
+    [state, dispatch, loadingContext.setLoading, toastContext.show]
   );
 
   return (

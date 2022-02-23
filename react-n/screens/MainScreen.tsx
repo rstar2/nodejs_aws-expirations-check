@@ -1,43 +1,44 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
-  Button,
   StyleSheet,
   TouchableOpacity,
   TouchableHighlight,
   useWindowDimensions,
   Animated,
-  ScrollView,
   View,
+  Alert,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import CheckBox from "react-native-check-box";
 import { SwipeListView, SwipeRow } from "react-native-swipe-list-view";
 
+// @ts-ignore
+import Drawer from "react-native-circle-drawer";
+
+import * as Notifications from "expo-notifications";
+
+import { useAuthContext } from "../state/auth/context";
 import { useListContext } from "../state/list/context";
-import { HandwrittenText } from "../components/StyledText";
-import { Separator } from "../components/Separator";
+import { HandwrittenText } from "../components/Text";
+import { HandwrittenButton } from "../components/Button";
 import { ListItem, RootStackScreenProps } from "../types";
 import { formatDate, noop } from "../utils";
 import { Icon } from "../components/Icon";
 import Colors from "../constants/Colors";
+import { CircleIconButton } from "../components/CircleIconButton";
+import {
+  registerForPushNotifications,
+  requestNotificationPermissions,
+  schedulePushNotification,
+  setNotificationHandler,
+} from "../utils/notifications";
 
 const HIDDEN_ACTION_VIEW_WIDTH = 75;
 
 export default function MainScreen({
   navigation,
 }: RootStackScreenProps<"Main">) {
-  // NOTE: one of the APIs to configure screen options dynamically
-  // from inside the screen component
-  // the other is from the <Stack.Screen options={}.../> component
-  // const selectionCount = 0;
-  // useLayoutEffect(() => {
-  // 	navigation.setOptions({
-  // 	  title:
-  // 		selectionCount === 0
-  // 		  ? 'Select items'
-  // 		  : `${selectionCount} items selected`,
-  // 	});
-  //   }, [navigation, selectionCount]);
+  const drawerOpened = useRef(false);
+  const drawer = useRef<Drawer>();
 
   const { state, refresh, remove } = useListContext();
 
@@ -45,6 +46,8 @@ export default function MainScreen({
 
   // flags which rows are being deleted
   const [deleting, setDeleting] = useState<{ [key: string]: boolean }>({});
+  
+  const { width: screenWidth } = useWindowDimensions();
 
   const loadList = async () => {
     console.log("Load list");
@@ -56,6 +59,39 @@ export default function MainScreen({
     }
     setRefreshing(false);
   };
+
+   // NOTE: one of the APIs to configure screen options dynamically
+  // from inside the screen component
+  // the other is from the <Stack.Screen options={}.../> component
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => (
+        <HandwrittenText style={styles.title}>Expirations list</HandwrittenText>
+      ),
+
+      headerLeft: ({ tintColor }) => (
+        <CircleIconButton
+          name="bars"
+          color={tintColor ?? Colors.dark.icon}
+          size={17}
+          onPress={() => {
+            // toggle the drawer
+            if (drawerOpened.current) drawer.current?.close();
+            else drawer.current?.open();
+            drawerOpened.current = !drawerOpened.current;
+          }}
+        />
+      ),
+      headerRight: ({ tintColor }) => (
+        <CircleIconButton
+          name="plus"
+          color={tintColor ?? Colors.dark.icon}
+          size={17}
+          //   onPress={() => navigation.navigate("ModalAddItem")}
+        />
+      ),
+    });
+  }, [navigation]);
 
   // remove the dependency so only once execute the effect (and call refresh),
   // the context will be changed, because context.state will be changed
@@ -70,7 +106,31 @@ export default function MainScreen({
     setDeleting({});
   }, [state.list]);
 
-  const { width: screenWidth } = useWindowDimensions();
+  useEffect(() => {
+    // setup notifications
+    setNotificationHandler();
+    requestNotificationPermissions().then(() => registerForPushNotifications());
+
+    // register a listener that will react when a notification is received
+    // NOTE: it will be called only when app is in the foreground
+    const notificationListener = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        console.log("NotificationReceived", notification);
+      }
+    );
+
+    // register a listener that will react when user interacted with the notification
+    // NOTE! called when app is Foreground/Background/Killed
+    const responseListener =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log("NotificationResponseReceived", response);
+      });
+
+    return () => {
+      Notifications.removeNotificationSubscription(notificationListener);
+      Notifications.removeNotificationSubscription(responseListener);
+    };
+  }, []);
 
   const onDeletePressed = (item: ListItem) => {
     console.log("Delete pressed", item.name);
@@ -93,62 +153,99 @@ export default function MainScreen({
   // https://www.youtube.com/watch?v=1y_B4tBezQQ&t=1767s
 
   return (
-    <SafeAreaView style={styles.screen}>
-      <HandwrittenText style={styles.title}>Expirations list</HandwrittenText>
-      <Button title="Add" onPress={() => navigation.navigate("ModalAddItem")} />
-      <Separator />
+    <View style={styles.screen}>
+      <Drawer
+        ref={drawer}
+        sideMenu={<SideMenu />}
+        marginLeft={10}
+        marginTop={10}
+      >
+        {!state.list.length && <ListEmpty />}
 
-      {!state.list.length && <ListEmpty />}
+		{/* TODO: check a demo how to show schedule notifications */}
+        {/* <HandwrittenButton
+          title="Press to schedule a notification"
+          onPress={async () => {
+            await schedulePushNotification({
+              title: "You've got mail! 📬",
+              body: "Here is the notification body",
+              data: { data: "goes here" },
+			  triggerDate: Date.now() + 3*1000
+            });
+          }}
+        /> */}
 
-      <SwipeListView
-        onRefresh={loadList}
-        refreshing={isRefreshing}
-        style={styles.listContainer}
-        data={state.list}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <RowListItem
-            item={item}
-            deleting={deleting[item.id]}
-            onEdit={onEdit}
-          />
-        )}
-        renderHiddenItem={({ item }, rawMap) => (
-          <RowListItemHidden
-            item={item}
-            onDeletePressed={onDeletePressed}
-            deleting={deleting[item.id]}
-            onDelete={onDelete}
-            onEdit={onEdit}
-            swipeRow={rawMap[item.id]}
-          />
-        )}
-        // when swiping from left to right
-        // and this left value is passed the swipe will open to it when gesture is released
-        // only a single button on the left
-        leftOpenValue={HIDDEN_ACTION_VIEW_WIDTH}
-        // when swiping from right to left
-        // and this right value is passed the swipe will open to it when gesture is released
-        // we have 2 buttons on the right so multiply with 2
-        rightOpenValue={-(2 * HIDDEN_ACTION_VIEW_WIDTH)}
-        // when swiping from right to left
-        // and this right value is passed then the transformX of the swipe will be set to the 'rightActionValue'
-        // (e.g. the visible component will be shifted to the left) and in this case it will appear are removed as this is -screenWidth
-        // also the onRightAction() will be called and the 'rightActionActivated' prop action (that's passed
-        // to each visible/hidden rendered component) will be set to true
-        rightActivationValue={-screenWidth / 2}
-        rightActionValue={-screenWidth}
-        // existing of 'onRightActionStatusChange' is obligatory in order to use 'rightActionActivated'
-        onRightActionStatusChange={noop}
-        useNativeDriver={false}
+        <SwipeListView
+          onRefresh={loadList}
+          refreshing={isRefreshing}
+          style={styles.listContainer}
+          data={state.list}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <RowListItem
+              item={item}
+              deleting={deleting[item.id]}
+              onEdit={onEdit}
+            />
+          )}
+          renderHiddenItem={({ item }, rawMap) => (
+            <RowListItemHidden
+              item={item}
+              onDeletePressed={onDeletePressed}
+              deleting={deleting[item.id]}
+              onDelete={onDelete}
+              onEdit={onEdit}
+              swipeRow={rawMap[item.id]}
+            />
+          )}
+          // when swiping from left to right
+          // and this left value is passed the swipe will open to it when gesture is released
+          // only a single button on the left
+          leftOpenValue={HIDDEN_ACTION_VIEW_WIDTH}
+          // when swiping from right to left
+          // and this right value is passed the swipe will open to it when gesture is released
+          // we have 2 buttons on the right so multiply with 2
+          rightOpenValue={-(2 * HIDDEN_ACTION_VIEW_WIDTH)}
+          // when swiping from right to left
+          // and this right value is passed then the transformX of the swipe will be set to the 'rightActionValue'
+          // (e.g. the visible component will be shifted to the left) and in this case it will appear are removed as this is -screenWidth
+          // also the onRightAction() will be called and the 'rightActionActivated' prop action (that's passed
+          // to each visible/hidden rendered component) will be set to true
+          rightActivationValue={-screenWidth / 2}
+          rightActionValue={-screenWidth}
+          // existing of 'onRightActionStatusChange' is obligatory in order to use 'rightActionActivated'
+          onRightActionStatusChange={noop}
+          useNativeDriver={false}
+        />
+      </Drawer>
+    </View>
+  );
+}
+
+function SideMenu() {
+  const { signOut } = useAuthContext();
+  return (
+    <View style={styles.sideMenu}>
+      <HandwrittenButton
+        onPress={() => {
+          Alert.alert("Sign out", "Do you really want to sign out?", [
+            {
+              text: "Cancel",
+              onPress: noop,
+              style: "cancel",
+            },
+            { text: "OK", onPress: signOut },
+          ]);
+        }}
+        title="Logout"
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
 function ListEmpty() {
   return (
-    <View style={styles.empty}>
+    <View style={styles.listEmpty}>
       <HandwrittenText>No expirations set</HandwrittenText>
     </View>
   );
@@ -170,7 +267,7 @@ function RowListItem(props: RowListItemProps) {
   // @ts-ignore - this leftActionActivated is also auto-passed from react-native-swipe-list-view
   const rightActionActivated: boolean = props.rightActionActivated;
 
-  console.log("render visible item", item.name, rightActionActivated);
+  //   console.log("render visible item", item.name, rightActionActivated);
 
   if (rightActionActivated || deleting) {
     Animated.timing(heightAnimatedValue, {
@@ -232,7 +329,7 @@ function RowListItemHidden(props: RowListItemHiddenProps) {
   // @ts-ignore - this leftActionActivated is also auto-passed from react-native-swipe-list-view
   const rightActionActivated: boolean = props.rightActionActivated;
 
-  console.log("render hidden item", item.name, rightActionActivated);
+  //   console.log("render hidden item", item.name, rightActionActivated);
 
   if (rightActionActivated || deleting) {
     console.log("render hidden item - animation start");
@@ -342,19 +439,24 @@ const ROW_ITEM_HEIGHT = 40;
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    width: "100%",
+    height: "100%",
   },
   title: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 40,
   },
-  empty: {
+  sideMenu: {
+    flex: 1,
+    backgroundColor: "gray",
+    padding: 20,
+  },
+  listEmpty: {
     // backgroundColor: "yellow",
   },
   listContainer: {
     flex: 1,
     width: "100%",
+    // backgroundColor: "white"
   },
 
   listItem: {

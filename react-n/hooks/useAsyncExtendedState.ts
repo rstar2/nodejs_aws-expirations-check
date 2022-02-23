@@ -61,7 +61,7 @@ export type AsyncExtendState<State> = (
  * extendState(fetchPartialState())
  * ```
  */
-export const useAsyncExtendedState = <State>(
+const useAsyncExtendedState = <State>(
 	initialState: State
 ): [State, AsyncSetState<State>, AsyncExtendState<State>] => {
 	const [state, setState] = useState<State>(initialState);
@@ -122,3 +122,4 @@ export const useAsyncExtendedState = <State>(
 
 	return [state, asyncSetState, asyncExtendState];
 };
+export default useAsyncExtendedState;
