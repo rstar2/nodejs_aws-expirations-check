@@ -5,13 +5,14 @@ export default {
   light: {
     text: "#000",
     textInput: "#000",
-    textInputBackground: "#0f0",
+    textInputBackground: "#0ff",
     background: "#fff",
     tint: tintColorLight,
     tabIconDefault: "#ccc",
     tabIconSelected: tintColorLight,
     icon: "#000",
-	button: "#000",
+	button: "#00F",
+	buttonBackground: "#0FF",
 	header: "blue",
 	headerBackground: "cyan"
   },
@@ -25,6 +26,7 @@ export default {
     tabIconSelected: tintColorDark,
     icon: "#fff",
 	button: "#fff",
+	buttonBackground: "#0FF",
 	header: "red",
 	headerBackground: "pink"
   },

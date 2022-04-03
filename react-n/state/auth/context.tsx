@@ -33,7 +33,7 @@ function createAuthContextValue(
         token = await auth.login(data.email, data.password);
       } catch (err) {
         console.error("Failed to sign-in", err);
-		// TODO: If needed can check the concrete error-reason and show more specific error message
+		// If needed can check the concrete error-reason and show more specific error message
 		showError("Failed to sign-in", true);
         
 		// leave the whole method

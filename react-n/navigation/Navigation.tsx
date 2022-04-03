@@ -61,9 +61,9 @@ function RootNavigator() {
   // within the safe area. (e.g like when 'headerShown' is false).
   // So the screen component has to be wrapped in <SafeAreaView> component (from 'react-native-safe-area-context')
   // it works together with the <SafeAreaProvider> (like in LoginScreen and MainScreen)
-  {
-    /* TODO:  shown or don't show anything and keep the splash screen until state.isLoading */
-  }
+  
+  // TODO: show or don't show anything and keep the splash screen until state.isLoading
+
   return (
     <ListContextProvider>
       <Stack.Navigator

@@ -10,7 +10,6 @@
  } from "@react-navigation/native";
  import { NativeStackScreenProps } from "@react-navigation/native-stack";
  
- export type AsyncFunction<A, O> = (arg: A) => Promise<O>;
  declare global {
 	 namespace ReactNavigation {
 		 interface RootParamList extends RootStackParamList {}
@@ -18,16 +17,18 @@
  }
  
  export type RootStackParamList = {
-	 Tabs: NavigatorScreenParams<TabsParamList> | undefined;
 	 Main: undefined;
 	 Login: undefined;
-	 Modal: undefined;
 	 ModalAddItem: undefined;
 	 ModalUpdateItem: {
 		 // id of the ListItem to update
 		 id: string
 	 };
 	 NotFound: undefined;
+
+	 // these are for demo/tests
+	 Tabs: NavigatorScreenParams<TabsParamList> | undefined;
+	 Modal: undefined;
  };
  
  export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
@@ -44,6 +45,9 @@
 		 NativeStackScreenProps<RootStackParamList>
 	 >;
  
+
+// other common types
+
  export type SignInData = {
 	 email: string;
 	 password: string;
@@ -85,4 +89,5 @@
 	 remove: AsyncFunction<string, void>;
 	 refresh: AsyncFunction<void, void>;
  };
- 
+
+ export type AsyncFunction<A, O> = (arg: A) => Promise<O>;

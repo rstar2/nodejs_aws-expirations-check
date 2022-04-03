@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, TextStyle, Dimensions, Image } from "react-native";
+import { HandwrittenText } from "./Text";
 
 export interface AwesomeLoadingProps {
   indicatorId: 1 | 2;
@@ -46,7 +47,7 @@ export default function AwesomeLoading(props: AwesomeLoadingProps) {
         style={{ width: size, height: size, alignSelf: "center" }}
         source={images[indicatorId]}
       />
-      {text ? <Text style={textStyle}>{text}</Text> : null}
+      {text ? <HandwrittenText style={textStyle}>{text}</HandwrittenText> : null}
     </View>
   ) : (
     <></>

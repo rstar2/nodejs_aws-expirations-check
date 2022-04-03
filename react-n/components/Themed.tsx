@@ -28,7 +28,9 @@ export function useThemeColor(
   props: { light?: string; dark?: string },
   colorName: keyof typeof Colors.light & keyof typeof Colors.dark
 ) {
-  const theme = "light"; useColorScheme();
+	// useColorScheme will use (and is subscribed to changes)
+	// the preferred light/dark mode for the whole device 
+  const theme = useColorScheme(); // "dark"
   const colorFromProps = props[theme];
 
   if (colorFromProps) {
@@ -43,15 +45,20 @@ type ThemeProps = {
   darkColor?: string;
 };
 
-// Define common main components View/Text/TextInput, specific ones wil be in separate files
+// Define common main components View/Text/TextInput/Button, specific ones wil be in separate files
 
 export type TextProps = ThemeProps & DefaultText["props"];
 export type ViewProps = ThemeProps & DefaultView["props"];
-export type ButtonProps = ThemeProps & DefaultButton["props"];
-export type TextInputProps = ThemeProps & {
-  lightBackgroundColor?: string;
-  darkBackgroundColor?: string;
-} & DefaultTextInput["props"];
+export type ButtonProps = ThemeProps &
+  DefaultButton["props"] & {
+    lightBackgroundColor?: string;
+    darkBackgroundColor?: string;
+  };
+export type TextInputProps = ThemeProps &
+  DefaultTextInput["props"] & {
+    lightBackgroundColor?: string;
+    darkBackgroundColor?: string;
+  };
 
 export function Text(props: TextProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
@@ -91,22 +98,19 @@ export function TextInput(props: TextInputProps) {
     "textInputBackground"
   );
 
-  return <DefaultTextInput style={[{ color, backgroundColor }, style]} {...otherProps} />;
+  return (
+    <DefaultTextInput
+      style={[{ color, backgroundColor }, style]}
+      {...otherProps}
+    />
+  );
 }
 
-
 export function Button(props: ButtonProps) {
-	// Use theme and default colors if not explicitly set
-	const {
-	  lightColor,
-	  darkColor,
-	  ...otherProps
-	} = props;
-	const color = useThemeColor(
-	  { light: lightColor, dark: darkColor },
-	  "button"
-	);
-  
-	return <DefaultButton color={color } {...otherProps} />;
-  }
-  
+  // Use theme and default colors if not explicitly set
+  const { lightColor, darkColor, ...otherProps } = props;
+  // in RN button's color prop means the background-color fr Android, and textColor for iOS
+  const color = useThemeColor({ light: lightColor, dark: darkColor }, "button");
+
+  return <DefaultButton color={color} {...otherProps} />;
+}

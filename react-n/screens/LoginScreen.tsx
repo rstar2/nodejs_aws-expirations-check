@@ -1,19 +1,16 @@
 import { useReducer, useCallback } from "react";
-import {
-  Button,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  Keyboard,
-} from "react-native";
+import { StyleSheet, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import isEmail from "validator/es/lib/isEmail";
 import isLength from "validator/es/lib/isLength";
 
-import { Text, TextInput, View } from "../components/Themed";
+import { View } from "../components/Themed";
 import { Separator } from "../components/Separator";
 import { RootStackScreenProps } from "../types";
 import { useAuthContext } from "../state/auth/context";
+import { HandwrittenTextInput } from "../components/TextInput";
+import { HandwrittenButton } from "../components/Button";
 
 type Validator = (value: string) => boolean;
 
@@ -80,29 +77,35 @@ export default function LoginScreen({
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.screen}>
-          {/* <Text style={styles.title}>Login</Text> */}
           <Separator />
-          <TextInput
+          <HandwrittenTextInput
             placeholder="Email"
             keyboardType="email-address"
             autoCapitalize={"none"}
             autoCorrect={false}
             autoCompleteType="email"
             value={state.inputs.email}
+            style={styles.inputEmail}
             onChangeText={inputChangeHandler.bind(null, "email", isEmail)}
           />
-          <TextInput
+          <HandwrittenTextInput
             placeholder="Password"
             keyboardType="default"
             autoCapitalize={"none"}
             autoCorrect={false}
             autoCompleteType="password"
             value={state.inputs.password}
+            style={styles.inputPassword}
             onChangeText={inputChangeHandler.bind(null, "password", isPassword)}
             secureTextEntry
           />
           <Separator />
-          <Button title="Login" disabled={!isValid} onPress={loginHandler} />
+          <HandwrittenButton
+            title="Login"
+            style={styles.buttonLogin}
+            disabled={!isValid}
+            onPress={loginHandler}
+          />
         </View>
       </SafeAreaView>
     </TouchableWithoutFeedback>
@@ -115,8 +118,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
+  inputEmail: {
+    width: "90%",
+  },
+  inputPassword: {
+    width: "90%",
+  },
+  buttonLogin: {
+    width: "90%",
   },
 });

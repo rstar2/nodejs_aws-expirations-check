@@ -20,6 +20,7 @@ import {
 } from "./state/loading/context";
 import AwesomeLoading from "./components/AwesomeLoading";
 import { ToastContextProvider } from "./state/error/context";
+import Fonts from "./constants/Fonts";
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
@@ -73,11 +74,13 @@ function AppMain() {
 
   return (
     <View style={{ flex: 1 }}>
+      {/* show a loading indicator (it's a fixed global view) */}
       <AwesomeLoading
         indicatorId={1}
         size={50}
         isActive={loadingContext.isLoading}
         text={loadingContext.text}
+		textStyle={styles.spinnerTextStyle}
       />
       <Navigation theme={theme} />
       <StatusBar />
@@ -87,6 +90,6 @@ function AppMain() {
 
 const styles = StyleSheet.create({
   spinnerTextStyle: {
-    color: "#FFF",
+    // color: "#000",
   },
 });

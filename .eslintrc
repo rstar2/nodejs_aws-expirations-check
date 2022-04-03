@@ -23,5 +23,6 @@
 		"no-var"           : "error",
 		"comma-dangle"	   : [ "off", "always" ],
 		"linebreak-style"  : "off"
-    }
+    },
+	"root": true
 }

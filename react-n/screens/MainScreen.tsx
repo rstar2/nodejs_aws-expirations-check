@@ -31,6 +31,7 @@ import {
   schedulePushNotification,
   setNotificationHandler,
 } from "../utils/notifications";
+import { useToastContext } from "../state/error/context";
 
 const HIDDEN_ACTION_VIEW_WIDTH = 75;
 
@@ -46,8 +47,10 @@ export default function MainScreen({
 
   // flags which rows are being deleted
   const [deleting, setDeleting] = useState<{ [key: string]: boolean }>({});
-  
+
   const { width: screenWidth } = useWindowDimensions();
+
+  const { show } = useToastContext();
 
   const loadList = async () => {
     console.log("Load list");
@@ -55,12 +58,12 @@ export default function MainScreen({
     try {
       await refresh();
     } catch (err) {
-      // TODO:
+      show("Failed to refresh", true);
     }
     setRefreshing(false);
   };
 
-   // NOTE: one of the APIs to configure screen options dynamically
+  // NOTE: one of the APIs to configure screen options dynamically
   // from inside the screen component
   // the other is from the <Stack.Screen options={}.../> component
   useLayoutEffect(() => {
@@ -87,7 +90,7 @@ export default function MainScreen({
           name="plus"
           color={tintColor ?? Colors.dark.icon}
           size={17}
-          //   onPress={() => navigation.navigate("ModalAddItem")}
+          onPress={() => navigation.navigate("ModalAddItem")}
         />
       ),
     });
@@ -162,7 +165,7 @@ export default function MainScreen({
       >
         {!state.list.length && <ListEmpty />}
 
-		{/* TODO: check a demo how to show schedule notifications */}
+        {/* a demo how to show schedule notifications */}
         {/* <HandwrittenButton
           title="Press to schedule a notification"
           onPress={async () => {
