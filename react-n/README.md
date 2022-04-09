@@ -23,3 +23,23 @@
 	> client app is ready, just the server remains
 1. token validation/expiration and auto-logout on expired stored token
 1. Build & Deploy to AppStore
+	> For building use the classic build process - https://docs.expo.dev/classic/building-standalone-apps/
+		
+		- build APK ```expo build:android -t apk```
+		- let expo generate keystore and save it locally with ```expo fetch:android:keystore```
+		- test on Android emulator - drag and drop the .apk into the emulator.
+		- test on real device - ```adb install app-filename.apk``` with "USB debugging enabled on your device" and the device plugged in
+		- publish it on Expo (this is different then "submit to an app store")
+
+## Tasks
+
+- Fix list gaps when removed an item - margins are not good
+- ~~apply the app theme styles to the DatePicker if possible (colors, font)~~
+	> I don't find a way, don't think it's possible - it's native component with no such props
+- ~~apply the app theme styles to the Switch and Slider~~
+	> Note - they are native elements - so only colors are possible (and images which I don't need)
+- apply the app theme styles to the Drawer - if not possible then use its source directly here and then styling will be possible as I need
+- Better theme colors - dark and light (tint color of the navigation header also)
+- add error-validation styles to each "invalid" row/field in Add/Edit screen? Idea is somehow user to understand why the "Add" button is not enabled
+- ~~listen to Internet connectivity and notify user if there's none currently~~
+	> Use '@react-native-community/netinfo', and my custom hook useNetworkState and a component ```<NoNetworkModal />``` 

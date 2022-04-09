@@ -28,14 +28,16 @@ export function useThemeColor(
   props: { light?: string; dark?: string },
   colorName: keyof typeof Colors.light & keyof typeof Colors.dark
 ) {
-	// useColorScheme will use (and is subscribed to changes)
-	// the preferred light/dark mode for the whole device 
+  // useColorScheme will use (and is subscribed to changes)
+  // the preferred light/dark mode for the whole device
   const theme = useColorScheme(); // "dark"
   const colorFromProps = props[theme];
 
+  // if explicitly passed the light/dark prop (as the current theme is) then use it
   if (colorFromProps) {
     return colorFromProps;
   } else {
+	  // otherwise use the color defined in the Colors for this  
     return Colors[theme][colorName];
   }
 }

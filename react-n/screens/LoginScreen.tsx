@@ -11,6 +11,7 @@ import { RootStackScreenProps } from "../types";
 import { useAuthContext } from "../state/auth/context";
 import { HandwrittenTextInput } from "../components/TextInput";
 import { HandwrittenButton } from "../components/Button";
+import NoNetworkModal from "../components/NoNetworkModal";
 
 type Validator = (value: string) => boolean;
 
@@ -77,6 +78,7 @@ export default function LoginScreen({
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.screen}>
+          <NoNetworkModal />
           <Separator />
           <HandwrittenTextInput
             placeholder="Email"

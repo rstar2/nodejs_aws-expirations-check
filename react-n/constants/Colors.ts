@@ -6,7 +6,7 @@ export default {
     text: "#000",
     textInput: "#000",
     textInputBackground: "#0ff",
-    background: "#fff",
+    background: "#f0f",
     tint: tintColorLight,
     tabIconDefault: "#ccc",
     tabIconSelected: tintColorLight,

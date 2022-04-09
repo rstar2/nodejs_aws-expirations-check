@@ -1,4 +1,10 @@
-import { ColorValue, StyleProp, StyleSheet, TouchableNativeFeedback, ViewStyle } from "react-native";
+import {
+  ColorValue,
+  StyleProp,
+  StyleSheet,
+  TouchableNativeFeedback,
+  ViewStyle,
+} from "react-native";
 
 import { View, ButtonProps, useThemeColor } from "./Themed";
 import { HandwrittenText } from "./Text";
@@ -11,12 +17,21 @@ export function HandwrittenButton(
     darkColor?: string;
     lightBackgroundColor?: string;
     darkBackgroundColor?: string;
-	style?: StyleProp<ViewStyle>
+    style?: StyleProp<ViewStyle>;
   }
 ) {
-  const { title, disabled, onPress, style, lightColor, darkColor,
-	lightBackgroundColor, darkBackgroundColor, 
-	rippleColor, ...otherProps } = props;
+  const {
+    title,
+    disabled,
+    onPress,
+    style,
+    lightColor,
+    darkColor,
+    lightBackgroundColor,
+    darkBackgroundColor,
+    rippleColor,
+    ...otherProps
+  } = props;
   // actually otherProps will be empty object {} as all allowed props are already descrtuctured
   // but keep it like that for easy extensibility and implementing any other props
 
@@ -27,7 +42,7 @@ export function HandwrittenButton(
   );
 
   return (
-    <View style={style} {...otherProps}>
+    <View style={[styles.container, style]} {...otherProps}>
       <TouchableNativeFeedback
         onPress={onPress}
         disabled={disabled}
@@ -42,8 +57,16 @@ export function HandwrittenButton(
 		      1. ripple 
 			  2. disabled
 		   */}
-        <View style={[styles.touchable, {backgroundColor}, {opacity: disabled ? 0.5 : 1}]}>
-          <HandwrittenText style={[styles.text, {color}]}>{title}</HandwrittenText>
+        <View
+          style={[
+            styles.touchable,
+            { backgroundColor },
+            { opacity: disabled ? 0.5 : 1 },
+          ]}
+        >
+          <HandwrittenText style={[styles.text, { color }]}>
+            {title}
+          </HandwrittenText>
         </View>
       </TouchableNativeFeedback>
     </View>
@@ -51,10 +74,13 @@ export function HandwrittenButton(
 }
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "transparent",
+  },
   touchable: {
     // borderColor: "red",
     borderWidth: 1,
-	borderRadius: 8,
+    borderRadius: 8,
     paddingHorizontal: 5,
     paddingVertical: 0,
   },

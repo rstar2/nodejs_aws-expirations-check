@@ -1,19 +1,22 @@
-import { useReducer, useState } from "react";
+import { Children, useReducer, useState } from "react";
 import {
-  Button,
-  Switch,
   StyleSheet,
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
+  View,
+  ViewProps,
 } from "react-native";
-import Slider from "@react-native-community/slider";
+
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import isLength from "validator/es/lib/isLength";
 
-import { Text, View } from "./Themed";
+import { HandwrittenText } from "./Text";
+import { HandwrittenTextInput } from "./TextInput";
+import { HandwrittenButton } from "./Button";
+import { Switch } from "./Switch";
+import { Slider } from "./Slider";
 import { Separator } from "./Separator";
-import { HandwrittenTextInput, TextInput } from "./TextInput";
 
 import { ListItem } from "../types";
 import { formatDate } from "../utils";
@@ -140,72 +143,117 @@ export default function AddEditListItem({
     });
   };
 
+  // all inputs must be valid
+  const isValid = Object.values(state.validations).every((value) => value);
+
   return (
     // close the keyboard if we tab somewhere else on the screen
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ScrollView style={styles.container}>
-        <Text>Name</Text>
-        <TextInput
-          value={state.inputs.name}
-          onChangeText={(value) =>
-            dispatch({ type: "UPDATE_NAME", name: value })
-          }
-          placeholder="Name"
-        />
+      <ScrollView style={styles.screen}>
+        <Row>
+          <Label text="Name" />
+          <HandwrittenTextInput
+            style={[styles.inputName]}
+            value={state.inputs.name}
+            onChangeText={(value) =>
+              dispatch({ type: "UPDATE_NAME", name: value })
+            }
+            placeholder="Name"
+          />
+        </Row>
 
-        <Text>Expires At</Text>
-        <Text>{formatDate(state.inputs.expiresAt)}</Text>
-        <Button onPress={() => setDatePickerVisibility(true)} title="Set" />
-        <DateTimePickerModal
-          isVisible={isDatePickerVisible}
-          mode="date"
-          date={state.inputs.expiresAt}
-          onConfirm={(date) =>
-            dispatch({ type: "UPDATE_EXPIRES_AT", expiresAt: date })
-          }
-          onCancel={() => setDatePickerVisibility(false)}
-        />
+        <Row>
+          <Label text={`Expires on ${formatDate(state.inputs.expiresAt)}`} />
+          <HandwrittenButton
+            onPress={() => setDatePickerVisibility(true)}
+            title="Change"
+          />
+          <DateTimePickerModal
+            isVisible={isDatePickerVisible}
+            date={state.inputs.expiresAt}
+            onConfirm={(date) => {
+              console.log("Date change,", date);
+              dispatch({ type: "UPDATE_EXPIRES_AT", expiresAt: date });
+              setDatePickerVisibility(false);
+            }}
+            onCancel={() => {
+              console.log("Date cancel");
+              setDatePickerVisibility(false);
+            }}
+          />
+        </Row>
 
-        <Text>Notify me {state.inputs.daysBefore} days before</Text>
-        <Slider
-          style={{ width: 200, height: 40 }}
-          minimumValue={1}
-          maximumValue={14}
-          value={state.inputs.daysBefore}
-          onValueChange={(value) =>
-            dispatch({ type: "UPDATE_DAYS_BEFORE", daysBefore: value })
-          }
-        />
+        <Row>
+          <Label text={`Notify me ${state.inputs.daysBefore} days before`} />
+          <Slider
+            style={[styles.slider]}
+            minimumValue={1}
+            maximumValue={14}
+            value={state.inputs.daysBefore}
+            onValueChange={(value) =>
+              dispatch({ type: "UPDATE_DAYS_BEFORE", daysBefore: value })
+            }
+          />
+        </Row>
 
-        <Text>Enabled</Text>
-
-        <Switch
-          style={{ flex: 0, justifyContent: "flex-start" }}
-          value={state.inputs.enabled}
-          onValueChange={(value) =>
-            dispatch({ type: "UPDATE_ENABLED", enabled: value })
-          }
-        />
+        <Row>
+          <Label text="Enabled" />
+          <Switch
+            style={styles.switch}
+            value={state.inputs.enabled}
+            onValueChange={(value) =>
+              dispatch({ type: "UPDATE_ENABLED", enabled: value })
+            }
+          />
+        </Row>
 
         <Separator />
 
-        <Button title={item ? "Edit" : "Add"} onPress={actionHandler} />
+        <HandwrittenButton
+          style={styles.button}
+          title={item ? "Edit" : "Add"}
+          onPress={actionHandler}
+          disabled={!isValid}
+        />
       </ScrollView>
     </TouchableWithoutFeedback>
   );
 }
 
+const Row = (props: ViewProps) => (
+  <View style={styles.row}>{props.children}</View>
+);
+const Label = ({ text }: { text: string }) => (
+  <HandwrittenText style={styles.label}>{text}</HandwrittenText>
+);
+
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
+    paddingTop: 10,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+	marginHorizontal: 5,
+    // backgroundColor: "transparent",
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: "80%",
+  label: {
+    marginRight: 5,
+  },
+  inputName: {
+    flexGrow: 1,
+  },
+  slider: {
+    maxWidth: 200,
+    flexGrow: 1,
+    marginRight: 5,
+  },
+  switch: {
+    flex: 0,
+    justifyContent: "flex-start",
+  },
+  button: {
+    marginHorizontal: 10,
   },
 });

@@ -32,6 +32,7 @@ import {
   setNotificationHandler,
 } from "../utils/notifications";
 import { useToastContext } from "../state/error/context";
+import NoNetworkModal from "../components/NoNetworkModal";
 
 const HIDDEN_ACTION_VIEW_WIDTH = 75;
 
@@ -157,6 +158,7 @@ export default function MainScreen({
 
   return (
     <View style={styles.screen}>
+      <NoNetworkModal />
       <Drawer
         ref={drawer}
         sideMenu={<SideMenu />}

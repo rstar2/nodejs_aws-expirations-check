@@ -1,7 +1,13 @@
-import { ColorValue, StyleSheet, TouchableNativeFeedback } from "react-native";
+import {
+  ColorValue,
+  StyleSheet,
+  TouchableNativeFeedback,
+  View,
+} from "react-native";
+import useColorScheme from "../hooks/useColorScheme";
 
-import { View } from "./Themed";
 import { Icon } from "./Icon";
+import { useThemeColor } from "./Themed";
 
 export function CircleIconButton(props: {
   onPress?: React.ComponentProps<typeof TouchableNativeFeedback>["onPress"];
@@ -12,8 +18,11 @@ export function CircleIconButton(props: {
   style?: React.ComponentProps<typeof Icon>["style"];
 }) {
   const { onPress, rippleColor, ...otherProps } = props;
+
+  const backgroundColor = useThemeColor({}, "buttonBackground");
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor }]}>
       <TouchableNativeFeedback
         onPress={onPress}
         background={

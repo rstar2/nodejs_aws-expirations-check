@@ -34,8 +34,8 @@ export function HandwrittenTextInput(props: TextInputProps) {
 
 const styles = StyleSheet.create({
   input: {
-    height: 40,
-    margin: 10,
+    // height: 40,
+    // margin: 10,
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
