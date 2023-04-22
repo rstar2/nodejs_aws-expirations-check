@@ -12,7 +12,8 @@ import CheckBox from "react-native-check-box";
 import { SwipeListView, SwipeRow } from "react-native-swipe-list-view";
 
 // @ts-ignore
-import Drawer from "react-native-circle-drawer";
+// import Drawer from "react-native-circle-drawer";
+import Drawer from "../components/Drawer";
 
 import * as Notifications from "expo-notifications";
 
@@ -40,7 +41,7 @@ export default function MainScreen({
   navigation,
 }: RootStackScreenProps<"Main">) {
   const drawerOpened = useRef(false);
-  const drawer = useRef<Drawer>();
+  const drawer = useRef<Drawer>(null);
 
   const { state, refresh, remove } = useListContext();
 
@@ -97,7 +98,7 @@ export default function MainScreen({
     });
   }, [navigation]);
 
-  // remove the dependency so only once execute the effect (and call refresh),
+  // remove the dependencies so only once execute the effect (and call refresh),
   // the context will be changed, because context.state will be changed
   // as result of the refresh updating it so
   // if 'refresh' is added as dependency the infinite loop/cycle will happen
@@ -142,7 +143,7 @@ export default function MainScreen({
   };
   const onDelete = (item: ListItem) => {
     console.log("Delete", item.name);
-    // remove(item.id);
+    remove(item.id);
   };
 
   const onEdit = (item: ListItem) => {
@@ -466,11 +467,12 @@ const styles = StyleSheet.create({
 
   listItem: {
     width: "100%",
+	overflow: "hidden",
     height: ROW_ITEM_HEIGHT,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "cyan",
-    marginBottom: 5,
+    // marginBottom: 5,
   },
   listItemCheckbox: {
     // padding: 10,
